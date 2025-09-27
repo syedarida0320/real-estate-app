@@ -33,11 +33,10 @@ const registerUser = async (req, res) => {
     );
 
     // ✅ Send Welcome Email (Job)
-    await sendEmail(
-      user.email,
-      "Welcome to Real Estate App 🎉",
-      `Hello ${user.firstName},\n\nThanks for registering on Real Estate App.`
-    );
+     await sendEmail(user.email, "Welcome to Real Estate App 🎉", "welcome", {
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
 
     response.created(res, "User registered successfully", {
       user: {

@@ -176,7 +176,7 @@ const Profile = () => {
           </div>
 
           <img
-            src={profile?.profileImage || "https://via.placeholder.com/150"}
+            src={profile?.profileImage || ""}
             alt="profile"
             className="w-20 h-20 rounded-full object-cover border-4 border-white absolute top-2 -right-[35px]"
           />
