@@ -22,7 +22,7 @@ const sendEmail = async (to, subject, templateName, data = {}) => {
       from: `"Real Estate App" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      html, // ✅ send HTML instead of text
+      html, 
     });
 
     console.log("✅ Email sent:", info.messageId);

@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const {response}= require ("../utils/response")
 
-const auth = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     // Tokens usually sent as: Authorization: Bearer <token>
     const authHeader = req.headers.authorization;
@@ -17,6 +17,8 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach user to request
+    // TODO: check how select work in monogodb
+    // Study mongoose ORM. Also read ORM in general
     req.user = await User.findById(decoded.userId).select("-password");
 
    if (!req.user) {
@@ -30,4 +32,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth;
+module.exports = {authMiddleware};

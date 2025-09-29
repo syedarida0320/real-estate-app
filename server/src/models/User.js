@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema(
       country: String,
     },
     role: { type: String, default: "user" },
+    profileImagePath: { type: String, default: "" },
+    // optional cached URL (can be computed server-side before sending too)
     profileImage: { type: String, default: "" },
     dateOfBirth: Date,
     createdAt: { type: Date, default: Date.now },

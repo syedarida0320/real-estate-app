@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const {getUsers, createUser, getUserById, updateUser} = require('../controllers/user.controller');
-const auth= require ("../middlewares/middleware")
+const {getUsers,getProfileImage,createUser, getUserById, updateUser} = require('../controllers/user.controller');
+const {authMiddleware}= require ("../middlewares/auth.middleware")
+const upload=require("../middlewares/upload")
+
+router.use(authMiddleware);
+
 router.get('/', getUsers);
-router.post('/', createUser);
+router.post("/", createUser);
 router.get('/:id', getUserById);
-router.put("/:id",auth, updateUser)
+router.put("/:id",upload.single("profileImage"), updateUser);
+router.get("/:id/profile-image",getProfileImage);
 
 module.exports = router;

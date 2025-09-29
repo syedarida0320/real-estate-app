@@ -3,12 +3,41 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import profileBg from "@/assets/profile-bg.png";
 import { MoreVertical, Mail, Phone, MapPin, Camera } from "lucide-react";
-import property1 from "@/assets/property-1.jpg"
-import property2 from "@/assets/property-2.jpg"
-import property3 from "@/assets/property-3.jpg"
+import property1 from "@/assets/property-1.jpg";
+import property2 from "@/assets/property-2.jpg";
+import property3 from "@/assets/property-3.jpg";
+import profileBg from "@/assets/profile-bg.png";
+import dummyAvatar from "@/assets/dummy-avatar.png";
 import axios from "@/utils/axios";
+
+function ProfileImage({ userId }) {
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    // fetch image with auth token
+    axios.get(`/users/${userId}/profile-image`, { responseType: "blob" })
+      .then(res => {
+        const url = URL.createObjectURL(res.data);
+        setImageUrl(url);
+      })
+      .catch((err) => {
+        console.warn("No profile image found:");
+        setImageUrl(dummyAvatar);
+      });
+  }, [userId]);
+
+  return (
+    <img
+      src={imageUrl || dummyAvatar}
+      alt="Profile"
+      className="w-20 h-20 rounded-full object-cover border-1 border-gray-400 bg-white absolute top-2 -right-[35px]"
+    />
+  );
+}
+
 
 const Profile = () => {
   const { user, setUser } = useAuth();
@@ -23,9 +52,8 @@ const Profile = () => {
 
   const fileInputRef = useRef(null);
 
-  
   // Initialize profile data from localStorage/context
-    useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         // console.log("user", user);
@@ -58,32 +86,25 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  //  Upload and save profile image to DB
-  const handleProfileImageChange = (e) => {
+  const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const formDataObj = new FormData();
+      try {
+        const formDataObj = new FormData();
+        formDataObj.append("profileImage", file);
 
-          Object.keys(profile).forEach((key) => {
-            formDataObj.append(key, profile[key]);
-          });
+        const res = await axios.put(`/users/${profile._id}`, formDataObj, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
-          formDataObj.append('profileImage', reader.result)
-
-          const res = await axios.put(`/users/${profile._id}`, formDataObj);
-
-          const savedUser = res.data.data || res.data;
-          setProfile(savedUser);
-          setUser(savedUser);
-          localStorage.setItem("user", JSON.stringify(savedUser));
-        } catch (err) {
-          console.error("Image upload failed:", err.message);
-        }
-      };
-      reader.readAsDataURL(file);
+        const savedUser = res.data.data || res.data;
+        setProfile(savedUser);
+        setUser(savedUser);
+        localStorage.setItem("user", JSON.stringify(savedUser));
+      } catch (err) {
+        console.error("Image upload failed:", err.message);
+      }
     }
   };
 
@@ -118,7 +139,7 @@ const Profile = () => {
 
   if (!profile) return <p className="p-6">Loading...</p>;
 
- return (
+  return (
     <div className="p-6">
       {/* Profile Header */}
       <h2 className="text-2xl font-bold mb-6">My Profile</h2>
@@ -175,11 +196,8 @@ const Profile = () => {
             />
           </div>
 
-          <img
-            src={profile?.profileImage || ""}
-            alt="profile"
-            className="w-20 h-20 rounded-full object-cover border-4 border-white absolute top-2 -right-[35px]"
-          />
+         <ProfileImage userId={profile?._id} />
+
         </div>
 
         {/* User Info */}
