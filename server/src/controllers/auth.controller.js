@@ -10,7 +10,11 @@ const registerUser = async (req, res) => {
 
     // check if user exists
     const existingUser = await User.findOne({ email });
-    if (existingUser) return response.badRequest(res, "User already exists");
+   if (existingUser) {
+      return response.badRequest(res, "Validation failed", {
+        email: ["Email already registered"],
+      });
+}
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,11 +64,20 @@ const loginUser = async (req, res) => {
 
     // check user
     const user = await User.findOne({ email });
-    if (!user) return response.badRequest(res, "Invalid email or password");
+    if (!user) {
+      return response.badRequest(res, "Validation failed", {
+        email: ["Email not found"],
+      });
+    }
+
 
     // check password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return response.badRequest(res, "Invalid email or password");
+      if (!isMatch) {
+      return response.badRequest(res, "Validation failed", {
+        password: ["Incorrect password"],
+      });
+    }
 
     // generate token
     const token = jwt.sign(

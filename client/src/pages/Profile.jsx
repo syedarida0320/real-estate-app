@@ -18,13 +18,13 @@ function ProfileImage({ userId }) {
     if (!userId) return;
 
     // fetch image with auth token
-    axios.get(`/users/${userId}/profile-image`, { responseType: "blob" })
-      .then(res => {
+    axios
+      .get(`/users/${userId}/profile-image`, { responseType: "blob" })
+      .then((res) => {
         const url = URL.createObjectURL(res.data);
         setImageUrl(url);
       })
-      .catch((err) => {
-        console.warn("No profile image found:");
+      .catch(() => {
         setImageUrl(dummyAvatar);
       });
   }, [userId]);
@@ -38,12 +38,12 @@ function ProfileImage({ userId }) {
   );
 }
 
-
 const Profile = () => {
   const { user, setUser } = useAuth();
   const [profile, setProfile] = useState(user || null);
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     address: "",
     phone: "",
@@ -56,10 +56,10 @@ const Profile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // console.log("user", user);
         if (user?._id) {
           const res = await axios.get(`/users/${user._id}`);
           const fetchedUser = res.data.data || res.data;
+         
           setProfile(fetchedUser);
           setFormData({
             address:
@@ -89,7 +89,7 @@ const Profile = () => {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file) {
+    
       try {
         const formDataObj = new FormData();
         formDataObj.append("profileImage", file);
@@ -105,35 +105,32 @@ const Profile = () => {
       } catch (err) {
         console.error("Image upload failed:", err.message);
       }
-    }
+    
   };
 
   // ✅ Save profile directly to DB
   const handleSave = async () => {
     try {
       const updatedUser = {
-        ...profile,
         address: formData.address,
         phone: formData.phone,
         email: formData.email,
       };
 
-      const formDataObj = new FormData();
-
-      Object.keys(updatedUser).forEach((key) => {
-        formDataObj.append(key, updatedUser[key]);
-      });
-
-      const res = await axios.put(`/users/${profile._id}`, formDataObj);
-
+      const res = await axios.put(`/users/${profile._id}`, updatedUser);
       const savedUser = res.data.data || res.data;
+      
       setProfile(savedUser);
       setUser(savedUser);
       localStorage.setItem("user", JSON.stringify(savedUser));
-
+      setErrors({});
       setEditing(false);
     } catch (err) {
-      console.error("Profile update failed:", err.message);
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors); // backend validation errors
+      } else {
+        console.error("Profile update failed:", err.message);
+      }
     }
   };
 
@@ -196,8 +193,7 @@ const Profile = () => {
             />
           </div>
 
-         <ProfileImage userId={profile?._id} />
-
+          <ProfileImage userId={profile?._id} />
         </div>
 
         {/* User Info */}
@@ -221,6 +217,9 @@ const Profile = () => {
                   placeholder="Enter your full address"
                   className="w-full"
                 />
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                )}
               </div>
 
               {/* Phone Number Field */}
@@ -234,6 +233,9 @@ const Profile = () => {
                   onChange={handleChange}
                   placeholder="Enter your phone number"
                 />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                )}
               </div>
 
               {/* Email Field */}
@@ -247,6 +249,9 @@ const Profile = () => {
                   onChange={handleChange}
                   placeholder="Enter your email"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
               </div>
 
               {/* Save & Cancel Buttons */}

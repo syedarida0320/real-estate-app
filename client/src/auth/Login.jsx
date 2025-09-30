@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import loginImage from "@/assets/Sign-In.jpg";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import axios from '@/utils/axios';
+import axios from "@/utils/axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Login() {
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -31,14 +31,18 @@ function Login() {
 
     try {
       setLoading(true);
-      setError(null);
+      setErrors({});
 
       const res = await axios.post("/auth/login", formData);
       const payload = res.data.data || res.data;
 
-      loginUser({ user : payload.user , token: payload.token });
+      loginUser({ user: payload.user, token: payload.token });
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors); // field-specific errors
+      } else {
+        setErrors({ general: err.response?.data?.message || "Login failed" });
+      }
     } finally {
       setLoading(false);
     }
@@ -58,22 +62,37 @@ function Login() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <div>
+                <Input
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
 
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center space-x-2">
@@ -85,11 +104,12 @@ function Login() {
                 </a>
               </div>
 
+              {errors.general && (
+                <p className="text-red-500 text-sm mt-2">{errors.general}</p>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign in"}
               </Button>
-
-              {error && <p className="text-red-500 text-sm">{error}</p>}
 
               <Button
                 type="button"

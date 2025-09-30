@@ -17,6 +17,7 @@ const registerSchema = Joi.object({
     "string.empty": "Password is required",
     "string.min": "Password must be at least 6 characters long",
   }),
+
   phone: Joi.string()
     .pattern(/^[0-9]{10,15}$/)
     .optional()

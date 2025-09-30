@@ -4,6 +4,7 @@ const {getUsers,getProfileImage,createUser, getUserById, updateUser} = require('
 const {authMiddleware}= require ("../middlewares/auth.middleware")
 const upload=require("../middlewares/upload")
 
+// Protect all routes
 router.use(authMiddleware);
 
 router.get('/', getUsers);
