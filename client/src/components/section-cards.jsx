@@ -1,12 +1,27 @@
+import { useEffect, useState } from "react";
+import axios from "@/utils/axios";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Import property images (replace with actual paths in your assets folder)
-import property1 from "@/assets/property-1.jpg";
-import property2 from "@/assets/property-2.jpg";
-import property3 from "@/assets/property-3.jpg";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function SectionCards() {
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const res = await axios.get("/properties");
+        if (res.data?.success) {
+          setProperties(res.data.data.slice(0, 3)); // only take 3
+        } else {
+          console.error("Failed to fetch properties");
+        }
+      } catch (err) {
+        console.error("Error fetching properties:", err);
+      }
+    };
+    fetchProperties();
+  }, []);
+
   return (
     <div className="px-4 lg:px-0">
       {/* Property List with Tabs */}
@@ -28,63 +43,36 @@ export function SectionCards() {
             </Tabs>
           </div>
         </CardHeader>
-
         <CardContent>
-          {/* Example static properties */}
-          <div className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-3 w-full gap-6">
-              <Card className="p-0 md:m-0 mt-[10px]">
-                <CardContent className="p-1">
+          {/* Property Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
+            {properties.map((property, index) => (
+              <Card
+                key={property._id || index}
+                className="rounded-xl shadow-sm hover:shadow-md transition"
+              >
+                <CardContent className="p-4">
                   <img
-                    src={property1}
-                    alt="property"
-                    className="w-full md:h-40 h-50 object-cover rounded-lg"
+                    src={`http://localhost:5000${property.image}`}
+                    alt={property.title}
+                    className="w-full h-40 object-cover rounded-lg"
                   />
-                  <h4 className="mt-3 font-semibold">
-                    Star Sun Hotel & Apartment
-                  </h4>
-                 <div className="flex flex-row justify-between px-1">
-                   <p className="text-sm text-gray-500">North Carolina, USA</p>
-                  <span className="text-blue-600 font-bold">$500</span>
-                 </div>
+                  <h4 className="mt-3 font-semibold">{property.title}</h4>
+                  <p className="text-sm text-gray-500">{property.location}</p>
+                  <span className="text-blue-600 font-bold">
+                    ${property.price}
+                  </span>
                 </CardContent>
               </Card>
+            ))}
 
-            
-            <Card className="p-0 md:m-0 mt-[10px]">
-              <CardContent className="p-1">
-                <img
-                  src={property2}
-                  alt="property"
-                  className="w-full md:h-40 h-50 object-cover rounded-lg"
-                />
-                <h4 className="mt-3 font-semibold">
-                  Letdo Ji Hotel & Apartment
-                </h4>
-               <div className="flex flex-row justify-between px-1">
-                 <p className="text-sm text-gray-500">New York City, USA</p>
-                <span className="text-blue-600 font-bold">$500</span>
-               </div>
-              </CardContent>
-            </Card>
-
-            <Card className="p-0 md:m-0 mt-[10px]">
-              <CardContent className="p-1">
-                <img
-                  src={property3}
-                  alt="property"
-                  className="w-full md:h-40 h-50 object-cover rounded-lg"
-                />
-                <h4 className="mt-3 font-semibold">Metro Jayakar Apartment</h4>
-               <div className="flex flex-row justify-between px-1">
-                 <p className="text-sm text-gray-500">North Carolina, USA</p>
-                <span className="text-blue-600 font-bold">$500</span>
-               </div>
-              </CardContent>
-            </Card>
+            {properties.length === 0 && (
+              <p className="text-gray-500 text-center col-span-3">
+                No properties available.
+              </p>
+            )}
           </div>
-          </div>
-        </CardContent>
+        </CardContent>{" "}
       </Card>
     </div>
   );
