@@ -24,11 +24,11 @@ function Register() {
   const [errors, setErrors] = useState({});
   const [localError, setLocalError] = useState(null);
 
-  useEffect(() => {
-    if (user) {
-      navigate("/home");
-    }
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate("/home");
+  //   }
+  // }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

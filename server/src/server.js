@@ -24,5 +24,7 @@ app.use('/api/properties', require('./routes/property.routes'));
 app.use('/api/agents', require('./routes/agent.routes'));
 app.use('/api/reviews', require('./routes/review.routes'));
 app.use("/api", require('./routes/email.routes'));
+app.use("/api/dashboard", require("./routes/dashboard.routes"));
+app.use('/images', express.static('public/images'));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(colors.bgCyan(`Server is running on port ${PORT}`)));

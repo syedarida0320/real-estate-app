@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 
 const AuthContext = createContext();
 
@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
     JSON.parse(localStorage.getItem("user")) || null
   );
 
-  // ✅ Login (called from Login.jsx)
+  // Login (called from Login.jsx)
   const loginUser = ({ user, token }) => {
     setUser(user);
     if (token) {
@@ -16,15 +16,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout
+  //  Logout
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   };
 
+  const value=useMemo(
+    ()=> ({user, loginUser,logout,setUser}),
+    [user]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, loginUser, logout, setUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

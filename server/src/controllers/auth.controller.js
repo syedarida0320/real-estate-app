@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { response } = require("../utils/response");
-const { sendEmail } = require("../utils/email"); // ✅ import email util
+const { sendEmail } = require("../utils/email"); 
 
 const registerUser = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
     );
 
     // ✅ Send Welcome Email (Job)
-     await sendEmail(user.email, "Welcome to Real Estate App 🎉", "welcome", {
+     await sendEmail(user.email, "Welcome to Real Estate App ", "welcome", {
       firstName: user.firstName,
       lastName: user.lastName,
     });

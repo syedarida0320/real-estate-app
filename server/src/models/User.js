@@ -24,9 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     role: { type: String, default: "user" },
     profileImagePath: { type: String, default: "" },
-    // profileImage: { type: String, default: "" },
     dateOfBirth: Date,
-    // createdAt: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

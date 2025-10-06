@@ -6,7 +6,7 @@ const propertySchema = new mongoose.Schema(
     name: { type: String, required: true },
     type: {
       type: String,
-      enum: ["hotel", "apartment", "house", "commercial"],
+      enum: ["hotel", "apartment", "house", "commercial", "garages", "lots"],
       required: true,
     },
     status: {
@@ -38,7 +38,7 @@ const propertySchema = new mongoose.Schema(
     createdAt: { type: Date, default: Date.now },
   },
   {
-    timeseries: true,
+    timestamps: true,
   }
 );
 

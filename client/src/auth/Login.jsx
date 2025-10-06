@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import loginImage from "@/assets/Sign-In.jpg";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import axios from "@/utils/axios";
+//import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const navigate = useNavigate();
+ // const navigate = useNavigate();
   const { loginUser, user } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (user) {
-      navigate("/home"); // redirect after login
-    }
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate("/home"); // redirect after login
+  //   }
+  // }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

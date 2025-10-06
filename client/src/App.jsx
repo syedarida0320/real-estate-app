@@ -1,20 +1,39 @@
-import React from "react";
-import {Route, Routes } from "react-router-dom";
-import Login from "@/auth/Login";
-import Register from "@/auth/Register";
-import Dashboard from "@/pages/Dashboard";
-import Profile from "@/pages/Profile";
+import React, { Suspense, lazy } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import PrivateRoute from "@/routes/PrivateRoute";
+import PublicRoute from "@/routes/PublicRoute";
+import Loader from "@/components/Loader";
+
+const Login = lazy(() => import("@/auth/Login"));
+const Register = lazy(() => import("@/auth/Register"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Property = lazy(() => import("@/pages/Property"));
+const Agent= lazy (()=> import("@/pages/Agent"))
+const Message= lazy(()=> import("@/pages/Message"))
+const Review= lazy(()=> import("@/pages/Review"))
 
 const App = () => {
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Dashboard/>}/>
-        <Route path="/profile" element={<Profile/>}/>
+        {/* Public Routes */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Private Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/home" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/property" element={<Property />} />
+          <Route path="/agent" element={<Agent/>}/>
+          <Route path="/message" element={<Message/>}/>
+          <Route path="/review" element={<Review/>}/>
+        </Route>
       </Routes>
-    </>
+    </Suspense>
   );
 };
 

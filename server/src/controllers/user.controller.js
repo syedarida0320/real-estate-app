@@ -6,7 +6,9 @@ const fs = require("fs");
 
 /// 📌 Utility: build profile image URL dynamically
 const buildProfileImageUrl = (req, userId) => {
-  return `${req.protocol}://${req.get("host")}/api/users/${userId}/profile-image`;
+  return `${req.protocol}://${req.get(
+    "host"
+  )}/api/users/${userId}/profile-image`;
 };
 
 const getUsers = async (req, res) => {
@@ -82,12 +84,14 @@ const updateUser = async (req, res) => {
         updateData[field] = req.body[field];
       }
     });
-    
+
     //  handle profile image -> if file uploaded, attach profileImagePath and delete old file if present
     if (req.file) {
       // remove old image if exists
       if (existing.profileImagePath) {
-        const oldPath = path.join( process.cwd(), "private/images",
+        const oldPath = path.join(
+          process.cwd(),
+          "private/images",
           existing.profileImagePath
         );
         if (fs.existsSync(oldPath)) {
@@ -113,11 +117,11 @@ const updateUser = async (req, res) => {
 
     // add computed profileImage URL for response if file exists
 
-if (!updatedUser) return response.notFound(res, "User not found");
+    if (!updatedUser) return response.notFound(res, "User not found");
 
     const userObj = updatedUser.toObject();
     if (userObj.profileImagePath) {
-      userObj.profileImage =  buildProfileImageUrl(req, userObj._id);
+      userObj.profileImage = buildProfileImageUrl(req, userObj._id);
     }
     response.ok(res, "User updated successfully", userObj);
   } catch (err) {
