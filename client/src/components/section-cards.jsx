@@ -25,7 +25,7 @@ export function SectionCards() {
   return (
     <div className="px-4 lg:px-0">
       {/* Property List with Tabs */}
-      <Card className="shadow-sm mt-12">
+      <Card className="shadow-sm mt-8">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <h3 className="md:text-lg text-[18px] font-semibold">
@@ -45,13 +45,13 @@ export function SectionCards() {
         </CardHeader>
         <CardContent>
           {/* Property Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-0">
             {properties.map((property, index) => (
               <Card
                 key={property._id || index}
-                className="rounded-xl shadow-sm hover:shadow-md transition"
+                className="rounded-xl py-0 shadow-sm hover:shadow-md transition"
               >
-                <CardContent className="p-4">
+                <CardContent className="p-2 ">
                   <img
                     src={`http://localhost:5000${property.image}`}
                     alt={property.title}

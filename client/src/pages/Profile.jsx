@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import dummyAvatar from "@/assets/dummy-avatar.png";
 import axios from "@/utils/axios";
 import MainLayout from "@/layouts/MainLayout";
 import { useLocation } from "react-router-dom";
+import { SectionCards } from "@/components/section-cards";
 
 function ProfileImage({ userId }) {
   const [imageUrl, setImageUrl] = useState(null);
@@ -49,19 +50,6 @@ const Profile = () => {
     phone: "",
     email: "",
   });
-  const [properties, setProperties] = useState([]);
-
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const res = await axios.get("/properties");
-        setProperties(res.data.data.slice(0, 3)); // only take first 3
-      } catch (error) {
-        console.error("Error fetching properties", error);
-      }
-    };
-    fetchProperties();
-  }, []);
 
   useEffect(() => {
     if (location.state?.editing) {
@@ -321,49 +309,7 @@ const Profile = () => {
             )}
           </div>
         </Card>
-
-        {/* Property List */}
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Property List</h3>
-            <div className="flex gap-2">
-              <Button size="sm" variant="secondary">
-                Popular
-              </Button>
-              <Button size="sm" variant="ghost">
-                Recommended
-              </Button>
-              <Button size="sm" variant="ghost">
-                Newest
-              </Button>
-              <Button size="sm" variant="ghost">
-                Most Recent
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {properties.map((property, index) => (
-              <Card
-                key={property._id || index}
-                className="rounded-xl shadow-sm hover:shadow-md transition"
-              >
-                <CardContent className="p-4">
-                  <img
-                    src={`http://localhost:5000${property.image}`}
-                    alt={property.title}
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
-                  <h4 className="mt-3 font-semibold">{property.title}</h4>
-                  <p className="text-sm text-gray-500">{property.location}</p>
-                  <span className="text-blue-600 font-bold">
-                    ${property.price}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <SectionCards />
       </div>
     </MainLayout>
   );
