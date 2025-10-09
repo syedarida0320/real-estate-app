@@ -46,8 +46,8 @@ const Property = () => {
     location: { address: "", city: "", state: "", country: "" },
     mapLocation: { lat: "", lng: "" },
     facilities: {
-      beds: 0,
-      baths: 0,
+      beds: "",
+      baths: "",
       area: "",
       wifi: false,
       smokingArea: false,
@@ -81,7 +81,10 @@ const Property = () => {
 
   // 🧾 Auto-fill agent info when form opens
   useEffect(() => {
-    if (user?.user && (user.user.role === "agent" || user.user.role === "admin")) {
+    if (
+      user?.user &&
+      (user.user.role === "agent" || user.user.role === "admin")
+    ) {
       setFormData((prev) => ({
         ...prev,
         agent: {
@@ -134,7 +137,9 @@ const Property = () => {
         title: formData.title,
         type: formData.type,
         mainImage: formData.mainImage,
-        galleryImages: formData.galleryImages.filter((img) => img.trim() !== ""),
+        galleryImages: formData.galleryImages.filter(
+          (img) => img.trim() !== ""
+        ),
         description: formData.description || "",
         rating: formData.rating || "",
         price: {
@@ -188,244 +193,309 @@ const Property = () => {
             <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg overflow-y-auto max-h-[90vh]">
               <h3 className="text-xl font-semibold mb-4">Add Property</h3>
 
-              <form onSubmit={handleAddProperty} className="space-y-5">
-                {/* Title */}
-                <input
-                  name="title"
-                  type="text"
-                  placeholder="Title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg h-10 px-3"
-                  required
-                />
+              <form
+                onSubmit={handleAddProperty}
+                className="space-y-6 text-gray-800"
+              >
+                {/* Title & Type */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Title
+                    </label>
+                    <input
+                      name="title"
+                      type="text"
+                      placeholder="Enter property title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Property Type
+                    </label>
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Apartment">Apartment</option>
+                      <option value="House">House</option>
+                      <option value="Hotel">Hotel</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Garages">Garages</option>
+                      <option value="Lots">Lots</option>
+                    </select>
+                  </div>
+                </div>
 
-                {/* Type */}
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded-lg h-10 px-3"
-                >
-                  <option value="">Select Type</option>
-                  <option value="Apartment">Apartment</option>
-                  <option value="House">House</option>
-                  <option value="Hotel">Hotel</option>
-                  <option value="Commercial">Commercial</option>
-                  <option value="Garages">Garages</option>
-                  <option value="Lots">Lots</option>
-                </select>
-
-                {/* Main Image */}
-                <input
-                  name="mainImage"
-                  type="text"
-                  placeholder="Main Image URL"
-                  value={formData.mainImage}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg h-10 px-3"
-                  required
-                />
-
-                {/* Gallery Images */}
-                <input
-                  name="galleryImages"
-                  type="text"
-                  placeholder="Gallery Images (comma separated URLs)"
-                  value={formData.galleryImages.join(", ")}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      galleryImages: e.target.value
-                        .split(",")
-                        .map((url) => url.trim()),
-                    })
-                  }
-                  className="w-full border rounded-lg h-10 px-3"
-                />
-
-                {/* Price */}
-                <div className="grid grid-cols-3 gap-2">
+                {/* Images */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Main Image URL
+                  </label>
                   <input
-                    name="priceAmount"
-                    type="number"
-                    placeholder="Amount"
-                    value={formData.priceAmount}
+                    name="mainImage"
+                    type="text"
+                    placeholder="https://example.com/image.jpg"
+                    value={formData.mainImage}
                     onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
+                    className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
                     required
                   />
-                  <select
-                    name="priceCurrency"
-                    value={formData.priceCurrency}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="PKR">PKR</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                  <select
-                    name="priceDuration"
-                    value={formData.priceDuration}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  >
-                    <option value="Per Day">Per Day</option>
-                    <option value="Per Month">Per Month</option>
-                    <option value="Per Year">Per Year</option>
-                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Gallery Images (comma separated)
+                  </label>
+                  <input
+                    name="galleryImages"
+                    type="text"
+                    placeholder="https://img1.jpg, https://img2.jpg"
+                    value={formData.galleryImages.join(", ")}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        galleryImages: e.target.value
+                          .split(",")
+                          .map((url) => url.trim()),
+                      })
+                    }
+                    className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                  />
+                </div>
+
+                {/* Price Section */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Price
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <input
+                      name="priceAmount"
+                      type="number"
+                      placeholder="Amount"
+                      value={formData.priceAmount}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                      required
+                    />
+                    <select
+                      name="priceCurrency"
+                      value={formData.priceCurrency}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="PKR">PKR</option>
+                      <option value="EUR">EUR</option>
+                    </select>
+                    <select
+                      name="priceDuration"
+                      value={formData.priceDuration}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    >
+                      <option value="Per Day">Per Day</option>
+                      <option value="Per Month">Per Month</option>
+                      <option value="Per Year">Per Year</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Location */}
-                <div className="grid grid-cols-2 gap-2">
-                  {["city", "country"].map((field) => (
-                    <input
-                      key={field}
-                      name={`location.${field}`}
-                      type="text"
-                      placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                      value={formData.location[field]}
-                      onChange={handleChange}
-                      className="border rounded-lg h-10 px-3"
-                    />
-                  ))}
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-semibold mb-2">
+                    Location
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {["city", "country"].map((field) => (
+                      <input
+                        key={field}
+                        name={`location.${field}`}
+                        type="text"
+                        placeholder={
+                          field.charAt(0).toUpperCase() + field.slice(1)
+                        }
+                        value={formData.location[field]}
+                        onChange={handleChange}
+                        className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 {/* Map Location */}
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    name="mapLocation.lat"
-                    type="text"
-                    placeholder="Latitude"
-                    value={formData.mapLocation.lat}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  />
-                  <input
-                    name="mapLocation.lng"
-                    type="text"
-                    placeholder="Longitude"
-                    value={formData.mapLocation.lng}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  />
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Map Location
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      name="mapLocation.lat"
+                      type="text"
+                      placeholder="Latitude"
+                      value={formData.mapLocation.lat}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                    <input
+                      name="mapLocation.lng"
+                      type="text"
+                      placeholder="Longitude"
+                      value={formData.mapLocation.lng}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                  </div>
                 </div>
 
                 {/* Facilities */}
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    name="facilities.beds"
-                    type="number"
-                    placeholder="Beds"
-                    value={formData.facilities.beds}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  />
-                  <input
-                    name="facilities.baths"
-                    type="number"
-                    placeholder="Baths"
-                    value={formData.facilities.baths}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  />
-                  <input
-                    name="facilities.area"
-                    type="text"
-                    placeholder="Area (sqft)"
-                    value={formData.facilities.area}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3"
-                  />
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-semibold mb-2">
+                    Facilities
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <input
+                      name="facilities.beds"
+                      type="number"
+                      placeholder="Beds"
+                      value={formData.facilities.beds}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                    <input
+                      name="facilities.baths"
+                      type="number"
+                      placeholder="Baths"
+                      value={formData.facilities.baths}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                    <input
+                      name="facilities.area"
+                      type="text"
+                      placeholder="Area (sqft)"
+                      value={formData.facilities.area}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
+                    {[
+                      {
+                        key: "wifi",
+                        label: "Wi-Fi",
+                        icon: <Wifi className="w-4 h-4" />,
+                      },
+                      {
+                        key: "smokingArea",
+                        label: "Smoking Area",
+                        icon: <Cigarette className="w-4 h-4" />,
+                      },
+                      {
+                        key: "kitchen",
+                        label: "Kitchen",
+                        icon: <Utensils className="w-4 h-4" />,
+                      },
+                      { key: "balcony", label: "Balcony" },
+                      {
+                        key: "parkingArea",
+                        label: "Parking",
+                        icon: <Car className="w-4 h-4" />,
+                      },
+                    ].map(({ key, label, icon }) => (
+                      <label
+                        key={key}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          name={`facilities.${key}`}
+                          checked={formData.facilities[key]}
+                          onChange={handleChange}
+                          className="accent-blue-600"
+                        />
+                        {icon}
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Checkbox Facilities */}
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                  {[
-                    { key: "wifi", label: "Wi-Fi", icon: <Wifi className="w-4 h-4" /> },
-                    {
-                      key: "smokingArea",
-                      label: "Smoking Area",
-                      icon: <Cigarette className="w-4 h-4" />,
-                    },
-                    { key: "kitchen", label: "Kitchen", icon: <Utensils className="w-4 h-4" /> },
-                    { key: "balcony", label: "Balcony" },
-                    { key: "parkingArea", label: "Parking", icon: <Car className="w-4 h-4" /> },
-                  ].map(({ key, label, icon }) => (
-                    <label key={key} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name={`facilities.${key}`}
-                        checked={formData.facilities[key]}
-                        onChange={handleChange}
-                      />
-                      {icon}
-                      {label}
-                    </label>
-                  ))}
+                {/* Rating & Description */}
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-semibold mb-2">
+                    Additional Info
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      name="rating"
+                      type="number"
+                      placeholder="Rating (0–5)"
+                      min="0"
+                      max="5"
+                      value={formData.rating}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    />
+                    <textarea
+                      name="description"
+                      placeholder="Description"
+                      rows="2"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-3 py-2"
+                    ></textarea>
+                  </div>
                 </div>
-
-                {/* Rating */}
-                <input
-                  name="rating"
-                  type="number"
-                  placeholder="Rating (0–5)"
-                  min="0"
-                  max="5"
-                  value={formData.rating}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg h-10 px-3"
-                />
-
-                {/* Description */}
-                <textarea
-                  name="description"
-                  placeholder="Description"
-                  rows="3"
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                ></textarea>
 
                 {/* Agent Info */}
-                <div>
-                  <h4 className="font-semibold text-sm mb-2 text-gray-700">
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-semibold mb-2">
                     Agent Details
-                  </h4>
-                  <input
-                    name="agent.name"
-                    type="text"
-                    placeholder="Agent Name"
-                    value={formData.agent.name}
-                    readOnly
-                    className="border rounded-lg h-10 px-3 mb-2 w-full bg-gray-100"
-                  />
-                  <input
-                    name="agent.email"
-                    type="text"
-                    placeholder="Agent Email"
-                    value={formData.agent.email}
-                    readOnly
-                    className="border rounded-lg h-10 px-3 mb-2 w-full bg-gray-100"
-                  />
-                  <input
-                    name="agent.contact.phone"
-                    type="text"
-                    placeholder="Phone"
-                    value={formData.agent.contact.phone}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3 mb-2 w-full"
-                  />
-                  <input
-                    name="agent.location"
-                    type="text"
-                    placeholder="Agent Location"
-                    value={formData.agent.location}
-                    onChange={handleChange}
-                    className="border rounded-lg h-10 px-3 w-full"
-                  />
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      name="agent.name"
+                      type="text"
+                      placeholder="Agent Name"
+                      value={formData.agent.name}
+                      readOnly
+                      className="border rounded-lg h-10 px-3 w-full bg-gray-100"
+                    />
+                    <input
+                      name="agent.email"
+                      type="text"
+                      placeholder="Agent Email"
+                      value={formData.agent.email}
+                      readOnly
+                      className="border rounded-lg h-10 px-3 w-full bg-gray-100"
+                    />
+                    <input
+                      name="agent.contact.phone"
+                      type="text"
+                      placeholder="Phone"
+                      value={formData.agent.contact.phone}
+                      onChange={handleChange}
+                      className="border rounded-lg h-10 px-3 w-full"
+                    />
+                    <input
+                      name="agent.location"
+                      type="text"
+                      placeholder="Agent Location"
+                      value={formData.agent.location}
+                      onChange={handleChange}
+                      className="border rounded-lg h-10 px-3 w-full"
+                    />
+                  </div>
                 </div>
 
                 {/* Buttons */}
@@ -488,7 +558,9 @@ const Property = () => {
                         <MapPin className="w-4 h-4 mr-1 text-blue-500" />
                         <span>
                           {property.location?.city
-                            ? `${property.location.city}, ${property.location?.country || ""}`
+                            ? `${property.location.city}, ${
+                                property.location?.country || ""
+                              }`
                             : "Unknown location"}
                         </span>
                       </div>

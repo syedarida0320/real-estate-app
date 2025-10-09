@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 //const Review = require("../models/Review");
 
-/// 📌 Utility: build profile image URL dynamically
+///  Utility: build profile image URL dynamically
 const buildProfileImageUrl = (req, userId) => {
   return `${req.protocol}://${req.get(
     "host"

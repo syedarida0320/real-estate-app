@@ -16,13 +16,13 @@ const propertySchema = new mongoose.Schema(
       country: { type: String },
     },
     price: {
-      amount: { type: Number, required: true }, // e.g. 80
-      duration: { type: String, default: "Per Day" }, // e.g. "For One Day"
+      amount: { type: Number, required: true }, 
+      duration: { type: String, default: "Per Day" }, 
       currency: { type: String, default: "USD" },
     },
-    rating: { type: Number, default: 0 }, // e.g. 4.5 stars
-    mainImage: { type: String, required: true }, // large display image
-    galleryImages: [String], // extra room images or +10 photos
+    rating: { type: Number, default: 0 },
+    mainImage: { type: String, required: true }, 
+    galleryImages: [String], 
     facilities: {
       beds: { type: Number, default: 0 },
       baths: { type: Number, default: 0 },
@@ -34,22 +34,27 @@ const propertySchema = new mongoose.Schema(
       parkingArea: { type: Boolean, default: false },
     },
     description: { type: String },
-
-    agent: {
-      name: { type: String },
-      role: { type: String, default: "Agent" },
-      profileImage: { type: String },
-      location: { type: String },
-      totalProperties: { type: Number, default: 0 },
-      contact: {
-        phone: { type: String },
-        email: { type: String },
-      },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
+    // agent: {
+    //   name: { type: String },
+    //   role: { type: String, default: "Agent" },
+    //   profileImage: { type: String },
+    //   location: { type: String },
+    //   totalProperties: { type: Number, default: 0 },
+    //   contact: {
+    //     phone: { type: String },
+    //     email: { type: String },
+    //   },
+    // },
     mapLocation: {
       lat: { type: Number },
       lng: { type: Number },
     },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

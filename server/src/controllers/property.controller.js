@@ -8,10 +8,10 @@ exports.getAllProperties = async (req, res) => {
     let filter = {};
 
     if (user.role === "agent") {
-      filter.createdBy = user._id; // Agent can see only his own
+      filter.createdBy = user._id; 
     }
 
-    const properties = await Property.find(filter).sort({ createdAt: -1 });
+    const properties = await Property.find(filter).populate("userId", "firstName lastName email role").sort({ createdAt: -1 });
     response.ok(res, "Properties fetched successfully", properties);
   } catch (error) {
     console.error("Error fetching properties:", error);
@@ -24,16 +24,7 @@ exports.getPropertyById = async (req, res) => {
     const { id } = req.params;
 
     // Try from MongoDB first
-    let property = await Property.findById(id);
-
-    // fallback: check dummy data if DB doesn’t have it
-    if (!property) {
-      property = properties.find(
-        (p) =>
-          p._id?.toString() === id.toString() ||
-          p.id?.toString() === id.toString()
-      );
-    }
+    const property = await Property.findById(id).populate("userId", "firstName lastName email role");
 
     if (!property) {
       return response.notFound(res, "Property not found");
@@ -61,17 +52,8 @@ exports.createProperty = async (req, res) => {
     const propertyData = req.body;
 
     // If agent, tag property with agent info
-    if (user.role === "agent") {
-      propertyData.agent = {
-        name: user.name,
-        role: "Agent",
-        profileImage: user.profileImage || "",
-        location: user.location || "",
-        totalProperties: 0,
-        contact: { phone: user.phone || "", email: user.email || "" },
-      };
-      propertyData.createdBy = user._id;
-    }
+   propertyData.userId = user._id;
+    propertyData.createdBy = user._id;
 
     const property = await Property.create(propertyData);
     response.created(res, "Property created successfully", property);

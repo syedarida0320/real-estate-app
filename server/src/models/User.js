@@ -22,9 +22,7 @@ const userSchema = new mongoose.Schema(
       zipCode: String,
       country: String,
     },
-    role: { type: String,
-      enum:["user", "agent", "admin"],
-      default: "user" },
+    role: { type: String, enum: ["user", "agent", "admin"], default: "user" },
     profileImagePath: { type: String, default: "" },
     dateOfBirth: Date,
   },
@@ -32,9 +30,14 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
 userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
+});
+userSchema.virtual("property", {
+  ref: "Property",
+  localField: "_id",
+  foreignField: "userId",
+  justOne: true, // ensures one-to-one
 });
 
 const User = mongoose.model("User", userSchema);
