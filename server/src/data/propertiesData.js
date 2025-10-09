@@ -1,4 +1,3 @@
-// backend/data/propertiesData.js
 const properties = [
   {
     id: 1,

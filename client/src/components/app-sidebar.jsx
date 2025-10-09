@@ -17,7 +17,7 @@ import {
 
 const navItems = [
   { title: "Dashboard", path: "/home", icon: IconDashboard },
-  { title: "Property", path: "/property", icon: IconBuildingSkyscraper },
+  { title: "Property", path: "/properties", icon: IconBuildingSkyscraper },
   { title: "Agent", path: "/agent", icon: IconUsers },
   { title: "Review", path: "/review", icon: IconStar },
   { title: "Message", path: "/message", icon: IconMessageDots },
@@ -25,6 +25,7 @@ const navItems = [
 ];
 
 export function AppSidebar() {
+  
   return (
     <Sidebar className="bg-white border-r border-gray-200 w-55 h-[calc(100vh-64px)] fixed left-0 top-[64px] shadow-sm">
       <SidebarContent className="flex-1 overflow-y-auto mt-5">

@@ -1,6 +1,5 @@
 const { response } = require("../utils/response");
 
-// Dummy dashboard data (can later come from DB/models)
 const dashboardData = {
   stats: [
     { title: "Properties for Sale", value: 684 },
@@ -22,7 +21,7 @@ const getDashboardData = async (req, res) => {
   try {
     return response.ok(res, "Dashboard data fetched successfully", dashboardData);
   } catch (err) {
-    return response.serverError(res, "Failed to fetch dashboard data",err.message);
+    return response.serverError(res, "Failed to fetch dashboard data", err.message);
   }
 };
 

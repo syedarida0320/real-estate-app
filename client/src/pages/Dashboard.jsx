@@ -14,6 +14,7 @@ export default function Dashboard() {
       try {
         const res = await axios.get("/dashboard");
         if (res.data.success) {
+          //console.log("here on dashboard", res.data);
           setData(res.data.data);
         } else {
           setError("Failed to load dashboard data.");

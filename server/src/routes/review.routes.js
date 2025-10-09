@@ -1,10 +1,11 @@
 // routes/reviews.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const reviewController = require('../controllers/review.controller');
-//const auth = require('../middleware/auth');
+const reviewController = require("../controllers/review.controller");
+const { authMiddleware } = require("../middlewares/auth.middleware");
+router.use(authMiddleware);
 
-router.get('/', reviewController.getReviews);
+router.get("/", reviewController.getReviews);
 // router.get('/property/:propertyId', reviewController.getPropertyReviews);
 // router.get('/agent/:agentId', reviewController.getAgentReviews);
 // router.post('/', auth, reviewController.createReview);

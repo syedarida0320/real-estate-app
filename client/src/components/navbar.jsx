@@ -23,6 +23,7 @@ useEffect(() => {
         });
         const imgUrl = URL.createObjectURL(res.data);
         setProfileImage(imgUrl);
+       // console.log("here in navbar => ", res.data);
       } catch (error) {
         console.error("Failed to fetch profile image:", error.message);
         setProfileImage(dummyAvatar);

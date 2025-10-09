@@ -9,9 +9,10 @@ const Register = lazy(() => import("@/auth/Register"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Property = lazy(() => import("@/pages/Property"));
-const Agent= lazy (()=> import("@/pages/Agent"))
-const Message= lazy(()=> import("@/pages/Message"))
-const Review= lazy(()=> import("@/pages/Review"))
+const PropertyDetail = lazy(() => import("@/pages/PropertyDetail"));
+const Agent = lazy(() => import("@/pages/Agent"));
+const Message = lazy(() => import("@/pages/Message"));
+const Review = lazy(() => import("@/pages/Review"));
 
 const App = () => {
   return (
@@ -27,10 +28,11 @@ const App = () => {
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/property" element={<Property />} />
-          <Route path="/agent" element={<Agent/>}/>
-          <Route path="/message" element={<Message/>}/>
-          <Route path="/review" element={<Review/>}/>
+          <Route path="/properties" element={<Property />} />
+          <Route path="/properties/:id" element={<PropertyDetail />} />
+          <Route path="/agent" element={<Agent />} />
+          <Route path="/message" element={<Message />} />
+          <Route path="/review" element={<Review />} />
         </Route>
       </Routes>
     </Suspense>

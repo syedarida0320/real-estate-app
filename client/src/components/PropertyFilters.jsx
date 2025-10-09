@@ -34,7 +34,7 @@ const PropertyFilters = ({ filters, onFiltersChange }) => {
           <SelectValue placeholder="Any Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="any">Any Status</SelectItem>
+          <SelectItem value="any" disabled>Any Status</SelectItem>
           <SelectItem value="for sale">For Sale</SelectItem>
           <SelectItem value="for rent">For Rent</SelectItem>
           <SelectItem value="sold">Sold</SelectItem>
@@ -49,7 +49,7 @@ const PropertyFilters = ({ filters, onFiltersChange }) => {
           <SelectValue placeholder="Any Type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="any">Any Type</SelectItem>
+          <SelectItem value="any" disabled>Any Type</SelectItem>
           <SelectItem value="hotel">Hotel</SelectItem>
           <SelectItem value="apartment">Apartment</SelectItem>
           <SelectItem value="house">House</SelectItem>
@@ -67,7 +67,7 @@ const PropertyFilters = ({ filters, onFiltersChange }) => {
           <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Countries</SelectItem>
+          <SelectItem value="all" disabled>All Countries</SelectItem>
           <SelectItem value="USA">USA</SelectItem>
           <SelectItem value="UK">UK</SelectItem>
           <SelectItem value="India">India</SelectItem>
@@ -82,7 +82,7 @@ const PropertyFilters = ({ filters, onFiltersChange }) => {
           <SelectValue placeholder="All States" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All States</SelectItem>
+          <SelectItem value="all" disabled>All States</SelectItem>
           <SelectItem value="California">California</SelectItem>
           <SelectItem value="Texas">Texas</SelectItem>
           <SelectItem value="North Carolina">North Carolina</SelectItem>

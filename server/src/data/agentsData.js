@@ -1,0 +1,48 @@
+const agents = [
+  {
+    id: 1,
+    name: "Karen Eilla Boyette",
+    role: "Real-Estate Agent",
+    email: "karenboyette@armyspy.com",
+    phone: "+502-324-4194",
+    location: "Manchester",
+    properties: 15,
+    image: "/images/agent-1.jpg",
+    bgColor: "bg-yellow-100",
+  },
+  {
+    id: 2,
+    name: "Walter Devid Moye",
+    role: "Real-Estate Agent",
+    email: "walterdevidmoye@armyspy.com",
+    phone: "+457-324-4147",
+    location: "Chicago, Canada",
+    properties: 10,
+    image: "/images/agent-2.jpg",
+    bgColor: "bg-cyan-100",
+  },
+  {
+    id: 3,
+    name: "David Smith Raddy",
+    role: "Real-Estate Agent",
+    email: "davidraddy@armyspy.com",
+    phone: "+584-324-7835",
+    location: "Manchester",
+    properties: 15,
+    image: "/images/agent-3.jpg",
+    bgColor: "bg-rose-100",
+  },
+  {
+    id: 4,
+    name: "Jhon Haron Bably",
+    role: "Real-Estate Agent",
+    email: "jhonbably@armyspy.com",
+    phone: "+502-324-4194",
+    location: "Chicago, Canada",
+    properties: 15,
+    image: "/images/agent-4.jpg",
+    bgColor: "bg-sky-100",
+  },
+];
+
+module.exports=agents;
