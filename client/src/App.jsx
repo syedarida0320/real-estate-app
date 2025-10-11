@@ -11,6 +11,7 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const Property = lazy(() => import("@/pages/Property"));
 const PropertyDetail = lazy(() => import("@/pages/PropertyDetail"));
 const Agent = lazy(() => import("@/pages/Agent"));
+const AgentDetail=lazy(()=> import("@/pages/AgentDetail"));
 const Message = lazy(() => import("@/pages/Message"));
 const Review = lazy(() => import("@/pages/Review"));
 
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/properties" element={<Property />} />
           <Route path="/properties/:id" element={<PropertyDetail />} />
           <Route path="/agent" element={<Agent />} />
+          <Route path="/agents/:id" element={<AgentDetail/>}/>
           <Route path="/message" element={<Message />} />
           <Route path="/review" element={<Review />} />
         </Route>

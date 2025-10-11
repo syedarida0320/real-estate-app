@@ -37,7 +37,7 @@ userSchema.virtual("property", {
   ref: "Property",
   localField: "_id",
   foreignField: "userId",
-  justOne: true, // ensures one-to-one
+  justOne: false,
 });
 
 const User = mongoose.model("User", userSchema);

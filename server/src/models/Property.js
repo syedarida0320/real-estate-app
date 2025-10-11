@@ -1,5 +1,6 @@
 // models/Property.js
 const mongoose = require("mongoose");
+const locationSchema=require("./Location")
 
 const propertySchema = new mongoose.Schema(
   {
@@ -9,12 +10,7 @@ const propertySchema = new mongoose.Schema(
       enum: ["Apartment", "Hotel", "House", "Commercial", "Garages", "Lots"],
       required: true,
     },
-    location: {
-      address: { type: String },
-      city: { type: String },
-      state: { type: String },
-      country: { type: String },
-    },
+    location: locationSchema,
     price: {
       amount: { type: Number, required: true }, 
       duration: { type: String, default: "Per Day" }, 
@@ -38,21 +34,6 @@ const propertySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
-    // agent: {
-    //   name: { type: String },
-    //   role: { type: String, default: "Agent" },
-    //   profileImage: { type: String },
-    //   location: { type: String },
-    //   totalProperties: { type: Number, default: 0 },
-    //   contact: {
-    //     phone: { type: String },
-    //     email: { type: String },
-    //   },
-    // },
-    mapLocation: {
-      lat: { type: Number },
-      lng: { type: Number },
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },

@@ -147,10 +147,11 @@ const Property = () => {
           currency: formData.priceCurrency || "USD",
           duration: formData.priceDuration || "Per Day",
         },
-        location: formData.location,
-        mapLocation: formData.mapLocation,
+        location: {
+          ...formData.location,
+          mapLocation: formData.mapLocation, // ✅ nest coordinates inside location
+        },
         facilities: formData.facilities,
-        agent: formData.agent,
       };
 
       await axios.post("/properties", payload);

@@ -1,6 +1,36 @@
 const Property = require("../models/Property");
+const path=require("path");
+const fs=require("fs");
+const User=require("../models/User")
 const { response } = require("../utils/response");
 // const properties = require("../data/propertiesData");
+
+exports.getProfileImage = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+
+    if (!user || !user.profileImagePath) {
+      // fallback if no image
+      const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
+      return res.sendFile(defaultImagePath);
+    }
+
+    // actual stored path
+    const imagePath = path.join(__dirname, "../uploads", user.profileImagePath);
+
+    if (fs.existsSync(imagePath)) {
+      res.sendFile(imagePath);
+    } else {
+      const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
+      res.sendFile(defaultImagePath);
+    }
+  } catch (error) {
+    console.error("Error serving profile image:", error);
+    const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
+    res.sendFile(defaultImagePath);
+  }
+};
 
 exports.getAllProperties = async (req, res) => {
   try {
@@ -8,10 +38,12 @@ exports.getAllProperties = async (req, res) => {
     let filter = {};
 
     if (user.role === "agent") {
-      filter.createdBy = user._id; 
+      filter.createdBy = user._id;
     }
 
-    const properties = await Property.find(filter).populate("userId", "firstName lastName email role").sort({ createdAt: -1 });
+    const properties = await Property.find(filter)
+      .populate("userId", "firstName lastName email role")
+      .sort({ createdAt: -1 });
     response.ok(res, "Properties fetched successfully", properties);
   } catch (error) {
     console.error("Error fetching properties:", error);
@@ -21,15 +53,25 @@ exports.getAllProperties = async (req, res) => {
 
 exports.getPropertyById = async (req, res) => {
   try {
-    const { id } = req.params;
-
     // Try from MongoDB first
-    const property = await Property.findById(id).populate("userId", "firstName lastName email role");
+    const property = await Property.findById(req.params.id).populate(
+      "userId",
+      "firstName lastName email phone role profileImagePath address"
+    );
 
     if (!property) {
       return response.notFound(res, "Property not found");
     }
-
+    // const propertyObj = property.toObject();
+    // if (propertyObj.userId?.profileImagePath) {
+    //   propertyObj.userId.profileImage = `${req.protocol}://${req.get(
+    //     "host"
+    //   )}/api/users/${propertyObj.userId._id}/profile-image`;
+    // } else {
+    //   propertyObj.userId.profileImage = `${req.protocol}://${req.get(
+    //     "host"
+    //   )}/public/images/dummy-avatar.png`;
+    // }
     response.ok(res, "Property fetched successfully", property);
   } catch (error) {
     console.error("Error fetching property by ID:", error);
@@ -52,7 +94,7 @@ exports.createProperty = async (req, res) => {
     const propertyData = req.body;
 
     // If agent, tag property with agent info
-   propertyData.userId = user._id;
+    propertyData.userId = user._id;
     propertyData.createdBy = user._id;
 
     const property = await Property.create(propertyData);

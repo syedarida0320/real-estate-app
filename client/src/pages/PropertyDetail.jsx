@@ -78,10 +78,13 @@ const PropertyDetail = () => {
   const gallery =
     property.galleryImages || (property.image ? [property.image] : []);
 
-  const agent = property.agent || {};
+  const agent = property.userId || {};
   const agentFullName = agent.firstName
     ? `${agent.firstName} ${agent.lastName}`
     : "Unknown Agent";
+
+  const lat = property?.location?.mapLocation?.lat;
+  const lng = property?.location?.mapLocation?.lng;
 
   return (
     <MainLayout>
@@ -229,17 +232,15 @@ const PropertyDetail = () => {
             {/* Right Side */}
             <aside className="space-y-4 pb-6">
               {/* Agent Info */}
+
               <div className="bg-white border rounded-xl p-4 shadow-sm">
                 <div className="flex items-center gap-3">
                   <img
-                    src={
-                      agent.profileImagePath
-                        ? formatImageUrl(agent.profileImagePath)
-                        : "/avatar-placeholder.png"
-                    }
+                    src={agent?.profileImage || "/avatar-placeholder.png"}
                     alt="Agent"
                     className="w-14 h-14 rounded-full object-cover"
                   />
+
                   <div>
                     <p className="font-semibold">{agentFullName}</p>
                     <p className="text-xs text-gray-400">
@@ -250,6 +251,7 @@ const PropertyDetail = () => {
                     </p>
                   </div>
                 </div>
+
                 <div className="mt-4 flex gap-2">
                   {agent.phone && (
                     <a href={`tel:${agent.phone}`} className="w-full">
@@ -269,10 +271,10 @@ const PropertyDetail = () => {
               {/* Map */}
               <div className="bg-white border rounded-xl p-3 shadow-sm">
                 <p className="text-sm text-gray-500 mb-2">Location Map</p>
-                {property.mapLocation?.lat && property.mapLocation?.lng ? (
+                {lat && lng ? (
                   <iframe
                     title="property-map"
-                    src={`https://maps.google.com/maps?q=${property.mapLocation.lat},${property.mapLocation.lng}&z=15&output=embed`}
+                    src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
                     className="w-full h-40 rounded-md border-0"
                   />
                 ) : (

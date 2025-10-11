@@ -8,9 +8,9 @@ router.use(authMiddleware);
 router.get('/',  getAllProperties);
 router.get('/:id', getPropertyById);
 router.post('/', createProperty);
+
+module.exports = router;
 // router.post('/', createProperty);
 //router.get('/search', propertyController.searchProperties);
 //router.put('/:id', auth, propertyController.updateProperty);
 //router.delete('/:id', auth, propertyController.deleteProperty);
-
-module.exports = router;
