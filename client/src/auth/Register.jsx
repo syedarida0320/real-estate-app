@@ -9,7 +9,7 @@ import registerImage from "@/assets/Sign-In.jpg";
 
 function Register() {
   const navigate = useNavigate();
-  const { loginUser, user } = useAuth();
+  const { loginUser } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",

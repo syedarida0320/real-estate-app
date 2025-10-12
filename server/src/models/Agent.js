@@ -14,6 +14,9 @@ const agentSchema = new mongoose.Schema({
   agentId: { type: String },
   phone: { type: String },
   email: { type: String },
+  gender: { type: String },
+  dateOfBirth:{type:String},
+
 
   // Agent Details
   agency: { type: String },
@@ -40,13 +43,13 @@ const agentSchema = new mongoose.Schema({
     instagram: { type: String },
     linkedin: { type: String },
   },
-
   // Active Listings
   activeListings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Property" }],
 
   // Other Info
   isActive: { type: Boolean, default: true },
   joinedDate: { type: Date, default: Date.now },
-});
+},
+  {timestamps:true});
 
 module.exports = mongoose.model("Agent", agentSchema);

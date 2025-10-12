@@ -44,7 +44,7 @@ const getUserById = async (req, res) => {
     // allow only the user themself or admin
     if (
       req.user._id.toString() !== req.params.id &&
-      req.user.role !== "admin" // .toString() → convert ObjectId to string for comparison.
+      req.user.role !== "Admin" // .toString() → convert ObjectId to string for comparison.
     ) {
       return response.forbidden(res, "Access denied");
     }
@@ -68,7 +68,7 @@ const updateUser = async (req, res) => {
     // only allow user to update own profile (admin allowed)
     if (
       req.user._id.toString() !== req.params.id &&
-      req.user.role !== "admin"
+      req.user.role !== "Admin"
     ) {
       return response.forbidden(res, "You can only update your own profile");
     }
@@ -141,7 +141,7 @@ const getProfileImage = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
-    // if (user._id.toString() === req.user._id.toString() || req.user.role === 'admin') {
+    // if (user._id.toString() === req.user._id.toString() || req.user.role === 'Admin') {
       let imagePath;
       if (user && user.profileImagePath) {
         imagePath = path.join(

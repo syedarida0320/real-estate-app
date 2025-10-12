@@ -37,7 +37,7 @@ exports.getAllProperties = async (req, res) => {
     const user = req.user;
     let filter = {};
 
-    if (user.role === "agent") {
+    if (user.role === "Agent") {
       filter.createdBy = user._id;
     }
 
@@ -84,7 +84,7 @@ exports.createProperty = async (req, res) => {
     const user = req.user; // comes from auth middleware
 
     // Only admin or agent can add property
-    if (user.role !== "admin" && user.role !== "agent") {
+    if (user.role !== "Admin" && user.role !== "Agent") {
       return response.forbidden(
         res,
         "Access denied: Only admin or agent can add properties"

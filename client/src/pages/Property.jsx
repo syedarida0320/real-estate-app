@@ -83,7 +83,7 @@ const Property = () => {
   useEffect(() => {
     if (
       user?.user &&
-      (user.user.role === "agent" || user.user.role === "admin")
+      (user.user.role === "Agent" || user.user.role === "Admin")
     ) {
       setFormData((prev) => ({
         ...prev,
@@ -172,7 +172,7 @@ const Property = () => {
             Property Listings
           </h2>
 
-          {(user?.user?.role === "admin" || user?.user?.role === "agent") && (
+          {(user?.user?.role === "Admin" || user?.user?.role === "Agent") && (
             <Button
               onClick={() => setShowForm(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white shadow inline-flex items-center"
