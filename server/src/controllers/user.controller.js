@@ -141,7 +141,7 @@ const getProfileImage = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
-    if (user._id.toString() === req.user._id.toString() || req.user.role === 'admin') {
+    // if (user._id.toString() === req.user._id.toString() || req.user.role === 'admin') {
       let imagePath;
       if (user && user.profileImagePath) {
         imagePath = path.join(
@@ -158,7 +158,7 @@ const getProfileImage = async (req, res) => {
         imagePath = path.join(process.cwd(), "public/images/dummy-avatar.png");
       }
       return res.sendFile(imagePath);
-    }
+    // }
 
     return response.forbidden(res, "Un-authorized access");
 

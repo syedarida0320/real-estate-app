@@ -1,4 +1,3 @@
-// src/pages/PropertyDetail.jsx
 import React, { useEffect, useState } from "react";
 import axios from "@/utils/axios";
 import { useParams, Link } from "react-router-dom";
@@ -14,32 +13,60 @@ import {
   Car,
   Cigarette,
   Utensils,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import dummyAvatar from "@/assets/dummy-avatar.png";
+
+
+const AgentProfileImage = ({ agentId }) => {
+  const [imageUrl, setImageUrl] = useState(null);
+  
+  useEffect(() => {
+    if (!agentId) return;
+    
+    const fetchProfileImage = async () => {
+      try {
+        const res = await axios.get(`/users/${agentId}/profile-image`, {
+          responseType: "blob",
+        });
+        const url = URL.createObjectURL(res.data);
+        setImageUrl(url);
+      } catch (err) {
+        console.error("Error loading agent profile image:", err);
+        setImageUrl(dummyAvatar);
+      }
+    };
+    
+    fetchProfileImage();
+  }, [agentId]);
+
+  return (
+    <img
+    src={imageUrl || dummyAvatar}
+    alt="Agent"
+    className="w-20 h-20 rounded-full object-cover border border-gray-300"
+    />
+  );
+};
+
+  const Facility = ({ children }) => (
+    <div className="flex items-center gap-2 text-sm text-gray-600">
+    {children}
+  </div>
+);
 
 const formatImageUrl = (img) => {
   if (!img) return "/placeholder.png";
   if (img.startsWith("http")) return img;
   return `http://localhost:5000${img}`;
 };
-
-const InfoItem = ({ label, value }) => (
-  <div className="flex justify-between text-sm py-1 border-b last:border-b-0">
-    <span className="font-medium text-gray-600">{label}</span>
-    <span className="text-gray-700">{value ?? "N/A"}</span>
-  </div>
-);
-
-const Facility = ({ children }) => (
-  <div className="flex items-center gap-2 text-sm text-gray-600">
-    {children}
-  </div>
-);
-
 const PropertyDetail = () => {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [agentPropertiesCount, setAgentPropertiesCount]=useState(0);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -48,6 +75,14 @@ const PropertyDetail = () => {
         const res = await axios.get(`/properties/${id}`);
         const data = res?.data?.data || res?.data;
         setProperty(data);
+
+         if (data?.userId?._id) {
+          const countRes = await axios.get(
+            `/properties?userId=${data.userId._id}`
+          );
+          const allProperties = countRes?.data?.data || countRes?.data || [];
+          setAgentPropertiesCount(allProperties.length || 0);
+        }
       } catch (err) {
         console.error("Error fetching property:", err);
       } finally {
@@ -60,7 +95,7 @@ const PropertyDetail = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="p-6">Loading...</div>
+        <div className="p-6 text-center">Loading...</div>
       </MainLayout>
     );
   }
@@ -68,7 +103,7 @@ const PropertyDetail = () => {
   if (!property) {
     return (
       <MainLayout>
-        <div className="p-6">Property not found</div>
+        <div className="p-6 text-center">Property not found</div>
       </MainLayout>
     );
   }
@@ -132,14 +167,22 @@ const PropertyDetail = () => {
               {/* Title + Location */}
               <div className="mt-6 flex flex-col md:flex-row justify-between">
                 <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[18px] text-black">
+                      {property.type || "Property"}
+                    </span>
+                  </div>
                   <h1 className="text-2xl font-bold text-gray-800">
                     {property.title}
                   </h1>
                   <div className="flex items-center text-sm text-gray-500 mt-2">
                     <MapPin className="w-4 h-4 mr-1 text-blue-500" />
                     <span>
-                      {property.location?.city || "Unknown city"},{" "}
-                      {property.location?.country || "Unknown country"}
+                      {property.location?.address
+                        ? `${property.location.address}, `
+                        : ""}
+                      {property.location?.city || "Unknown City"},{" "}
+                      {property.location?.country || "Unknown Country"}
                     </span>
                   </div>
                 </div>
@@ -198,102 +241,77 @@ const PropertyDetail = () => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   Description
                 </h3>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                   {property.description || "No description available."}
                 </p>
-              </div>
-
-              {/* Additional Info */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                  Additional Details
-                </h3>
-                <div className="border rounded-lg p-4 space-y-1">
-                  <InfoItem
-                    label="Property Type"
-                    value={property.type || "N/A"}
-                  />
-                  <InfoItem
-                    label="Rating"
-                    value={property.rating || "No rating"}
-                  />
-                  <InfoItem
-                    label="Created At"
-                    value={new Date(property.createdAt).toLocaleDateString()}
-                  />
-                  <InfoItem
-                    label="Updated At"
-                    value={new Date(property.updatedAt).toLocaleDateString()}
-                  />
-                </div>
               </div>
             </div>
 
             {/* Right Side */}
-            <aside className="space-y-4 pb-6">
-              {/* Agent Info */}
+            <aside className="space-y-6 pb-6">
+              {/* Agent Profile Card - redesigned like Figma */}
+              <div className="bg-white rounded-2xl border shadow-md overflow-hidden">
+       <div className="flex items-center justify-center gap-1 mt-4">
+                 <AgentProfileImage agentId={agent._id}/>
 
-              <div className="bg-white border rounded-xl p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={agent?.profileImage || "/avatar-placeholder.png"}
-                    alt="Agent"
-                    className="w-14 h-14 rounded-full object-cover"
-                  />
+</div>
+             
+                <div className="pt-5 pb-4 text-center px-3">
+                  <h2 className="font-semibold text-gray-800 text-lg">
+                    {agentFullName}
+                  </h2>
+                  <p className="text-gray-500 text-[14px] m-2">
+                    {agent.role || "Agent"}
+                  </p>
+                  <p className="text-gray-500 text-[14px]">
+                    {agent.address || "No location"}
+                  </p>
+                   <p className="text-black text-[14px]">
+                    {agentPropertiesCount}{" "}
+                    {agentPropertiesCount === 1 ? "Property" : "Properties"}
+                  </p>
 
-                  <div>
-                    <p className="font-semibold">{agentFullName}</p>
-                    <p className="text-xs text-gray-400">
-                      {agent.role || "Agent"}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {agent.address?.city || "No location"}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex gap-2">
-                  {agent.phone && (
-                    <a href={`tel:${agent.phone}`} className="w-full">
-                      <Button className="w-full">Call</Button>
-                    </a>
-                  )}
-                  {agent.email && (
-                    <a href={`mailto:${agent.email}`} className="w-full">
-                      <Button variant="outline" className="w-full">
+                  {/* Contact Buttons */}
+                  <div className="flex justify-center gap-4 mt-6">
+                    {agent.email && (
+                      <a
+                        href={`mailto:${agent.email}`}
+                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2.5 rounded-[8px] text-sm font-medium shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-200"
+                      >
+                        <Mail size={15} className="text-white" />
                         Message
-                      </Button>
-                    </a>
-                  )}
+                      </a>
+                    )}
+                     {agent.phone && (
+                      <a
+                        href={`tel:${agent.phone}`}
+                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-400 to-green-500 text-white px-5 py-2.5 rounded-[8px] text-sm font-medium shadow-md hover:from-green-600 hover:to-green-500 transition-all duration-200"
+                      >
+                        <Phone size={15} className="text-white" />
+                        Call
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Map */}
-              <div className="bg-white border rounded-xl p-3 shadow-sm">
-                <p className="text-sm text-gray-500 mb-2">Location Map</p>
+              {/* Booking Section */}
+              <div className="bg-white border rounded-xl p-4 shadow-sm text-center">
+               <p className="text-sm text-gray-500 mb-4 font-medium">
+                  Location Map
+                </p>
                 {lat && lng ? (
                   <iframe
                     title="property-map"
                     src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
-                    className="w-full h-40 rounded-md border-0"
+                    className="w-full h-70 rounded-md border-1 mb-6"
                   />
                 ) : (
-                  <div className="w-full h-40 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-400">
+                  <div className="w-full h-40 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-400 mb-6">
                     Map not available
                   </div>
                 )}
-              </div>
-
-              {/* Booking */}
-              <div className="bg-white border rounded-xl p-4 shadow-sm">
-                <div className="text-xs text-gray-500 mb-1">Book</div>
-                <p className="text-lg font-semibold">
-                  {property.price?.currency || "$"}{" "}
-                  {property.price?.amount ?? "N/A"}
-                </p>
-                <p className="text-xs text-gray-400 mb-3">
-                  {property.price?.duration || "Per Day"}
-                </p>
                 <Button className="w-full">Book Now</Button>
               </div>
             </aside>
