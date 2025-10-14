@@ -141,7 +141,7 @@ const getProfileImage = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
-    // if (user._id.toString() === req.user._id.toString() || req.user.role === 'Admin') {
+    if (user._id.toString() === req.user._id.toString() || req.user.role === 'Admin') {
       let imagePath;
       if (user && user.profileImagePath) {
         imagePath = path.join(
@@ -150,20 +150,16 @@ const getProfileImage = async (req, res) => {
           user.profileImagePath
         );
         if (!fs.existsSync(imagePath)) {
-          // fallback to default
           imagePath = path.join(process.cwd(), "public/images/dummy-avatar.png");
         }
       } else {
-        // fallback to default
         imagePath = path.join(process.cwd(), "public/images/dummy-avatar.png");
       }
       return res.sendFile(imagePath);
-    // }
-
-    return response.forbidden(res, "Un-authorized access");
-
+    }
   } catch (error) {
     response.serverError(res, error.message);
+    return response.forbidden(res, "Un-authorized access");
   }
 };
 

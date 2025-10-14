@@ -11,9 +11,13 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const Property = lazy(() => import("@/pages/Property"));
 const PropertyDetail = lazy(() => import("@/pages/PropertyDetail"));
 const Agent = lazy(() => import("@/pages/Agent"));
-const AgentDetail=lazy(()=> import("@/pages/AgentDetail"));
+const AgentDetail = lazy(() => import("@/pages/AgentDetail"));
 const Message = lazy(() => import("@/pages/Message"));
 const Review = lazy(() => import("@/pages/Review"));
+const AddAgent = lazy(() => import("@/pages/AddAgent"));
+const AddEditProperty = lazy(() => import("@/pages/AddEditProperty"));
+//const AddProperty=lazy(()=> import("@/pages/AddProperty"));
+//const EditProperty=lazy(()=> import("@/pages/EditProperty"))
 
 const App = () => {
   return (
@@ -30,9 +34,14 @@ const App = () => {
           <Route path="/home" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/properties" element={<Property />} />
+          <Route path="/properties/add" element={<AddEditProperty />} />
+          <Route path="/properties/edit/:id" element={<AddEditProperty />} />
+          {/* <Route path="/properties/add" element={<AddProperty/>}/>
+          <Route path="/properties/edit/:id" element={<EditProperty/>}/> */}
           <Route path="/properties/:id" element={<PropertyDetail />} />
           <Route path="/agent" element={<Agent />} />
-          <Route path="/agents/:id" element={<AgentDetail/>}/>
+          <Route path="/add-agent" element={<AddAgent />} />
+          <Route path="/agent/:id" element={<AgentDetail />} />
           <Route path="/message" element={<Message />} />
           <Route path="/review" element={<Review />} />
         </Route>

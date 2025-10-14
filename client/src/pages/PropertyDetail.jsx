@@ -167,8 +167,8 @@ const PropertyDetail = () => {
               {/* Title + Location */}
               <div className="mt-6 flex flex-col md:flex-row justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[18px] text-black">
+                  <div className="flex items-center font-bold gap-2 mb-0.5">
+                    <span className="text-[18px] text-gray-600">
                       {property.type || "Property"}
                     </span>
                   </div>

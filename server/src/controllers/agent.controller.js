@@ -1,10 +1,8 @@
 const Agent = require("../models/Agent");
 const Property = require("../models/Property");
 const { response } = require("../utils/response");
-const path=require("path");
-const fs=require("fs");
-
-// const agents=require("../data/agentsData")
+// const path = require("path");
+// const fs = require("fs");
 
 // ✅ Get all agents
 exports.getAllAgents = async (req, res) => {
@@ -16,16 +14,6 @@ exports.getAllAgents = async (req, res) => {
     response.serverError(res, "Failed to fetch agents");
   }
 };
-
-// exports.getAllAgents = async (req, res) => {
-//   try {
-//     const agents = await Agent.find().populate("user").sort({ createdAt: -1 });
-
-//     response.ok(res, "Agents fetched successfully", agents);
-//   } catch (error) {
-//     response.serverError(res, "Error fetching agents");
-//   }
-// };
 
 exports.getAgentProperties = async (req, res) => {
   try {
@@ -46,38 +34,75 @@ exports.createAgent = async (req, res) => {
       return response.unauthorized(res, "Only Admins can add agents");
 
     const {
-      firstName,
-      lastName,
-      phone,
-      dateOfBirth,
-      gender,
-      email,
+      name,
+      role,
+      age,
+      city,
+      state,
       country,
-      properties,
+      postCode,
+      phone,
+      email,
+      agency,
+      agentLicense,
+      taxNumber,
+      serviceAreas,
+      bio,
+      totalListings,
+      propertiesSold,
+      propertiesRented,
+      facebook,
+      twitter,
+      instagram,
     } = req.body;
+    const profileImage = req.file ? `/images/${req.file.filename}` : null;
 
-    const fullName = `${firstName} ${lastName}`.trim();
-
-    const newAgent = new Agent({
-      user: req.user._id, // admin user who creates
-      name: fullName,
+    const agentData = {
+      user: req.user._id,
+      name,
+      role: role || "Agent",
+      age,
+      city,
+      state,
+      country,
+      postCode,
       phone,
       email,
-      country,
-      role: "Agent",
-      gender,
-      dateOfBirth,
-      totalListings: Number(properties) || 0,
-      profileImage: req.file
-        ? `/images/${req.file.filename}`
-        : "/images/default.png",
-    });
+      agency,
+      agentLicense,
+      taxNumber,
+      serviceAreas: serviceAreas
+        ? Array.isArray(serviceAreas)
+          ? serviceAreas
+          : String(serviceAreas)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+        : [],
+      bio,
+      totalListings: totalListings ? Number(totalListings) : 0,
+      propertiesSold: propertiesSold ? Number(propertiesSold) : 0,
+      propertiesRented: propertiesRented ? Number(propertiesRented) : 0,
+      socialLinks: { facebook, twitter, instagram },
+      profileImage,
+    };
+    const agent = await Agent.create(agentData);
 
-    await newAgent.save();
-
-    response.created(res, "Agent added successfully", newAgent);
+    response.created(res, "Agent added successfully", agent);
   } catch (error) {
     console.error("Error adding agent:", error);
     response.serverError(res, "Failed to add agent");
+  }
+};
+exports.getAgentById = async (req, res) => {
+  try {
+    const agent = await Agent.findById(req.params.id).populate(
+      "activeListings"
+    );
+    if (!agent) return response.notFound(res, "Agent not found");
+    response.ok(res, "Agent fetched successfully", agent);
+  } catch (error) {
+    console.error("Error fetching agent:", error);
+    response.serverError(res, "Failed to fetch agent");
   }
 };

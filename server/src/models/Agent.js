@@ -11,9 +11,9 @@ const agentSchema = new mongoose.Schema({
   state: { type: String },
   country: { type: String },
   postCode: { type: String },
-  agentId: { type: String },
   phone: { type: String },
   email: { type: String },
+  agentId: { type: String },
   gender: { type: String },
   dateOfBirth:{type:String},
 

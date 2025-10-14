@@ -3,7 +3,7 @@ const path=require("path");
 const fs=require("fs");
 const User=require("../models/User")
 const { response } = require("../utils/response");
-// const properties = require("../data/propertiesData");
+
 
 exports.getProfileImage = async (req, res) => {
   try {
@@ -40,9 +40,12 @@ exports.getAllProperties = async (req, res) => {
     if (user.role === "Agent") {
       filter.createdBy = user._id;
     }
+     if (req.query.userId) {
+      filter.userId = req.query.userId;
+    }
 
     const properties = await Property.find(filter)
-      .populate("userId", "firstName lastName email role")
+      .populate("userId", "firstName lastName email role phone profileImagePath address")
       .sort({ createdAt: -1 });
     response.ok(res, "Properties fetched successfully", properties);
   } catch (error) {
@@ -104,6 +107,22 @@ exports.createProperty = async (req, res) => {
     response.serverError(res, "Failed to create property");
   }
 };
+exports.updateProperty = async (req, res) => {
+  try {
+    const property = await Property.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+    res.status(200).json(property);
+  } catch (error) {
+    console.error("Error updating property:", error);
+    res.status(500).json({ message: "Error updating property" });
+  }
+};
+
 
 // exports.getAllProperties = async (req, res) => {
 //   try {

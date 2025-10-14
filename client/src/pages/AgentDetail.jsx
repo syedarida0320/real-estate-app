@@ -1,11 +1,12 @@
-// src/pages/AgentDetail.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import axios from "@/utils/axios";
-import { Mail, Phone, MapPin, Home, Building2 } from "lucide-react";
-import { IconLicense, IconFileInvoice, IconMapPin } from "@tabler/icons-react";
+import { Mail, Phone, MapPin, ChevronLeft } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import dummyAvatar from "@/assets/dummy-avatar.png";
+import agentBg from "@/assets/agent-bg.png";
+import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 
 const AgentDetail = () => {
   const { id } = useParams();
@@ -17,157 +18,189 @@ const AgentDetail = () => {
         const res = await axios.get(`/agents/${id}`);
         setAgent(res.data.data);
       } catch (error) {
-        console.error("Error fetching agent:", error);
+        console.error("Error fetching agent details:", error);
       }
     };
     fetchAgent();
   }, [id]);
 
-  if (!agent) return <div className="text-center py-10">Loading...</div>;
+  if (!agent)
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-[80vh] text-gray-500">
+          Loading agent details...
+        </div>
+      </MainLayout>
+    );
 
   return (
     <MainLayout>
-      <div className="px-4 sm:px-8 py-8 bg-gray-50 min-h-screen">
-        {/* Main Container */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Profile Section */}
-          <Card className="w-full lg:w-1/3 p-6 shadow-md">
-            <div className="flex flex-col items-center text-center">
+      <div className="p-6 space-y-8">
+        {/* Agent Profile Section */}
+        <Link
+          to="/agent"
+          className="text-2xl mb-0 flex space-x-3 text-black font-medium p-4"
+        >
+          <ChevronLeft className="w-7 h-7" />
+          <h1>Details</h1>
+        </Link>
+        <div className="bg-white rounded-2xl shadow-md flex flex-col md:flex-row gap-8 px-8 py-4">
+          {/* Left Profile Card */}
+          <div className="flex flex-col  md:w-1/3 border-r border-gray-100 pr-8">
+            <div className="relative w-full h-48 flex items-center justify-center">
+              {/* Background image */}
+              <img
+                src={agentBg}
+                alt="Profile background"
+                className="absolute rounded-[10px] inset-0 w-full h-full object-cover opacity-90"
+              />
+
+              {/* Foreground (profile) image */}
               <img
                 src={
-                  agent.profileImage ||
-                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                  agent.profileImage
+                    ? `http://localhost:5000${agent.profileImage}`
+                    : dummyAvatar
                 }
-                alt={agent.name}
-                className="w-40 h-40 rounded-full object-cover mb-4"
+                alt="Agent"
+                className=" relative top-20 w-25 h-25 rounded-full object-cover border-1 -right-20 border-white shadow-md"
               />
-              <h2 className="text-xl font-semibold">{agent.name}</h2>
-              <p className="text-gray-500 mb-4">{agent.role || "Agent"}</p>
+            </div>
+            <div className="flex flex-col mb-4 items-start">
+              <h2 className="text-xl font-semibold mt-1 text-[16px]">{agent.name}</h2>
+              <p className="text-gray-500 text-[14px]">{agent.role}</p>
+            </div>
+            <div className="mt-1 space-y-2 text-sm text-gray-600 w-full">
+              <p>Age: {agent.age || "N/A"}</p>
+              <p>City: {agent.city || "N/A"}</p>
+              <p>State: {agent.state || "N/A"}</p>
+              <p>Country: {agent.country || "N/A"}</p>
+              <p>Post Code: {agent.postCode || "N/A"}</p>
+              <p>Agent ID: {agent.agentId || "N/A"}</p>
+              <p className="flex items-center gap-2">
+                <Phone size={14} /> {agent.phone || "N/A"}
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail size={14} /> {agent.email || "N/A"}
+              </p>
+            </div>
 
-              <div className="text-sm space-y-1 text-gray-600 w-full text-left">
-                <p>
-                  <strong>Age:</strong> {agent.age || "26"}
-                </p>
-                <p>
-                  <strong>City:</strong> {agent.city || "New York City"}
-                </p>
-                <p>
-                  <strong>State:</strong> {agent.state || "New York"}
-                </p>
-                <p>
-                  <strong>Country:</strong> {agent.country || "USA"}
-                </p>
-                <p>
-                  <strong>Post Code:</strong> {agent.postCode || "1001"}
-                </p>
-                <p>
-                  <strong>Agent ID:</strong> #{agent.agentId || "18457 865 8745"}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone size={15} /> {agent.phone || "+021 541 236 4580"}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Mail size={15} /> {agent.email || "hussain145@gmail.com"}
-                </p>
-              </div>
+            <div className="flex items-center gap-4 mt-4">
+              {agent.socialLinks?.facebook && (
+                <a
+                  href={agent.socialLinks.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaFacebook className="text-blue-600 text-xl hover:scale-110 transition" />
+                </a>
+              )}
+              {agent.socialLinks?.twitter && (
+                <a
+                  href={agent.socialLinks.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaTwitter className="text-sky-500 text-xl hover:scale-110 transition" />
+                </a>
+              )}
+              {agent.socialLinks?.instagram && (
+                <a
+                  href={agent.socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaInstagram className="text-pink-500 text-xl hover:scale-110 transition" />
+                </a>
+              )}
+            </div>
+          </div>
 
-              <div className="flex gap-3 mt-4 text-gray-500">
-                <i className="fab fa-facebook"></i>
-                <i className="fab fa-twitter"></i>
-                <i className="fab fa-instagram"></i>
+          {/* Right Detail Card */}
+          <div className="flex-1 space-y-6">
+            {/* Bio */}
+            <Card className="p-5 shadow-sm">
+              <CardContent>
+                <h3 className="text-lg font-semibold mb-2">Agent Details</h3>
+                <p className="text-gray-600 text-[16px]">{agent.bio || ""}</p>
+
+                <div className="flex flex-col gap-4 mt-4 text-sm text-gray-700">
+                  <p>
+                    <span className="font-medium">Agency:</span>{" "}
+                    {agent.agency || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Agent License:</span>{" "}
+                    {agent.agentLicense || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Tax Number:</span>{" "}
+                    {agent.taxNumber || "N/A"}
+                  </p>
+                  <p className="col-span-2 sm:col-span-3">
+                    <span className="font-medium">Service Area:</span>{" "}
+                    {agent.serviceAreas?.join(", ") || "N/A"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status Cards */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-semibold mb-2">Agent Status</h3>
+              <div className="grid grid-cols-3 gap-3">
+                <Card className="p-5 text-center">
+                  <p className="text-gray-500 text-[16px]">Total Listings</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {agent.totalListings}
+                  </p>
+                </Card>
+                <Card className="p-5 text-center">
+                  <p className="text-gray-500 text-[16px]">Properties Sold</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {agent.propertiesSold}
+                  </p>
+                </Card>
+                <Card className="p-5 text-center">
+                  <p className="text-gray-500 text-[16px]">Properties Rented</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {agent.propertiesRented}
+                  </p>
+                </Card>
               </div>
             </div>
-          </Card>
-
-          {/* Right Info Section */}
-          <div className="w-full lg:w-2/3 space-y-6">
-            {/* Agent Details Card */}
-            <Card className="p-6 shadow-md">
-              <h3 className="text-lg font-semibold mb-2">Agent Details</h3>
-              <p className="text-gray-600 text-sm mb-5">
-                Talent customers tend to earn a basic salary in the range of
-                £15,000 to £35,000 per annum. However, talented customers also
-                earn a commission for finding their client’s work. Typically,
-                agents receive around 10% of what the client is paid.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700 text-sm">
-                <p className="flex items-center gap-2">
-                  <Building2 size={16} className="text-blue-600" />
-                  <strong>Agency:</strong> All American Real Estate
-                </p>
-                <p className="flex items-center gap-2">
-                  <IconLicense size={16} className="text-blue-600" />
-                  <strong>Agent License:</strong> 3124 9764 9700 234
-                </p>
-                <p className="flex items-center gap-2">
-                  <IconFileInvoice size={16} className="text-blue-600" />
-                  <strong>Tax Number:</strong> TX 8760 678H P045
-                </p>
-                <p className="flex items-center gap-2">
-                  <IconMapPin size={16} className="text-blue-600" />
-                  <strong>Service Area:</strong> Chicago, Los Angeles, New York,
-                  Miami Beach
-                </p>
-              </div>
-            </Card>
-
-            {/* Agent Status Card */}
-            <Card className="p-6 shadow-md">
-              <h3 className="text-lg font-semibold mb-4">Agent Status</h3>
-              <div className="grid grid-cols-3 text-center">
-                <div>
-                  <h4 className="text-2xl font-bold text-blue-600">1050</h4>
-                  <p className="text-gray-500 text-sm">Total Listings</p>
-                </div>
-                <div>
-                  <h4 className="text-2xl font-bold text-green-600">650</h4>
-                  <p className="text-gray-500 text-sm">Properties Sold</p>
-                </div>
-                <div>
-                  <h4 className="text-2xl font-bold text-indigo-600">400</h4>
-                  <p className="text-gray-500 text-sm">Properties Rent</p>
-                </div>
-              </div>
-            </Card>
 
             {/* Active Listings */}
-            <Card className="p-6 shadow-md">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg font-semibold">Active Listing</h3>
-                <button className="text-blue-600 hover:underline text-sm">
-                  View All
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                {agent.listings?.map((listing, idx) => (
-                  <Card key={idx} className="overflow-hidden shadow-sm">
-                    <img
-                      src={listing.image}
-                      alt={listing.title}
-                      className="h-40 w-full object-cover"
-                    />
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-blue-600 font-semibold">
-                          ${listing.price}
-                        </span>
-                        <span className="text-gray-500 text-sm flex items-center gap-1">
-                          <MapPin size={14} /> {listing.location}
-                        </span>
+            <Card className="p-5">
+              <h3 className="text-lg font-semibold mb-4">Active Listings</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {agent.activeListings?.length > 0 ? (
+                  agent.activeListings.map((property) => (
+                    <div
+                      key={property._id}
+                      className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                    >
+                      <img
+                        src={property.images?.[0] || "/placeholder.jpg"}
+                        alt={property.title}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="p-3 text-sm text-gray-600">
+                        <p className="font-medium text-gray-800">
+                          {property.title}
+                        </p>
+                        <p className="flex items-center gap-2 text-gray-500">
+                          <MapPin size={13} /> {property.location}
+                        </p>
+                        <p className="text-blue-600 font-semibold mt-1">
+                          ${property.price?.toLocaleString()}
+                        </p>
                       </div>
-                      <h4 className="font-medium text-gray-800">
-                        {listing.title}
-                      </h4>
-                      <p className="text-sm text-gray-500 flex items-center gap-2">
-                        <Home size={14} /> {listing.beds} Beds • {listing.area}M
-                      </p>
-                    </CardContent>
-                  </Card>
-                )) || (
+                    </div>
+                  ))
+                ) : (
                   <p className="text-gray-500 text-sm">
-                    No active listings available.
+                    No active listings yet.
                   </p>
                 )}
               </div>
