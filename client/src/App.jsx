@@ -16,8 +16,7 @@ const Message = lazy(() => import("@/pages/Message"));
 const Review = lazy(() => import("@/pages/Review"));
 const AddAgent = lazy(() => import("@/pages/AddAgent"));
 const AddEditProperty = lazy(() => import("@/pages/AddEditProperty"));
-//const AddProperty=lazy(()=> import("@/pages/AddProperty"));
-//const EditProperty=lazy(()=> import("@/pages/EditProperty"))
+const VerifyEmail= lazy(()=> import("@/pages/VerifyEmail"));
 
 const App = () => {
   return (
@@ -27,6 +26,7 @@ const App = () => {
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify/email" element={<VerifyEmail/>}/>
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
         {/* Private Routes */}
@@ -36,8 +36,6 @@ const App = () => {
           <Route path="/properties" element={<Property />} />
           <Route path="/properties/add" element={<AddEditProperty />} />
           <Route path="/properties/edit/:id" element={<AddEditProperty />} />
-          {/* <Route path="/properties/add" element={<AddProperty/>}/>
-          <Route path="/properties/edit/:id" element={<EditProperty/>}/> */}
           <Route path="/properties/:id" element={<PropertyDetail />} />
           <Route path="/agent" element={<Agent />} />
           <Route path="/add-agent" element={<AddAgent />} />

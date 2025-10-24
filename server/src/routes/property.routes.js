@@ -11,6 +11,6 @@ router.post('/', createProperty);
 router.put('/:id', updateProperty);
 
 module.exports = router;
-// router.post('/', createProperty);
+
 //router.get('/search', propertyController.searchProperties);
 //router.delete('/:id', auth, propertyController.deleteProperty);

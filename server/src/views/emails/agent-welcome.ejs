@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome Agent</title>
+  </head>
+
+  <body style="margin:0; padding:0; background-color:#f3f4f6; font-family:Arial, Helvetica, sans-serif; line-height:1.6;">
+    <div style="max-width:600px; margin:40px auto; background-color:#ffffff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.05); overflow:hidden;">
+
+      <!-- Header -->
+      <div style="background-color:#2563eb; color:#ffffff; text-align:center; padding:30px 20px;">
+        <h1 style="margin:0; font-size:24px; font-weight:bold; letter-spacing:0.5px;">Welcome to Real Estate App</h1>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:40px 30px; color:#374151;">
+        <p style="font-size:16px; margin-bottom:20px;">
+          Hi <strong><%= name %></strong>,
+        </p>
+
+        <p style="margin-bottom:20px; font-size:15px; color:#4b5563;">
+          Congratulations on joining our trusted team of real estate agents!  
+          You can now add, manage, and update property listings directly from your personal dashboard.
+        </p>
+
+        <div style="background-color:#eff6ff; border-left:4px solid #2563eb; padding:12px 16px; border-radius:6px; margin-bottom:24px;">
+          <p style="font-size:14px; color:#374151; margin:0;">
+            <strong>Login Email:</strong> <%= email %>
+          </p>
+        </div>
+
+        <p style="margin-bottom:30px; font-size:15px; color:#4b5563;">
+          Please verify your email to activate your agent account and gain full access to the platform.
+        </p>
+
+        <!-- Verify Button -->
+        <div style="text-align:center; margin:40px 0;">
+          <a href="<%= verifyUrl %>" 
+             style="display:inline-block; background-color:#16a34a; color:#ffffff; font-weight:bold; padding:14px 32px; border-radius:8px; text-decoration:none; font-size:16px; border:1px solid #15803d; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+             Verify Email
+          </a>
+        </div>
+
+        <p style="font-size:15px; color:#4b5563;">
+          If you have any questions, feel free to reach out to our support team.  
+          We’re thrilled to have you on board and can’t wait to see the amazing properties you’ll list!
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color:#f9fafb; border-top:1px solid #e5e7eb; text-align:center; padding:20px 10px;">
+        <p style="font-size:13px; color:#6b7280; margin:0;">
+          © <%= new Date().getFullYear() %> Real Estate App. All rights reserved.<br />
+          <span style="color:#9ca3af;">Your journey in real estate starts here.</span>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

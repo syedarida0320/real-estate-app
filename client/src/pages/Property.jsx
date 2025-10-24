@@ -1,4 +1,4 @@
-// src/pages/Property.jsx (updated)
+// src/pages/Property.jsx
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import {

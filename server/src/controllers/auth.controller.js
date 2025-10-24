@@ -2,7 +2,55 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { response } = require("../utils/response");
-const { sendEmail } = require("../utils/email"); 
+const { sendEmail } = require("../utils/email");
+const { decrypt } = require("../utils/crypto");
+
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return response.badRequest(res, "Missing token");
+
+    const { email } = decrypt(token);
+
+    const user = await User.findOne({ email });
+    if (!user) return response.notFound(res, "Email does not exist");
+
+    // if (user.emailVerifiedAt) user.emailVerifiedAt = new Date();
+    if(!user.emailVerifiedAt){
+      user.emailVerifiedAt=new Date();
+      await user.save();
+    }
+    // Temporarily send back success to show password form
+    response.ok(res, "Email verified successfully", {
+      verified: false,
+      password: true,
+      email,
+    });
+  } catch (err) {
+    console.error("Email verification error:", err);
+    response.serverError(res, "Invalid or expired token");
+  }
+};
+
+const setNewPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return response.badRequest(res, "Missing email or password");
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    await User.findOneAndUpdate(
+      { email },
+      { password: hashed, emailVerifiedAt: new Date() }
+    );
+
+    response.ok(res, "Password set successfully. You can now log in.");
+  } catch (err) {
+    console.error(err);
+    response.serverError(res, "Failed to set new password");
+  }
+};
 
 const registerUser = async (req, res) => {
   try {
@@ -10,11 +58,11 @@ const registerUser = async (req, res) => {
 
     // check if user exists
     const existingUser = await User.findOne({ email });
-   if (existingUser) {
+    if (existingUser) {
       return response.badRequest(res, "Validation failed", {
         email: ["Email already registered"],
       });
-}
+    }
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +85,7 @@ const registerUser = async (req, res) => {
     );
 
     // ✅ Send Welcome Email (Job)
-     await sendEmail(user.email, "Welcome to Real Estate App ", "welcome", {
+    await sendEmail(user.email, "Welcome to Real Estate App ", "welcome", {
       firstName: user.firstName,
       lastName: user.lastName,
     });
@@ -70,10 +118,9 @@ const loginUser = async (req, res) => {
       });
     }
 
-
     // check password
     const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
+    if (!isMatch) {
       return response.badRequest(res, "Validation failed", {
         password: ["Incorrect password"],
       });
@@ -100,4 +147,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, registerUser };
+module.exports = { loginUser, registerUser, verifyEmail, setNewPassword };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import axios from "@/utils/axios";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const AddAgent = () => {
   const navigate = useNavigate();
@@ -56,20 +57,24 @@ const AddAgent = () => {
     }
   };
 
+   const handleCancel = () => {
+    navigate("/agent");
+  };
+
   return (
     <MainLayout>
       <div className="px-4 sm:px-8 py-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center mb-6">
+         <Button
+            variant="outline"
+            onClick={handleCancel}
+            className="mr-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
           <h2 className="text-2xl font-semibold text-gray-800">
             Add New Agent
           </h2>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/agent")}
-            className="text-gray-600"
-          >
-            Back
-          </Button>
         </div>
 
         {/* Gradient Header */}

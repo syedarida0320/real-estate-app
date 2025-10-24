@@ -249,7 +249,6 @@ const PropertyDetail = () => {
 
             {/* Right Side */}
             <aside className="space-y-6 pb-6">
-              {/* Agent Profile Card - redesigned like Figma */}
               <div className="bg-white rounded-2xl border shadow-md overflow-hidden">
        <div className="flex items-center justify-center gap-1 mt-4">
                  <AgentProfileImage agentId={agent._id}/>
