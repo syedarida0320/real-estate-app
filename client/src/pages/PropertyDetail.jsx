@@ -178,11 +178,11 @@ const PropertyDetail = () => {
                   <div className="flex items-center text-sm text-gray-500 mt-2">
                     <MapPin className="w-4 h-4 mr-1 text-blue-500" />
                     <span>
-                      {property.location?.address
+                      {/* {property.location?.address
                         ? `${property.location.address}, `
-                        : ""}
-                      {/* {property.location?.city || "Unknown City"},{" "}
-                      {property.location?.country || "Unknown Country"} */}
+                        : ""} */}
+                      {property.location?.city || "Unknown City"},{" "}
+                      {property.location?.country || "Unknown Country"}
                     </span>
                   </div>
                 </div>

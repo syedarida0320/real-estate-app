@@ -2,10 +2,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { MapContainer, TileLayer, Marker,useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Wifi, Cigarette, Utensils, Car, ArrowLeft, Search } from "lucide-react";
+import {
+  Wifi,
+  Cigarette,
+  Utensils,
+  Car,
+  ArrowLeft,
+  Search,
+} from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -24,7 +37,7 @@ const AddEditProperty = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // For edit mode
   const user = useAuth();
-  
+
   const isEditMode = !!id;
   const [loading, setLoading] = useState(false);
 
@@ -59,15 +72,44 @@ const AddEditProperty = () => {
     },
   });
 
- // 🧭 Subcomponent to handle map clicks
+  // 🧭 Subcomponent to handle map clicks
   function LocationMarker() {
     useMapEvents({
-      click(e) {
+      async click(e) {
         const { lat, lng } = e.latlng;
         setFormData((prev) => ({
           ...prev,
           mapLocation: { lat: lat.toFixed(6), lng: lng.toFixed(6) },
         }));
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+          );
+          const data = await res.json();
+
+          // Extract city and country safely
+          const address = data.address || {};
+          const city =
+            address.city ||
+            address.town ||
+            address.village ||
+            address.county ||
+            "";
+          const country = address.country || "";
+
+          // Auto-fill location fields
+          setFormData((prev) => ({
+            ...prev,
+            location: {
+              ...prev.location,
+              city,
+              country,
+              address: data.display_name || prev.location.address,
+            },
+          }));
+        } catch (error) {
+          console.error("Error fetching location details:", error);
+        }
       },
     });
 
@@ -81,7 +123,7 @@ const AddEditProperty = () => {
     ) : null;
   }
 
-// 🧭 Component to control map view programmatically
+  // 🧭 Component to control map view programmatically
   function MapUpdater({ lat, lng }) {
     const map = useMap();
     useEffect(() => {
@@ -95,6 +137,15 @@ const AddEditProperty = () => {
   // Handle Input Changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (
+      (name === "priceAmount" ||
+        name === "facilities.beds" ||
+        name === "facilities.baths" ||
+        name === "facilities.area") &&
+      Number(value) < 0
+    ) {
+      return; // ignore update if below zero
+    }
     if (name.includes(".")) {
       const [key, subkey, subsubkey] = name.split(".");
       setFormData((prev) => {
@@ -143,7 +194,10 @@ const AddEditProperty = () => {
         const { lat, lon, display_name } = data[0];
         setFormData((prev) => ({
           ...prev,
-          mapLocation: { lat: parseFloat(lat).toFixed(6), lng: parseFloat(lon).toFixed(6) },
+          mapLocation: {
+            lat: parseFloat(lat).toFixed(6),
+            lng: parseFloat(lon).toFixed(6),
+          },
           location: { ...prev.location, address: display_name || "" },
         }));
       } else {
@@ -157,10 +211,12 @@ const AddEditProperty = () => {
     }
   };
 
-
   // Auto-fill agent info when component loads
   useEffect(() => {
-    if (user?.user && (user.user.role === "Agent" || user.user.role === "Admin")) {
+    if (
+      user?.user &&
+      (user.user.role === "Agent" || user.user.role === "Admin")
+    ) {
       setFormData((prev) => ({
         ...prev,
         agent: {
@@ -168,7 +224,8 @@ const AddEditProperty = () => {
           name: user.user.name || user.user.firstName || "",
           email: user.user.email || "",
           role: user.user.role || "",
-          profileImage: user.user.profileImage || user.user.profileImagePath || "",
+          profileImage:
+            user.user.profileImage || user.user.profileImagePath || "",
         },
       }));
     }
@@ -186,7 +243,11 @@ const AddEditProperty = () => {
             ...p,
             title: p.title || "",
             type: p.type || "",
-            mainImage: p.mainImage || p.image || (p.galleryImages && p.galleryImages[0]) || "",
+            mainImage:
+              p.mainImage ||
+              p.image ||
+              (p.galleryImages && p.galleryImages[0]) ||
+              "",
             galleryImages: p.galleryImages || (p.image ? [p.image] : []),
             priceAmount: p.price?.amount ?? "",
             priceCurrency: p.price?.currency ?? "USD",
@@ -200,7 +261,7 @@ const AddEditProperty = () => {
             },
             mapLocation: {
               lat: p.location?.mapLocation?.lat ?? "",
-              lng: p.location?.mapLocation?.lng  ?? "",
+              lng: p.location?.mapLocation?.lng ?? "",
             },
             facilities: {
               beds: p.facilities?.beds ?? "",
@@ -214,7 +275,10 @@ const AddEditProperty = () => {
             },
             agent: {
               name:
-                (p.userId && (p.userId.firstName ? `${p.userId.firstName} ${p.userId.lastName || ""}` : p.userId.fullName)) ||
+                (p.userId &&
+                  (p.userId.firstName
+                    ? `${p.userId.firstName} ${p.userId.lastName || ""}`
+                    : p.userId.fullName)) ||
                 prev?.agent?.name ||
                 "",
               email: (p.userId && p.userId.email) || prev?.agent?.email || "",
@@ -224,7 +288,8 @@ const AddEditProperty = () => {
                 email: p.userId?.email || prev?.agent?.contact?.email || "",
               },
               location: p.userId?.address?.city || prev?.agent?.location || "",
-              profileImage: p.userId?.profileImagePath || prev?.agent?.profileImage || "",
+              profileImage:
+                p.userId?.profileImagePath || prev?.agent?.profileImage || "",
             },
           }));
         } catch (error) {
@@ -237,16 +302,55 @@ const AddEditProperty = () => {
     }
   }, [id, isEditMode]);
 
+  // 🧭 Auto-update city/country when lat/lng change manually
+  useEffect(() => {
+    const { lat, lng } = formData.mapLocation;
+    if (!lat || !lng) return;
+
+    const fetchReverseGeo = async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+        );
+        const data = await res.json();
+        const address = data.address || {};
+        const city =
+          address.city ||
+          address.town ||
+          address.village ||
+          address.county ||
+          "";
+        const country = address.country || "";
+
+        setFormData((prev) => ({
+          ...prev,
+          location: {
+            ...prev.location,
+            city,
+            country,
+            address: data.display_name || prev.location.address,
+          },
+        }));
+      } catch (err) {
+        console.error("Reverse geocoding error:", err);
+      }
+    };
+
+    fetchReverseGeo();
+  }, [formData.mapLocation.lat, formData.mapLocation.lng]);
+
   // Helper to build payload from formData
   const buildPayloadFromForm = () => {
     return {
       title: formData.title,
       type: formData.type,
       mainImage: formData.mainImage,
-      galleryImages: formData.galleryImages.filter((img) => img && img.trim() !== ""),
+      galleryImages: formData.galleryImages.filter(
+        (img) => img && img.trim() !== ""
+      ),
       description: formData.description || "",
       price: {
-        amount: Number(formData.priceAmount) || 0,
+        amount: Math.max(0, Number(formData.priceAmount) || 0),
         currency: formData.priceCurrency || "USD",
         duration: formData.priceDuration || "Per Day",
       },
@@ -279,8 +383,13 @@ const AddEditProperty = () => {
       }
       navigate("/properties");
     } catch (error) {
-      console.error(`❌ Error ${isEditMode ? "updating" : "adding"} property:`, error);
-      alert(`Failed to ${isEditMode ? "update" : "add"} property. Check console.`);
+      console.error(
+        `❌ Error ${isEditMode ? "updating" : "adding"} property:`,
+        error
+      );
+      alert(
+        `Failed to ${isEditMode ? "update" : "add"} property. Check console.`
+      );
     } finally {
       setLoading(false);
     }
@@ -295,11 +404,7 @@ const AddEditProperty = () => {
       <div className="p-6 bg-gray-50 min-h-screen">
         {/* Header */}
         <div className="flex items-center mb-6">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            className="mr-4"
-          >
+          <Button variant="outline" onClick={handleCancel} className="mr-4">
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h2 className="text-2xl font-bold text-gray-800">
@@ -388,9 +493,7 @@ const AddEditProperty = () => {
 
               {/* Price Section */}
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Price
-                </label>
+                <label className="block text-sm font-medium mb-2">Price</label>
                 <div className="grid grid-cols-3 gap-3">
                   <input
                     name="priceAmount"
@@ -398,6 +501,8 @@ const AddEditProperty = () => {
                     placeholder="Amount"
                     value={formData.priceAmount}
                     onChange={handleChange}
+                    min="0"
+                    step="any"
                     className="border border-gray-300 rounded-[2px] h-10 px-3"
                     required
                   />
@@ -426,124 +531,166 @@ const AddEditProperty = () => {
 
               {/* Location */}
               <div className="border-t pt-4">
-                <label className="block text-sm font-semibold mb-2">
+                <label className="block text-lg font-semibold mb-3">
                   Location
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {["city", "country"].map((field) => (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Country
+                    </label>
                     <input
-                      key={field}
-                      name={`location.${field}`}
+                      name="location.country"
                       type="text"
-                      placeholder={
-                        field.charAt(0).toUpperCase() + field.slice(1)
-                      }
-                      value={formData.location[field]}
+                      placeholder="Country"
+                      value={formData.location.country}
                       onChange={handleChange}
-                      className="border border-gray-300 rounded-[2px] h-10 px-3"
+                      className="border border-gray-300 w-full rounded-[2px] h-10 px-3"
                     />
-                  ))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      City
+                    </label>
+                    <input
+                      name="location.city"
+                      type="text"
+                      placeholder="City"
+                      value={formData.location.city}
+                      onChange={handleChange}
+                      className="border border-gray-300 w-full rounded-[2px] h-10 px-3"
+                    />
+                  </div>
                 </div>
               </div>
-
               {/* 🗺️ Map Section */}
               <div className="flex items-center gap-2 mb-3">
-              {/* <label className="block text-sm font-semibold mb-2">
+                {/* <label className="block text-sm font-semibold mb-2">
                 Search Location (if not visible on map)
               </label> */}
-              <input
-                type="text"
-                placeholder="Search city, address, or landmark"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              />
-              <button
-              type="button"
-                onClick={handleLocationSearch}
-                className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md"
-                disabled={searchLoading}
-              >
+                <input
+                  type="text"
+                  placeholder="Search city, address, or landmark"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleLocationSearch}
+                  className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md"
+                  disabled={searchLoading}
+                >
                   <Search className="w-4 h-4 mr-1" />
                   {searchLoading ? "Searching..." : "Search"}
                 </button>
-            </div>
-
-            {/* 🗺️ Map Section */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                Click on Map to Select Location
-              </label>
-              <MapContainer
-                center={[
-                  formData.mapLocation.lat || 30.3753,
-                  formData.mapLocation.lng || 69.3451,
-                ]}
-                zoom={6}
-                scrollWheelZoom={true}
-                style={{ height: "350px", width: "100%", borderRadius: "8px" }}
-              >
-                <TileLayer
-                  attribution='&copy; OpenStreetMap contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <LocationMarker />
-                <MapUpdater
-                  lat={parseFloat(formData.mapLocation.lat)}
-                  lng={parseFloat(formData.mapLocation.lng)}
-                />
-              </MapContainer>
-
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <input
-                  name="mapLocation.lat"
-                  type="text"
-                  placeholder="Latitude"
-                  value={formData.mapLocation.lat}
-                  readOnly
-                  className="border border-gray-300 rounded px-3 py-2"
-                />
-                <input
-                  name="mapLocation.lng"
-                  type="text"
-                  placeholder="Longitude"
-                  value={formData.mapLocation.lng}
-                  readOnly
-                  className="border border-gray-300 rounded px-3 py-2"
-                />
               </div>
-            </div>
+
+              {/* 🗺️ Map Section */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  Click on Map to Select Location
+                </label>
+                <MapContainer
+                  center={[
+                    formData.mapLocation.lat || 30.3753,
+                    formData.mapLocation.lng || 69.3451,
+                  ]}
+                  zoom={6}
+                  scrollWheelZoom={true}
+                  style={{
+                    height: "350px",
+                    width: "100%",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <LocationMarker />
+                  <MapUpdater
+                    lat={parseFloat(formData.mapLocation.lat)}
+                    lng={parseFloat(formData.mapLocation.lng)}
+                  />
+                </MapContainer>
+
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Latitude
+                    </label>
+                    <input
+                      name="mapLocation.lat"
+                      type="text"
+                      placeholder="Latitude"
+                      value={formData.mapLocation.lat}
+                      readOnly
+                      className="border w-full border-gray-300 rounded px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Longitude
+                    </label>
+                    <input
+                      name="mapLocation.lng"
+                      type="text"
+                      placeholder="Longitude"
+                      value={formData.mapLocation.lng}
+                      readOnly
+                      className="border w-full border-gray-300 rounded px-3 py-2"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Facilities */}
               <div className="border-t pt-4">
-                <label className="block text-sm font-semibold mb-2">
+                <label className="block text-lg font-semibold mb-4">
                   Facilities
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  <input
-                    name="facilities.beds"
-                    type="number"
-                    placeholder="Beds"
-                    value={formData.facilities.beds}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                  />
-                  <input
-                    name="facilities.baths"
-                    type="number"
-                    placeholder="Baths"
-                    value={formData.facilities.baths}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                  />
-                  <input
-                    name="facilities.area"
-                    type="text"
-                    placeholder="Area (sqft)"
-                    value={formData.facilities.area}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Beds
+                    </label>
+                    <input
+                      name="facilities.beds"
+                      type="number"
+                      placeholder="Beds"
+                      value={formData.facilities.beds}
+                      onChange={handleChange}
+                      className="border border-gray-300 w-full rounded-[2px] h-10 px-3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Baths
+                    </label>
+                    <input
+                      name="facilities.baths"
+                      type="number"
+                      placeholder="Baths"
+                      value={formData.facilities.baths}
+                      onChange={handleChange}
+                      className="border border-gray-300 w-full rounded-[2px] h-10 px-3"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Area (sqft)
+                    </label>
+                    <input
+                      name="facilities.area"
+                      type="text"
+                      placeholder="Area (sqft)"
+                      value={formData.facilities.area}
+                      onChange={handleChange}
+                      className="border border-gray-300 w-full rounded-[2px] h-10 px-3"
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
                   {[
@@ -655,12 +802,16 @@ const AddEditProperty = () => {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-blue-600 text-white"
                   disabled={loading}
                 >
-                  {loading ? "Processing..." : (isEditMode ? "Update Property" : "Save Property")}
+                  {loading
+                    ? "Processing..."
+                    : isEditMode
+                    ? "Update Property"
+                    : "Save Property"}
                 </Button>
               </div>
             </form>
