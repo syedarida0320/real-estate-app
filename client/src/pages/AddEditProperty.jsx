@@ -2,10 +2,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { Wifi, Cigarette, Utensils, Car, ArrowLeft } from "lucide-react";
+import { MapContainer, TileLayer, Marker,useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { Wifi, Cigarette, Utensils, Car, ArrowLeft, Search } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 const AddEditProperty = () => {
   const navigate = useNavigate();
@@ -24,7 +37,6 @@ const AddEditProperty = () => {
     priceCurrency: "USD",
     priceDuration: "Per Day",
     description: "",
-    rating: "",
     location: { address: "", city: "", state: "", country: "" },
     mapLocation: { lat: "", lng: "" },
     facilities: {
@@ -46,6 +58,39 @@ const AddEditProperty = () => {
       profileImage: "",
     },
   });
+
+ // 🧭 Subcomponent to handle map clicks
+  function LocationMarker() {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormData((prev) => ({
+          ...prev,
+          mapLocation: { lat: lat.toFixed(6), lng: lng.toFixed(6) },
+        }));
+      },
+    });
+
+    return formData.mapLocation.lat && formData.mapLocation.lng ? (
+      <Marker
+        position={[
+          parseFloat(formData.mapLocation.lat),
+          parseFloat(formData.mapLocation.lng),
+        ]}
+      />
+    ) : null;
+  }
+
+// 🧭 Component to control map view programmatically
+  function MapUpdater({ lat, lng }) {
+    const map = useMap();
+    useEffect(() => {
+      if (lat && lng) {
+        map.setView([lat, lng], 13);
+      }
+    }, [lat, lng, map]);
+    return null;
+  }
 
   // Handle Input Changes
   const handleChange = (e) => {
@@ -78,6 +123,41 @@ const AddEditProperty = () => {
     }
   };
 
+  // 📍 Location Search Feature (Geocoding)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const handleLocationSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearchLoading(true);
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery
+        )}`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        setFormData((prev) => ({
+          ...prev,
+          mapLocation: { lat: parseFloat(lat).toFixed(6), lng: parseFloat(lon).toFixed(6) },
+          location: { ...prev.location, address: display_name || "" },
+        }));
+      } else {
+        alert("Location not found. Try a different search.");
+      }
+    } catch (error) {
+      console.error("Error during location search:", error);
+      alert("Failed to fetch location.");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+
   // Auto-fill agent info when component loads
   useEffect(() => {
     if (user?.user && (user.user.role === "Agent" || user.user.role === "Admin")) {
@@ -101,9 +181,9 @@ const AddEditProperty = () => {
         try {
           const res = await axios.get(`/properties/${id}`);
           const p = res?.data?.data || res?.data || {};
-          
           setFormData((prev) => ({
             ...prev,
+            ...p,
             title: p.title || "",
             type: p.type || "",
             mainImage: p.mainImage || p.image || (p.galleryImages && p.galleryImages[0]) || "",
@@ -112,7 +192,6 @@ const AddEditProperty = () => {
             priceCurrency: p.price?.currency ?? "USD",
             priceDuration: p.price?.duration ?? "Per Day",
             description: p.description || "",
-            rating: p.rating ?? "",
             location: {
               address: p.location?.address || "",
               city: p.location?.city || "",
@@ -120,8 +199,8 @@ const AddEditProperty = () => {
               country: p.location?.country || "",
             },
             mapLocation: {
-              lat: p.location?.mapLocation?.lat ?? (p.mapLocation?.lat ?? ""),
-              lng: p.location?.mapLocation?.lng ?? (p.mapLocation?.lng ?? ""),
+              lat: p.location?.mapLocation?.lat ?? "",
+              lng: p.location?.mapLocation?.lng  ?? "",
             },
             facilities: {
               beds: p.facilities?.beds ?? "",
@@ -166,7 +245,6 @@ const AddEditProperty = () => {
       mainImage: formData.mainImage,
       galleryImages: formData.galleryImages.filter((img) => img && img.trim() !== ""),
       description: formData.description || "",
-      rating: formData.rating || 0,
       price: {
         amount: Number(formData.priceAmount) || 0,
         currency: formData.priceCurrency || "USD",
@@ -199,7 +277,6 @@ const AddEditProperty = () => {
         await axios.post("/properties", payload);
         alert("✅ Property added successfully!");
       }
-      
       navigate("/properties");
     } catch (error) {
       console.error(`❌ Error ${isEditMode ? "updating" : "adding"} property:`, error);
@@ -246,7 +323,7 @@ const AddEditProperty = () => {
                     placeholder="Enter property title"
                     value={formData.title}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
                     required
                   />
                 </div>
@@ -259,7 +336,7 @@ const AddEditProperty = () => {
                     value={formData.type}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
                   >
                     <option value="">Select Type</option>
                     <option value="Apartment">Apartment</option>
@@ -283,7 +360,7 @@ const AddEditProperty = () => {
                   placeholder="https://example.com/image.jpg"
                   value={formData.mainImage}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                  className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
                   required
                 />
               </div>
@@ -305,7 +382,7 @@ const AddEditProperty = () => {
                         .map((url) => url.trim()),
                     })
                   }
-                  className="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                  className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
                 />
               </div>
 
@@ -321,14 +398,14 @@ const AddEditProperty = () => {
                     placeholder="Amount"
                     value={formData.priceAmount}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                     required
                   />
                   <select
                     name="priceCurrency"
                     value={formData.priceCurrency}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                   >
                     <option value="USD">USD</option>
                     <option value="PKR">PKR</option>
@@ -338,7 +415,7 @@ const AddEditProperty = () => {
                     name="priceDuration"
                     value={formData.priceDuration}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                   >
                     <option value="Per Day">Per Day</option>
                     <option value="Per Month">Per Month</option>
@@ -363,36 +440,79 @@ const AddEditProperty = () => {
                       }
                       value={formData.location[field]}
                       onChange={handleChange}
-                      className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                      className="border border-gray-300 rounded-[2px] h-10 px-3"
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Map Location */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Map Location
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    name="mapLocation.lat"
-                    type="text"
-                    placeholder="Latitude"
-                    value={formData.mapLocation.lat}
-                    onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
-                  />
-                  <input
-                    name="mapLocation.lng"
-                    type="text"
-                    placeholder="Longitude"
-                    value={formData.mapLocation.lng}
-                    onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
-                  />
-                </div>
+              {/* 🗺️ Map Section */}
+              <div className="flex items-center gap-2 mb-3">
+              {/* <label className="block text-sm font-semibold mb-2">
+                Search Location (if not visible on map)
+              </label> */}
+              <input
+                type="text"
+                placeholder="Search city, address, or landmark"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
+              <button
+              type="button"
+                onClick={handleLocationSearch}
+                className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md"
+                disabled={searchLoading}
+              >
+                  <Search className="w-4 h-4 mr-1" />
+                  {searchLoading ? "Searching..." : "Search"}
+                </button>
+            </div>
+
+            {/* 🗺️ Map Section */}
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Click on Map to Select Location
+              </label>
+              <MapContainer
+                center={[
+                  formData.mapLocation.lat || 30.3753,
+                  formData.mapLocation.lng || 69.3451,
+                ]}
+                zoom={6}
+                scrollWheelZoom={true}
+                style={{ height: "350px", width: "100%", borderRadius: "8px" }}
+              >
+                <TileLayer
+                  attribution='&copy; OpenStreetMap contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <LocationMarker />
+                <MapUpdater
+                  lat={parseFloat(formData.mapLocation.lat)}
+                  lng={parseFloat(formData.mapLocation.lng)}
+                />
+              </MapContainer>
+
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <input
+                  name="mapLocation.lat"
+                  type="text"
+                  placeholder="Latitude"
+                  value={formData.mapLocation.lat}
+                  readOnly
+                  className="border border-gray-300 rounded px-3 py-2"
+                />
+                <input
+                  name="mapLocation.lng"
+                  type="text"
+                  placeholder="Longitude"
+                  value={formData.mapLocation.lng}
+                  readOnly
+                  className="border border-gray-300 rounded px-3 py-2"
+                />
               </div>
+            </div>
 
               {/* Facilities */}
               <div className="border-t pt-4">
@@ -406,7 +526,7 @@ const AddEditProperty = () => {
                     placeholder="Beds"
                     value={formData.facilities.beds}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                   />
                   <input
                     name="facilities.baths"
@@ -414,7 +534,7 @@ const AddEditProperty = () => {
                     placeholder="Baths"
                     value={formData.facilities.baths}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                   />
                   <input
                     name="facilities.area"
@@ -422,7 +542,7 @@ const AddEditProperty = () => {
                     placeholder="Area (sqft)"
                     value={formData.facilities.area}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
@@ -467,29 +587,19 @@ const AddEditProperty = () => {
                 </div>
               </div>
 
-              {/* Rating & Description */}
+              {/* Description */}
               <div className="border-t pt-4">
                 <label className="block text-sm font-semibold mb-2">
                   Additional Info
                 </label>
                 <div className="grid grid-cols-1 gap-3">
-                  <input
-                    name="rating"
-                    type="number"
-                    placeholder="Rating (0–5)"
-                    min="0"
-                    max="5"
-                    value={formData.rating}
-                    onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg h-10 px-3"
-                  />
                   <textarea
                     name="description"
                     placeholder="Description"
                     rows="3"
                     value={formData.description}
                     onChange={handleChange}
-                    className="border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-3 py-2"
+                    className="border border-gray-300 rounded-[2px] px-3 py-2"
                   ></textarea>
                 </div>
               </div>
@@ -506,7 +616,7 @@ const AddEditProperty = () => {
                     placeholder="Agent Name"
                     value={formData.agent.name}
                     readOnly
-                    className="border rounded-lg h-10 px-3 w-full bg-gray-100"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3 w-full bg-gray-100"
                   />
                   <input
                     name="agent.email"
@@ -514,7 +624,7 @@ const AddEditProperty = () => {
                     placeholder="Agent Email"
                     value={formData.agent.email}
                     readOnly
-                    className="border rounded-lg h-10 px-3 w-full bg-gray-100"
+                    className="border rounded-[2px] border-gray-300 h-10 px-3 w-full bg-gray-100"
                   />
                   <input
                     name="agent.contact.phone"
@@ -522,7 +632,7 @@ const AddEditProperty = () => {
                     placeholder="Phone"
                     value={formData.agent.contact.phone}
                     onChange={handleChange}
-                    className="border rounded-lg h-10 px-3 w-full"
+                    className="border rounded-[2px] border-gray-300 h-10 px-3 w-full"
                   />
                   <input
                     name="agent.location"
@@ -530,7 +640,7 @@ const AddEditProperty = () => {
                     placeholder="Agent Location"
                     value={formData.agent.location}
                     onChange={handleChange}
-                    className="border rounded-lg h-10 px-3 w-full"
+                    className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
                   />
                 </div>
               </div>

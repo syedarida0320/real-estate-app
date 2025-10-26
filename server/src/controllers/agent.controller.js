@@ -23,7 +23,7 @@ exports.getAgentProperties = async (req, res) => {
     });
     response.ok(res, "Agent properties fetched successfully", properties);
   } catch (error) {
-    console.error("Error fetching properties:", properties);
+    console.error("Error fetching properties:", error);
     response.serverError(res, "Error fetching agent properties");
   }
 };

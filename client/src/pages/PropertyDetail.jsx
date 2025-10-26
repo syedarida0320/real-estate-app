@@ -181,14 +181,14 @@ const PropertyDetail = () => {
                       {property.location?.address
                         ? `${property.location.address}, `
                         : ""}
-                      {property.location?.city || "Unknown City"},{" "}
-                      {property.location?.country || "Unknown Country"}
+                      {/* {property.location?.city || "Unknown City"},{" "}
+                      {property.location?.country || "Unknown Country"} */}
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-500">Price</p>
-                  <p className="text-xl font-semibold text-blue-600">
+                  <p className="text-lg font-semibold text-blue-600">
                     {property.price?.currency || "$"}{" "}
                     {property.price?.amount ?? "N/A"}
                   </p>
