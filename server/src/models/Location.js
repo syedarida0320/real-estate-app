@@ -10,6 +10,7 @@ const locationSchema = new mongoose.Schema({
   mapLocation: {   
     lat: { type: Number },
     lng: { type: Number },
+    alt: {type: Number},
   },
 });
 

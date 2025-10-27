@@ -210,7 +210,7 @@ const PropertyDetail = () => {
                 </Facility>
                 <Facility>
                   <MoveDiagonal className="w-5 h-5" />
-                  {property.facilities?.area || "N/A"}
+                  {property.facilities?.area || "N/A"}M
                 </Facility>
                 <Facility>
                   <Wifi className="w-5 h-5" />

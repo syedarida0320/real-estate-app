@@ -1,6 +1,7 @@
 // src/pages/AddEditProperty.jsx
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   MapContainer,
@@ -38,9 +39,10 @@ const AddEditProperty = () => {
   const { id } = useParams(); // For edit mode
   const user = useAuth();
 
+  
   const isEditMode = !!id;
   const [loading, setLoading] = useState(false);
-
+  
   const [formData, setFormData] = useState({
     title: "",
     type: "",
@@ -71,6 +73,8 @@ const AddEditProperty = () => {
       profileImage: "",
     },
   });
+  const debouncedLat = useDebounce(formData.mapLocation.lat, 1000);
+  const debouncedLng = useDebounce(formData.mapLocation.lng, 1000);
 
   // 🧭 Subcomponent to handle map clicks
   function LocationMarker() {
@@ -83,8 +87,9 @@ const AddEditProperty = () => {
         }));
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+            `http://localhost:5000/api/maps/reverse?lat=${lat}&lon=${lng}`
           );
+
           const data = await res.json();
 
           // Extract city and country safely
@@ -185,7 +190,7 @@ const AddEditProperty = () => {
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        `http://localhost:5000/api/maps/search?q=${encodeURIComponent(
           searchQuery
         )}`
       );
@@ -217,6 +222,7 @@ const AddEditProperty = () => {
       user?.user &&
       (user.user.role === "Agent" || user.user.role === "Admin")
     ) {
+      // console.log("user agent=> ", user);
       setFormData((prev) => ({
         ...prev,
         agent: {
@@ -226,6 +232,15 @@ const AddEditProperty = () => {
           role: user.user.role || "",
           profileImage:
             user.user.profileImage || user.user.profileImagePath || "",
+          contact: {
+            phone: user.user.phone || "", // fetch phone from user object
+            email: user.user.email || "",
+          },
+          location:
+            user.user.address?.city ||
+            user.user.address?.state ||
+            user.user.location ||
+            "",
         },
       }));
     }
@@ -305,12 +320,12 @@ const AddEditProperty = () => {
   // 🧭 Auto-update city/country when lat/lng change manually
   useEffect(() => {
     const { lat, lng } = formData.mapLocation;
-    if (!lat || !lng) return;
+    if (!debouncedLat || !debouncedLng) return;
 
     const fetchReverseGeo = async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+          `http://localhost:5000/api/maps/reverse?lat=${debouncedLat}&lon=${debouncedLng}`
         );
         const data = await res.json();
         const address = data.address || {};
@@ -337,7 +352,7 @@ const AddEditProperty = () => {
     };
 
     fetchReverseGeo();
-  }, [formData.mapLocation.lat, formData.mapLocation.lng]);
+  }, [debouncedLat, debouncedLng]);
 
   // Helper to build payload from formData
   const buildPayloadFromForm = () => {
@@ -493,39 +508,56 @@ const AddEditProperty = () => {
 
               {/* Price Section */}
               <div>
-                <label className="block text-sm font-medium mb-2">Price</label>
+                <label className="block text-lg font-semibold mb-3">
+                  Price
+                </label>
                 <div className="grid grid-cols-3 gap-3">
-                  <input
-                    name="priceAmount"
-                    type="number"
-                    placeholder="Amount"
-                    value={formData.priceAmount}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                    required
-                  />
-                  <select
-                    name="priceCurrency"
-                    value={formData.priceCurrency}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="PKR">PKR</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                  <select
-                    name="priceDuration"
-                    value={formData.priceDuration}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-[2px] h-10 px-3"
-                  >
-                    <option value="Per Day">Per Day</option>
-                    <option value="Per Month">Per Month</option>
-                    <option value="Per Year">Per Year</option>
-                  </select>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Amount
+                    </label>
+                    <input
+                      name="priceAmount"
+                      type="number"
+                      placeholder="Amount"
+                      value={formData.priceAmount}
+                      onChange={handleChange}
+                      min="0"
+                      step="any"
+                      className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Currency
+                    </label>
+                    <select
+                      name="priceCurrency"
+                      value={formData.priceCurrency}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="PKR">PKR (₨)</option>
+                      <option value="EUR">EUR (€)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Duration
+                    </label>
+                    <select
+                      name="priceDuration"
+                      value={formData.priceDuration}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
+                    >
+                      <option value="Per Day">Per Day</option>
+                      <option value="Per Month">Per Month</option>
+                      <option value="Per Year">Per Year</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -566,7 +598,7 @@ const AddEditProperty = () => {
               {/* 🗺️ Map Section */}
               <div className="flex items-center gap-2 mb-3">
                 {/* <label className="block text-sm font-semibold mb-2">
-                Search Location (if not visible on map)
+                Search Location
               </label> */}
                 <input
                   type="text"
@@ -622,23 +654,36 @@ const AddEditProperty = () => {
                     </label>
                     <input
                       name="mapLocation.lat"
-                      type="text"
+                      type="number"
                       placeholder="Latitude"
                       value={formData.mapLocation.lat}
-                      readOnly
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          mapLocation: { ...prev.mapLocation, lat: value },
+                        }));
+                      }}
                       className="border w-full border-gray-300 rounded px-3 py-2"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Longitude
                     </label>
                     <input
                       name="mapLocation.lng"
-                      type="text"
+                      type="number"
                       placeholder="Longitude"
                       value={formData.mapLocation.lng}
-                      readOnly
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          mapLocation: { ...prev.mapLocation, lng: value },
+                        }));
+                      }}
                       className="border w-full border-gray-300 rounded px-3 py-2"
                     />
                   </div>
@@ -684,7 +729,7 @@ const AddEditProperty = () => {
                     </label>
                     <input
                       name="facilities.area"
-                      type="text"
+                      type="number"
                       placeholder="Area (sqft)"
                       value={formData.facilities.area}
                       onChange={handleChange}
@@ -737,7 +782,7 @@ const AddEditProperty = () => {
               {/* Description */}
               <div className="border-t pt-4">
                 <label className="block text-sm font-semibold mb-2">
-                  Additional Info
+                  Description
                 </label>
                 <div className="grid grid-cols-1 gap-3">
                   <textarea
@@ -752,7 +797,7 @@ const AddEditProperty = () => {
               </div>
 
               {/* Agent Info */}
-              <div className="border-t pt-4">
+              {/* <div className="border-t pt-4">
                 <label className="block text-sm font-semibold mb-2">
                   Agent Details
                 </label>
@@ -779,6 +824,7 @@ const AddEditProperty = () => {
                     placeholder="Phone"
                     value={formData.agent.contact.phone}
                     onChange={handleChange}
+                    readOnly
                     className="border rounded-[2px] border-gray-300 h-10 px-3 w-full"
                   />
                   <input
@@ -787,13 +833,14 @@ const AddEditProperty = () => {
                     placeholder="Agent Location"
                     value={formData.agent.location}
                     onChange={handleChange}
+                    readOnly
                     className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* Buttons */}
-              <div className="flex justify-end space-x-3 pt-4 border-t mt-4">
+              <div className="flex justify-end space-x-3 pt-4 mt-4">
                 <Button
                   type="button"
                   variant="outline"

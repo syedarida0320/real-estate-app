@@ -148,7 +148,7 @@ const Property = () => {
                           </div>
                           <div className="flex items-center text-[12px] gap-1">
                             <MoveDiagonal className="w-4 h-4" />
-                            {property.facilities?.area ?? "-"}
+                            {property.facilities?.area ?? "-"}M
                           </div>
                         </div>
                       </div>

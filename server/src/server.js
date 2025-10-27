@@ -25,6 +25,7 @@ app.use('/api/agents', require('./routes/agent.routes'));
 app.use('/api/reviews', require('./routes/review.routes'));
 app.use("/api", require('./routes/email.routes'));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
+app.use("/api/maps", require("./routes/map.routes"));
 
 app.use('/images', express.static('public/images'));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
