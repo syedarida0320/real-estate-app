@@ -10,7 +10,7 @@ export function SectionCards() {
     const fetchProperties = async () => {
       try {
         const res = await axios.get("/properties");
-        if (res.data?.success) {
+        if (res.data?.success && Array.isArray(res.data.data)) {
           setProperties(res.data.data.slice(0, 3));
         } else {
           console.error("Failed to fetch properties");
@@ -24,10 +24,12 @@ export function SectionCards() {
 
   return (
     <div className="px-4 lg:px-0">
-      <Card className="shadow-sm mt-8">
+      <Card className="shadow-sm mt-8 border rounded-xl">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <h3 className="md:text-lg text-[18px] font-semibold">Property List</h3>
+            <h3 className="md:text-lg text-[18px] font-semibold text-gray-800">
+              Property List
+            </h3>
 
             {/* Tabs Section */}
             <Tabs defaultValue="popular" className="w-full md:w-auto">
@@ -42,7 +44,7 @@ export function SectionCards() {
         </CardHeader>
 
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-0">
             {properties.map((property, index) => {
               const id = property._id || property.id;
               const img =
@@ -55,7 +57,7 @@ export function SectionCards() {
                 img && img.startsWith("http")
                   ? img
                   : img
-                  ? `http://localhost:5000${img}`
+                  ? `http://localhost:5000/${img.replace(/\\/g, "/")}`
                   : "/placeholder.png";
 
               return (

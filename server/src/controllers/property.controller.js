@@ -1,36 +1,8 @@
 const Property = require("../models/Property");
-const path=require("path");
-const fs=require("fs");
-const User=require("../models/User")
+const path = require("path");
+const fs = require("fs");
+const User = require("../models/User");
 const { response } = require("../utils/response");
-
-
-exports.getProfileImage = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await User.findById(userId);
-
-    if (!user || !user.profileImagePath) {
-      // fallback if no image
-      const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
-      return res.sendFile(defaultImagePath);
-    }
-
-    // actual stored path
-    const imagePath = path.join(__dirname, "../uploads", user.profileImagePath);
-
-    if (fs.existsSync(imagePath)) {
-      res.sendFile(imagePath);
-    } else {
-      const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
-      res.sendFile(defaultImagePath);
-    }
-  } catch (error) {
-    console.error("Error serving profile image:", error);
-    const defaultImagePath = path.join(__dirname, "../public/images/dummy-avatar.png");
-    res.sendFile(defaultImagePath);
-  }
-};
 
 exports.getAllProperties = async (req, res) => {
   try {
@@ -40,12 +12,15 @@ exports.getAllProperties = async (req, res) => {
     if (user.role === "Agent") {
       filter.createdBy = user._id;
     }
-     if (req.query.userId) {
+    if (req.query.userId) {
       filter.userId = req.query.userId;
     }
 
     const properties = await Property.find(filter)
-      .populate("userId", "firstName lastName email role phone profileImagePath address")
+      .populate(
+        "userId",
+        "firstName lastName email role phone profileImagePath address"
+      )
       .sort({ createdAt: -1 });
     response.ok(res, "Properties fetched successfully", properties);
   } catch (error) {
@@ -65,16 +40,6 @@ exports.getPropertyById = async (req, res) => {
     if (!property) {
       return response.notFound(res, "Property not found");
     }
-    // const propertyObj = property.toObject();
-    // if (propertyObj.userId?.profileImagePath) {
-    //   propertyObj.userId.profileImage = `${req.protocol}://${req.get(
-    //     "host"
-    //   )}/api/users/${propertyObj.userId._id}/profile-image`;
-    // } else {
-    //   propertyObj.userId.profileImage = `${req.protocol}://${req.get(
-    //     "host"
-    //   )}/public/images/dummy-avatar.png`;
-    // }
     response.ok(res, "Property fetched successfully", property);
   } catch (error) {
     console.error("Error fetching property by ID:", error);
@@ -94,11 +59,24 @@ exports.createProperty = async (req, res) => {
       );
     }
 
-    const propertyData = req.body;
+    const { price, location, facilities, ...rest } = req.body;
+    const propertyData = {
+      ...rest,
+      price: price ? JSON.parse(price) : {},
+      location: location ? JSON.parse(location) : {},
+      facilities: facilities ? JSON.parse(facilities) : {},
+      userId: user._id,
+      createdBy: user._id,
+    };
 
-    // If agent, tag property with agent info
-    propertyData.userId = user._id;
-    propertyData.createdBy = user._id;
+    // Handle uploaded files
+    propertyData.mainImage = req.files?.mainImage?.[0]
+      ? `uploads/${req.files.mainImage[0].filename}`
+      : undefined;
+
+    propertyData.galleryImages = req.files?.galleryImages
+      ? req.files.galleryImages.map((file) => `uploads/${file.filename}`)
+      : [];
 
     const property = await Property.create(propertyData);
     response.created(res, "Property created successfully", property);
@@ -109,62 +87,88 @@ exports.createProperty = async (req, res) => {
 };
 exports.updateProperty = async (req, res) => {
   try {
-    const property = await Property.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+    // Parse nested objects
+    const { price, location, facilities, ...rest } = req.body;
+    const updateData = {
+      ...rest,
+      price: price ? JSON.parse(price) : undefined,
+      location: location ? JSON.parse(location) : undefined,
+      facilities: facilities ? JSON.parse(facilities) : undefined,
+    };
+
+    // Handle uploaded files
+    // Main Image
+    if (req.files?.mainImage?.[0]) {
+      updateData.mainImage = `uploads/${req.files.mainImage[0].filename}`;
+    } else if (req.body.mainImageUrl) {
+      updateData.mainImage = req.body.mainImageUrl; // keep existing main image
     }
-    res.status(200).json(property);
+
+    // Gallery Images
+    let newGalleryImages = [];
+    if (req.files?.galleryImages) {
+      newGalleryImages = req.files.galleryImages.map(
+        (file) => `uploads/${file.filename}`
+      );
+    }
+
+    // Include existing gallery images from frontend
+    const existingGalleryImages = req.body.existingGalleryImages
+      ? Array.isArray(req.body.existingGalleryImages)
+        ? req.body.existingGalleryImages
+        : [req.body.existingGalleryImages]
+      : [];
+
+    updateData.galleryImages = [...existingGalleryImages, ...newGalleryImages];
+
+    const property = await Property.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!property) {
+      return response.notFound(res, "Property not found");
+    }
+    response.ok(res, "Property updated successfully", property);
   } catch (error) {
     console.error("Error updating property:", error);
-    res.status(500).json({ message: "Error updating property" });
+    response.serverError(res, "Error updating property");
   }
 };
 
+exports.getProfileImage = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
 
-// exports.getAllProperties = async (req, res) => {
-//   try {
-//     const { status, type, country, state, page = 1, limit = 10 } = req.query;
+    if (!user || !user.profileImagePath) {
+      const defaultImagePath = path.join(
+        __dirname,
+        "../public/images/dummy-avatar.png"
+      );
+      return res.sendFile(defaultImagePath);
+    }
 
-//     let filter = {};
-//     if (status && status !== 'any') filter.status = status;
-//     if (type && type !== 'any') filter.type = type;
-//     if (country && country !== 'all') filter['location.country'] = country;
-//     if (state && state !== 'all') filter['location.state'] = state;
+    const imagePath = path.join(__dirname, "../uploads", user.profileImagePath);
 
-//     const properties = await Property.find(filter)
-//       .populate('agent')
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit)
-//       .sort({ createdAt: -1 });
-
-//     const total = await Property.countDocuments(filter);
-
-//     response.ok(res, "Properties fetched successfully", {
-//       properties,
-//       totalPages: Math.ceil(total / limit),
-//       currentPage: page,
-//       total
-//     });
-//   } catch (error) {
-//     response.serverError(res, "Error fetching properties");
-//   }
-// };
-
-// exports.getPropertyById = async (req, res) => {
-//   try {
-//     const property = await Property.findById(req.params.id)
-//       .populate("agent")
-//       .populate("owner");
-
-//     if (!property) {
-//       return response.notFound(res, "Property not found");
-//     }
-
-//     response.ok(res, "Property fetched successfully", property);
-//   } catch (error) {
-//     response.serverError(res, "Error fetching property");
-//   }
-// };
+    if (fs.existsSync(imagePath)) {
+      res.sendFile(imagePath);
+    } else {
+      const defaultImagePath = path.join(
+        __dirname,
+        "../public/images/dummy-avatar.png"
+      );
+      res.sendFile(defaultImagePath);
+    }
+  } catch (error) {
+    console.error("Error serving profile image:", error);
+    const defaultImagePath = path.join(
+      __dirname,
+      "../public/images/dummy-avatar.png"
+    );
+    res.sendFile(defaultImagePath);
+  }
+};

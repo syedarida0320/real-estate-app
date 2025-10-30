@@ -86,11 +86,7 @@ function Login() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center space-x-2">
-                  <input type="checkbox" className="rounded" />
-                  <span>Remember for 30 days</span>
-                </label>
+              <div className="text-sm">
                 <a href="#" className="text-blue-600 hover:underline">
                   Forgot Password?
                 </a>
