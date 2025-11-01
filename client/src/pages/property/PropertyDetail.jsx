@@ -85,8 +85,12 @@ const PropertyDetail = () => {
           const countRes = await axios.get(
             `/properties?userId=${data.userId._id}`
           );
-          const allProperties = countRes?.data?.data || countRes?.data || [];
-          setAgentPropertiesCount(allProperties.length || 0);
+          const propertiesData = countRes?.data?.data;
+
+          // const allProperties = countRes?.data?.data || countRes?.data || [];
+          if (propertiesData) {
+            setAgentPropertiesCount(propertiesData.totalItems || 0);
+          }
         }
         // ✅ Reverse Geocode to fetch city/country from lat/lng
         const lat = data?.location?.mapLocation?.lat;
@@ -139,15 +143,16 @@ const PropertyDetail = () => {
   }
 
   // ✅ Image paths from backend
- const baseURL = import.meta.env.VITE_API || "http://localhost:5000";
+  const baseURL = import.meta.env.VITE_API || "http://localhost:5000";
   const mainImageUrl = property.mainImage
     ? `${baseURL}/${property.mainImage.replace(/\\/g, "/")}`
     : "/placeholder.jpg";
 
   const galleryUrls = Array.isArray(property.galleryImages)
-    ? property.galleryImages.map((img) => `${baseURL}/${img.replace(/\\/g, "/")}`)
+    ? property.galleryImages.map(
+        (img) => `${baseURL}/${img.replace(/\\/g, "/")}`
+      )
     : [];
-
 
   const agent = property.userId || {};
   const agentFullName = agent.firstName
