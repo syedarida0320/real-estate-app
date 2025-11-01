@@ -34,7 +34,7 @@ exports.getAllProperties = async (req, res) => {
       filter["location.state"] = state;
     }
 
- // 🔍 Text search (title or city or address)
+    // 🔍 Text search (title or city or address)
     if (search && search.trim() !== "") {
       const searchRegex = new RegExp(search.trim(), "i");
       filter.$or = [
@@ -227,16 +227,9 @@ exports.getUniqueCountries = async (req, res) => {
     // Remove empty strings or undefined
     const filteredCountries = countries.filter(Boolean);
 
-    res.status(200).json({
-      success: true,
-      message: "Countries fetched successfully",
-      data: filteredCountries,
-    });
+    response.ok(res, "Countries fetched successfully", filteredCountries);
   } catch (error) {
     console.error("Error fetching unique countries:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch countries",
-    });
+    response.serverError(res, "Failed to fetch countries");
   }
 };
