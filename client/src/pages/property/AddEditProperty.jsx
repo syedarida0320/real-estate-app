@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useNavigate, useParams } from "react-router-dom";
-// import { ToastContainer, toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 import {
   MapContainer,
@@ -248,7 +247,7 @@ const AddEditProperty = () => {
               p.mainImage ||
               p.image ||
               (p.galleryImages && p.galleryImages[0]) ||
-              "", 
+              "",
             galleryImages: p.galleryImages || (p.image ? [p.image] : []),
             priceAmount: p.price?.amount ?? "",
             priceCurrency: p.price?.currency ?? "USD",
@@ -345,18 +344,19 @@ const AddEditProperty = () => {
 
       if (isEditMode) {
         await axios.put(`/properties/${id}`, data, config);
-          // toast.success("Property updated successfully!");
+        toast.success("Property updated successfully!");
       } else {
         await axios.post("/properties", data, config);
-        // toast.success("Property added successfully!");
+        toast.success("Property added successfully!");
       }
 
       handleBack();
     } catch (error) {
       console.error(" Error submitting property:", error);
-    //    toast.error(
-    //   error.response?.data?.message || "Something went wrong while adding property."
-    // );
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong while adding the property."
+      );
     } finally {
       setLoading(false);
     }

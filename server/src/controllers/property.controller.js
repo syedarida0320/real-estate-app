@@ -9,20 +9,64 @@ exports.getAllProperties = async (req, res) => {
     const user = req.user;
     let filter = {};
 
-    if (user.role === "Agent") {
+    if (user && user.role === "Agent") {
       filter.createdBy = user._id;
     }
     if (req.query.userId) {
       filter.userId = req.query.userId;
     }
 
+    const { status, type, country, state, search } = req.query;
+
+    if (status && status !== "any") {
+      filter.status = status;
+    }
+
+    if (type && type !== "any") {
+      filter.type = type;
+    }
+
+    if (country && country !== "all") {
+      filter["location.country"] = country;
+    }
+
+    if (state && state !== "all") {
+      filter["location.state"] = state;
+    }
+
+ // 🔍 Text search (title or city or address)
+    if (search && search.trim() !== "") {
+      const searchRegex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { "location.city": searchRegex },
+        { "location.address": searchRegex },
+      ];
+    }
+
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalProperties = await Property.countDocuments(filter);
+
     const properties = await Property.find(filter)
       .populate(
         "userId",
         "firstName lastName email role phone profileImagePath address"
       )
-      .sort({ createdAt: -1 });
-    response.ok(res, "Properties fetched successfully", properties);
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    response.ok(res, "Properties fetched successfully", {
+      properties,
+      currentPage: page,
+      totalPages: Math.ceil(totalProperties / limit),
+      totalItems: totalProperties,
+    });
   } catch (error) {
     console.error("Error fetching properties:", error);
     response.serverError(res, "Failed to fetch properties");
@@ -170,5 +214,29 @@ exports.getProfileImage = async (req, res) => {
       "../public/images/dummy-avatar.png"
     );
     res.sendFile(defaultImagePath);
+  }
+};
+
+// ✅ Get all unique countries from properties
+exports.getUniqueCountries = async (req, res) => {
+  try {
+    const countries = await Property.distinct("location.country", {
+      "location.country": { $ne: null },
+    });
+
+    // Remove empty strings or undefined
+    const filteredCountries = countries.filter(Boolean);
+
+    res.status(200).json({
+      success: true,
+      message: "Countries fetched successfully",
+      data: filteredCountries,
+    });
+  } catch (error) {
+    console.error("Error fetching unique countries:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch countries",
+    });
   }
 };

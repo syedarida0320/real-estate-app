@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import loginImage from "@/assets/Sign-In.jpg";
 import { useAuth } from "@/context/AuthContext";
 import axios from "@/utils/axios";
+import { toast } from "react-toastify";
 
 function Login() {
   const { loginUser } = useAuth();
@@ -29,12 +30,25 @@ function Login() {
       const payload = res.data.data || res.data;
 
       loginUser({ user: payload.user, token: payload.token });
+ // ✅ Success toast
+    toast.success("Login successful! Welcome back", {
+      position: "top-right",
+      autoClose: 3000,
+      theme: "colored",
+    });
+
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors); // field-specific errors
       } else {
         setErrors({ general: err.response?.data?.message || "Login failed" });
       }
+      // ❌ Error toast
+    toast.error(err.response?.data?.message || "Invalid email or password", {
+      position: "top-right",
+      autoClose: 3000,
+      theme: "colored",
+    });
     } finally {
       setLoading(false);
     }

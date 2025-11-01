@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "@/routes/PrivateRoute";
 import PublicRoute from "@/routes/PublicRoute";
 import Loader from "@/components/Loader";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = lazy(() => import("@/auth/Login"));
 const Register = lazy(() => import("@/auth/Register"));
@@ -16,7 +18,7 @@ const Message = lazy(() => import("@/pages/Message"));
 const Review = lazy(() => import("@/pages/Review"));
 const AddAgent = lazy(() => import("@/pages/agent/AddAgent"));
 const AddEditProperty = lazy(() => import("@/pages/property/AddEditProperty"));
-const VerifyEmail= lazy(()=> import("@/pages/VerifyEmail"));
+const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 
 const App = () => {
   return (
@@ -26,7 +28,7 @@ const App = () => {
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/verify/email" element={<VerifyEmail/>}/>
+          <Route path="/verify/email" element={<VerifyEmail />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
         {/* Private Routes */}
@@ -44,6 +46,16 @@ const App = () => {
           <Route path="/review" element={<Review />} />
         </Route>
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        theme="light"
+        toastStyle={{backgroundColor: "#f8fafc", color:"#111827"}}
+      />
     </Suspense>
   );
 };

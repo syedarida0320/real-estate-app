@@ -63,7 +63,7 @@ const AgentDetail = () => {
                     : dummyAvatar
                 }
                 alt="Agent"
-                className=" relative top-20 w-25 h-25 rounded-full object-cover border-1 -right-20 border-white shadow-md"
+                className=" relative top-20 w-25 h-25 rounded-full object-cover border-1 -right-20 border-gray-300 bg-white shadow-md"
               />
             </div>
             <div className="flex flex-col mb-4 items-start">

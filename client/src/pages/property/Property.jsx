@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
-import {
-  MapPin,
-  BedDouble,
-  MoveDiagonal,
-  Plus,
-  Edit,
-} from "lucide-react";
+import Pagination from "@/components/Pagination";
+import { MapPin, BedDouble, MoveDiagonal, Plus, Edit } from "lucide-react";
 import PropertyFilters from "@/components/PropertyFilters";
 import MainLayout from "@/layouts/MainLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,31 +12,74 @@ import { useAuth } from "@/context/AuthContext";
 
 const Property = () => {
   const [properties, setProperties] = useState([]);
-  const [filters, setFilters] = useState({
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages]=useState(1);
+  const [itemsPerPage] = useState(10); // show 10 cards per page
+  const defaultFilters={
     status: "any",
     type: "any",
     country: "all",
     state: "all",
     search: "",
-  });
+  }
+  const [filters, setFilters] = useState(defaultFilters);
+  // Function to reset filters
+const handleClearFilters = () => {
+  setFilters(defaultFilters);
+  fetchProperties(1); // Optional: re-fetch all properties after clearing
+};
 
   const user = useAuth();
   const navigate = useNavigate();
 
-  // 🏘️ Fetch all properties
-  const fetchProperties = async () => {
-    try {
-      const res = await axios.get("/properties");
-      const data = res?.data?.data || res?.data || [];
-      setProperties(data);
-    } catch (error) {
-      console.error("Error fetching properties", error);
-    }
-  };
+  // Fetch all properties
+  const fetchProperties = async (page = 1) => {
+  try {
+    const params = new URLSearchParams({
+      page,
+      limit: itemsPerPage,
+    });
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
+    if (filters.status && filters.status !== "any") {
+      params.append("status", filters.status);
+    }
+    if (filters.type && filters.type !== "any") {
+      params.append("type", filters.type);
+    }
+    if (filters.country && filters.country !== "all") {
+      params.append("country", filters.country);
+    }
+    if (filters.state && filters.state !== "all") {
+      params.append("state", filters.state);
+    }
+    if (filters.search && filters.search.trim() !== "") {
+      params.append("search", filters.search.trim());
+    }
+
+    const res = await axios.get(`/properties?${params.toString()}`);
+    const data = res?.data?.data || res?.data || {};
+
+    setProperties(data.properties || []);
+    setTotalPages(data.totalPages || 1);
+    setCurrentPage(data.currentPage || 1);
+  } catch (error) {
+    console.error("Error fetching properties", error);
+  }
+};
+
+useEffect(() => {
+  // when either filters or currentPage changes, fetch data
+  fetchProperties(currentPage);
+}, [currentPage, filters]);
+
+  // useEffect(() => {
+  //   fetchProperties(1);
+  // }, [filters]);
+
+useEffect(() => {
+  // when filters change, reset to page 1
+  setCurrentPage(1);
+}, [filters]);
 
   // Navigate to add property page
   const handleAddProperty = () => {
@@ -58,7 +96,8 @@ const Property = () => {
   const isOwnerOfProperty = (property) => {
     if (!user?.user) return false;
     const uid = user.user._id || user.user.id || user.user._id?.toString();
-    const propUserId = property.userId?._id || property.userId || property.userId?.toString();
+    const propUserId =
+      property.userId?._id || property.userId || property.userId?.toString();
     return uid && propUserId && uid.toString() === propUserId.toString();
   };
 
@@ -66,7 +105,7 @@ const Property = () => {
   const getImageUrl = (imgPath) => {
     if (!imgPath) return "/placeholder.png";
     if (typeof imgPath !== "string") return "/placeholder.png";
-   const baseHost = axios.defaults.baseURL.replace("/api", "");
+    const baseHost = axios.defaults.baseURL.replace("/api", "");
     return imgPath.startsWith("http")
       ? imgPath
       : `${baseHost}/${imgPath.replace(/\\/g, "/")}`;
@@ -94,7 +133,11 @@ const Property = () => {
 
         {/* Filters */}
         <div className="mb-8">
-          <PropertyFilters filters={filters} onFiltersChange={setFilters} />
+          <PropertyFilters 
+          filters={filters}
+           onFiltersChange={setFilters}
+           onClearFilters={handleClearFilters}
+           />
         </div>
 
         {/* Property Cards */}
@@ -102,7 +145,7 @@ const Property = () => {
           {properties.map((property) => {
             const id = property._id || property.id;
 
-             const mainImg =
+            const mainImg =
               property.mainImage ||
               (Array.isArray(property.galleryImages) &&
                 property.galleryImages[0]) ||
@@ -163,14 +206,15 @@ const Property = () => {
                 </Link>
 
                 {/* Edit button only visible to owner/creator or Admin */}
-                {((user?.user?.role === "Admin") || isOwnerOfProperty(property)) && (
+                {(user?.user?.role === "Admin" ||
+                  isOwnerOfProperty(property)) && (
                   <div className="absolute top-2 right-3">
                     <Button
                       size="sm"
                       className=" text-black bg-white  border shadow-sm text-sm hover:bg-gray-300"
                       onClick={() => handleEditProperty(property)}
                     >
-                    <Edit className=" w-3 h-3"/>
+                      <Edit className=" w-3 h-3" />
                     </Button>
                   </div>
                 )}
@@ -178,6 +222,14 @@ const Property = () => {
             );
           })}
         </div>
+  {/*  Pagination Component */}
+       <div className="flex justify-end items-end mt-8 pr-4">
+         <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+       </div>
       </div>
     </MainLayout>
   );

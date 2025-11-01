@@ -10,13 +10,13 @@ export function SectionCards() {
     const fetchProperties = async () => {
       try {
         const res = await axios.get("/properties");
-        if (res.data?.success && Array.isArray(res.data.data)) {
-          setProperties(res.data.data.slice(0, 3));
+        if (res.data?.data?.properties && Array.isArray(res.data.data.properties)) {
+          setProperties(res.data.data.properties.slice(0, 3));
         } else {
-          console.error("Failed to fetch properties");
+          console.error("Failed to fetch properties", res.data);
         }
       } catch (err) {
-        console.error("Error fetching properties:", err);
+        console.error("Error fetching properties:", err.response?.data || err.message );
       }
     };
     fetchProperties();
