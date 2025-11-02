@@ -97,7 +97,7 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
           </SelectContent>
         </Select>
 
-        <Select
+        {/* <Select
           value={filters.state}
           onValueChange={(value) => handleChange("state", value)}
         >
@@ -112,10 +112,8 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
             <SelectItem value="Texas">Texas</SelectItem>
             <SelectItem value="North Carolina">North Carolina</SelectItem>
           </SelectContent>
-        </Select>
-      </div>
-      {/* Clear Filters Button */}
-      <div className="flex justify-end mt-2">
+        </Select> */}
+      {/* <div className="flex justify-end mt-2"> */}
         <Button
           onClick={onClearFilters}
           size="sm"
@@ -125,6 +123,8 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
           <span>Clear Filters</span>
         </Button>
       </div>
+      {/* </div> */}
+      {/* Clear Filters Button */}
     </div>
   );
 };

@@ -6,39 +6,39 @@ import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
 import { useAuth } from "@/context/AuthContext";
-import axios from "@/utils/axios"
+//import axios from "@/utils/axios"
 
 
 export const Navbar = () => {
-  const {user}=useAuth();
-  const [profileImage, setProfileImage]=useState(dummyAvatar);
+  const {user, profileImage}=useAuth();
+  // const [profileImage, setProfileImage]=useState(dummyAvatar);
 
-useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (!user?._id) return;
+// useEffect(() => {
+//     const fetchProfileImage = async () => {
+//       if (!user?._id) return;
 
-      try {
-        const res = await axios.get(`/users/${user._id}/profile-image`, {
-          responseType: "blob",
-        });
-        const imgUrl = URL.createObjectURL(res.data);
-        setProfileImage(imgUrl);
-       // console.log("here in navbar => ", res.data);
-      } catch (error) {
-        console.error("Failed to fetch profile image:", error.message);
-        setProfileImage(dummyAvatar);
-      }
-    };
+//       try {
+//         const res = await axios.get(`/users/${user._id}/profile-image`, {
+//           responseType: "blob",
+//         });
+//         const imgUrl = URL.createObjectURL(res.data);
+//         setProfileImage(imgUrl);
+//        // console.log("here in navbar => ", res.data);
+//       } catch (error) {
+//         console.error("Failed to fetch profile image:", error.message);
+//         setProfileImage(dummyAvatar);
+//       }
+//     };
 
-    fetchProfileImage();
-  }, [user?._id]);
+//     fetchProfileImage();
+//   }, [user?._id]);
 
   const userData=user
     ?{
       name:`${user.firstName || ""} 
       ${user.lastName || ""}`.trim(), 
       role:user.role || "User",
-    avatar: profileImage,
+    avatar: profileImage || dummyAvatar,
   }
     :null;
      

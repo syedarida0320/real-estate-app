@@ -22,7 +22,7 @@ const propertySchema = new mongoose.Schema(
     facilities: {
       beds: { type: Number, default: 0 },
       baths: { type: Number, default: 0 },
-      area: { type: String }, // e.g. "28M"
+      area: { type: String },
       smokingArea: { type: Boolean, default: false },
       kitchen: { type: Boolean, default: false },
       balcony: { type: Boolean, default: false },

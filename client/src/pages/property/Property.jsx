@@ -61,25 +61,22 @@ const handleClearFilters = () => {
 
     setProperties(data.properties || []);
     setTotalPages(data.totalPages || 1);
-    setCurrentPage(data.currentPage || 1);
+    // setCurrentPage(data.currentPage || 1);
   } catch (error) {
     console.error("Error fetching properties", error);
   }
 };
 
+// when either filters or currentPage changes, fetch data
 useEffect(() => {
-  // when either filters or currentPage changes, fetch data
   fetchProperties(currentPage);
 }, [currentPage, filters]);
 
-  // useEffect(() => {
-  //   fetchProperties(1);
-  // }, [filters]);
 
-useEffect(() => {
-  // when filters change, reset to page 1
+const handleFiltersChange=(newFilters) => {
+  setFilters(newFilters);
   setCurrentPage(1);
-}, [filters]);
+}
 
   // Navigate to add property page
   const handleAddProperty = () => {
@@ -135,7 +132,7 @@ useEffect(() => {
         <div className="mb-8">
           <PropertyFilters 
           filters={filters}
-           onFiltersChange={setFilters}
+           onFiltersChange={handleFiltersChange}
            onClearFilters={handleClearFilters}
            />
         </div>

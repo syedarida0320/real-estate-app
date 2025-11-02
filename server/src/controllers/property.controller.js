@@ -217,16 +217,24 @@ exports.getProfileImage = async (req, res) => {
   }
 };
 
-// ✅ Get all unique countries from properties
+// Get all unique countries from properties
 exports.getUniqueCountries = async (req, res) => {
   try {
-    const countries = await Property.distinct("location.country", {
-      "location.country": { $ne: null },
-    });
+     const user = req.user;
+    let filter = { "location.country": { $ne: null } };
+
+    // If user is Agent → only get their own property countries
+    if (user && user.role === "Agent") {
+      filter.createdBy = user._id;
+    }
+
+    // If Admin or Normal User → show all countries (no filter on createdBy)
+    // (nothing special needed, filter remains global)
+
+    const countries = await Property.distinct("location.country", filter);
 
     // Remove empty strings or undefined
     const filteredCountries = countries.filter(Boolean);
-
     response.ok(res, "Countries fetched successfully", filteredCountries);
   } catch (error) {
     console.error("Error fetching unique countries:", error);
