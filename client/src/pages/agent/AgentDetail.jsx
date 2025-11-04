@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
 import axios from "@/utils/axios";
-import { Mail, Phone, MapPin, ChevronLeft } from "lucide-react";
+import {  MapPin, ChevronLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 import agentBg from "@/assets/agent-bg.png";
-import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
 
 const AgentDetail = () => {
   const { id } = useParams();
@@ -67,22 +67,32 @@ const AgentDetail = () => {
               />
             </div>
             <div className="flex flex-col mb-4 items-start">
-              <h2 className="text-xl font-semibold mt-1 text-[16px]">{agent.name}</h2>
-              <p className="text-gray-500 text-[14px]">{agent.role}</p>
+              <h2 className="text-xl font-semibold mt-1 text-[16px]">
+                {agent.user?.firstName} {agent.user?.lastName}
+              </h2>
+              <p className="text-gray-500 text-[14px]">{agent.user?.role}</p>
             </div>
             <div className="mt-1 space-y-2 text-sm text-gray-600 w-full">
               <p>Age: {agent.age || "N/A"}</p>
-              <p>City: {agent.city || "N/A"}</p>
-              <p>State: {agent.state || "N/A"}</p>
-              <p>Country: {agent.country || "N/A"}</p>
-              <p>Post Code: {agent.postCode || "N/A"}</p>
-              <p>Agent ID: {agent.agentId || "N/A"}</p>
-              <p className="flex items-center gap-2">
-                <Phone size={14} /> {agent.phone || "N/A"}
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail size={14} /> {agent.email || "N/A"}
-              </p>
+              {agent?.user?.address && (
+                <div className="mt-1 space-y-2 text-sm text-gray-600 w-full">
+                  {agent.user.address.city && (
+                    <p>City: {agent.user.address.city}</p>
+                  )}
+                  {agent.user.address.state && (
+                    <p>State: {agent.user.address.state}</p>
+                  )}
+                  {agent.user.address.country && (
+                    <p>Country: {agent.user.address.country}</p>
+                  )}
+                  {agent.user.address.zipCode && (
+                    <p>Post Code: {agent.user.address.zipCode}</p>
+                  )}
+                </div>
+              )}
+
+              <p>Phone: {agent.user?.phone || "N/A"}</p>
+              <p>Email: {agent.user?.email || "N/A"}</p>
             </div>
 
             <div className="flex items-center gap-4 mt-4">
@@ -111,6 +121,15 @@ const AgentDetail = () => {
                   rel="noopener noreferrer"
                 >
                   <FaInstagram className="text-pink-500 text-xl hover:scale-110 transition" />
+                </a>
+              )}
+              {agent.socialLinks?.linkedin && (
+                <a
+                  href={agent.socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaLinkedin className="text-blue-900 text-xl hover:scale-110 transition" />
                 </a>
               )}
             </div>

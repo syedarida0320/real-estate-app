@@ -120,7 +120,7 @@ const Profile = () => {
       const updatedUser = {
         address: formData.address,
         phone: formData.phone,
-        email: formData.email,
+        // email: formData.email,
       };
 
       const res = await axios.put(`/users/${profile._id}`, updatedUser);
@@ -255,12 +255,9 @@ const Profile = () => {
                   <Input
                     name="email"
                     value={formData.email || ""}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
+                    disabled
+                   className="text-sm bg-gray-100 cursor-not-allowed"
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                  )}
                 </div>
 
                 {/* Save & Cancel Buttons */}

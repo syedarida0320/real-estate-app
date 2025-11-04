@@ -73,25 +73,25 @@ const Agent = () => {
               <CardContent className="flex flex-col p-0 justify-center w-full">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {agent.name}
+                    {agent.user?.firstName} {agent.user?.lastName}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-7">{agent.role}</p>
+                  <p className="text-sm text-gray-500 mb-7">{agent.user?.role}</p>
 
                   <div className="flex flex-row gap-2 my-2 text-gray-600 text-sm">
                     <div className="flex flex-col space-x-20">
                       <p className="flex items-center gap-2">
                         <Mail size={15} className="text-gray-500" />
-                        {agent.email}
+                        {agent.user?.email}
                       </p>
                       <p className="flex items-center gap-2">
                         <Phone size={15} className="text-gray-500" />
-                        {agent.phone}
+                        {agent.user?.phone}
                       </p>
                     </div>
                     <div className="flex flex-col space-x-20">
                       <p className="flex items-center gap-2">
                         <MapPin size={15} className="text-gray-500" />
-                        {agent.country || "No Location"}
+                        {agent.user?.address?.country || "No Location"}
                       </p>
                       <p className="flex items-center gap-2">
                         <IconBuildingSkyscraper

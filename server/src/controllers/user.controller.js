@@ -77,13 +77,21 @@ const updateUser = async (req, res) => {
     const existing = await User.findById(req.params.id);
     if (!existing) return response.notFound(res, "User not found");
 
-    const allowedFields = ["email", "address", "phone"];
+    const allowedFields = ["address", "phone"];
     const updateData = {};
     allowedFields.forEach((field) => {
       if (req.body[field] != undefined) {
         updateData[field] = req.body[field];
       }
     });
+
+ // ✅ Block email changes even if someone tries manually
+    if (req.body.email && req.body.email !== existing.email) {
+      return response.forbidden(
+        res,
+        "Changing email is not allowed for security reasons"
+      );
+    }
 
     //  handle profile image -> if file uploaded, attach profileImagePath and delete old file if present
     if (req.file) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/utils/axios";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const VerifyEmail = () => {
   const [status, setStatus] = useState("");
@@ -15,24 +16,28 @@ const VerifyEmail = () => {
         .get(`/auth/verify/email?token=${token}`)
         .then((res) => {
           if (!res.data.success) {
+            toast.error("Verification failed. Redirecting to login...");
             setTimeout(() => navigate("/login"), 2000);
-          }
-
-          if (res.data.data.verified) {
-            setStatus("Email already verified. Redirecting to login...");
+          } else if (res.data.data.verified) {
+            toast.info("Email already verified. Redirecting to login...");
             setTimeout(() => navigate("/login"), 2000);
           } else {
             setEmail(res.data.data.email);
+            toast.success("Email verified successfully!");
             setStatus("verified");
           }
         })
-        .catch(() =>
+        .catch(() => {
+          toast.error("Invalid or expired token. Please request a new link.");
           setStatus(
-            "Invalid or expired token.  Please request a new verification link."
-          )
-        );
+            "Invalid or expired token. Please request a new verification link."
+          );
+        });
+    } else {
+      toast.warn("Verification token not found in URL.");
+      setStatus("Verification token not found.");
     }
-  }, []);
+  }, [navigate, searchParams]);
 
   if (status === "verified") {
     return (
@@ -62,12 +67,17 @@ const SetPassword = ({ email }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.warn("Passwords do not match!");
       return;
     }
-    await axios.post("/auth/set-password", { email, password });
-    alert("Password set successfully!");
-    navigate("/login");
+
+    try {
+      await axios.post("/auth/set-password", { email, password });
+      toast.success("Password set successfully!");
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      toast.error("Failed to set password. Please try again.");
+    }
   };
 
   return (

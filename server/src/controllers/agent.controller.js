@@ -1,15 +1,27 @@
 const Agent = require("../models/Agent");
+const User = require("../models/User");
 const Property = require("../models/Property");
 const { response } = require("../utils/response");
-const crypto = require("../utils/crypto"); 
-const sendEmail = require("../utils/agent-email"); 
-const User = require("../models/User");
+const crypto = require("../utils/crypto");
+const sendEmail = require("../utils/agent-email");
 
 // ✅ Get all agents
 exports.getAllAgents = async (req, res) => {
   try {
-    const agents = await Agent.find().sort({ createdAt: -1 });
-    response.ok(res, "Agents fetched successfully", agents);
+    const agents = await Agent.find()
+      .populate(
+        "user",
+        "firstName lastName email role phone address profileImagePath emailVerifiedAt"
+      )
+      .sort({ createdAt: -1 });
+
+    // ✅ Add verification status for each agent
+    const formattedAgents = agents.map((agent) => ({
+      ...agent.toObject(),
+      isVerified: !!agent.user?.emailVerifiedAt, // ✅ true if verified
+    }));
+
+    response.ok(res, "Agents fetched successfully", formattedAgents);
   } catch (error) {
     console.error("Error fetching agents:", error);
     response.serverError(res, "Failed to fetch agents");
@@ -35,58 +47,73 @@ exports.createAgent = async (req, res) => {
       return response.unauthorized(res, "Only Admins can add agents");
 
     const {
-      name,
-      role,
-      age,
-      city,
-      state,
-      country,
-      postCode,
-      phone,
+      firstName,
+      lastName,
       email,
+      phone,
       agency,
       agentLicense,
       taxNumber,
       serviceAreas,
       bio,
-      totalListings,
-      propertiesSold,
-      propertiesRented,
+      experience,
       facebook,
       twitter,
       instagram,
+      linkedin,
+      age,
+      // totalListings,
+      // propertiesSold,
+      // propertiesRented,
     } = req.body;
 
+    // ✅ Build address object (handle both flat and nested keys)
+    let address = {};
+    if (req.body.address) {
+      try {
+        address = JSON.parse(req.body.address); // ✅ Parse JSON string from frontend
+      } catch {
+        address = {
+          street: "",
+          city: "",
+          state: "",
+          country: "",
+          zipCode: "",
+        };
+      }
+    }
+    // console.log("Received address:", address);
+
+    // handle image upload path
     const profileImage = req.file ? `/images/${req.file.filename}` : null;
 
     // ✅ Step 1: Check if a user already exists
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return response.conflict(res, "User already exists with this email");
+    if (existingUser) {
+      return response.conflict(res, "User already exists.");
+    }
+
+    // console.log("Creating user with data:", { firstName, email, phone });
 
     // ✅ Step 2: Create temporary user account (unverified)
     const tempPassword = Math.random().toString(36).slice(-8);
     const user = await User.create({
-      firstName: name,
-      lastName: "",
+      firstName,
+      lastName,
       email,
+      phone,
+      address,
       password: tempPassword,
       role: "Agent",
-      emailVerifiedAt: null,
+      // emailVerifiedAt: null,
     });
 
     // ✅ Step 3: Create agent profile
-    const agentData = {
+    const agent = await Agent.create({
       user: user._id,
-      name,
-      role: role || "Agent",
+      firstName,
+      lastName,
       age,
-      city,
-      state,
-      country,
-      postCode,
-      phone,
-      email,
       agency,
       agentLicense,
       taxNumber,
@@ -99,14 +126,13 @@ exports.createAgent = async (req, res) => {
               .filter(Boolean)
         : [],
       bio,
-      totalListings: totalListings ? Number(totalListings) : 0,
-      propertiesSold: propertiesSold ? Number(propertiesSold) : 0,
-      propertiesRented: propertiesRented ? Number(propertiesRented) : 0,
-      socialLinks: { facebook, twitter, instagram },
+      experience,
+      // totalListings: totalListings ? Number(totalListings) : 0,
+      // propertiesSold: propertiesSold ? Number(propertiesSold) : 0,
+      // propertiesRented: propertiesRented ? Number(propertiesRented) : 0,
+      socialLinks: { facebook, twitter, instagram, linkedin },
       profileImage,
-    };
-
-    const agent = await Agent.create(agentData);
+    });
 
     // ✅ Step 4: Encrypt token
     const token = crypto.encrypt({ email: user.email });
@@ -115,13 +141,13 @@ exports.createAgent = async (req, res) => {
     const verifyUrl = `${process.env.FRONTEND_URL}/verify/email?token=${token}`;
 
     console.log("verifyUrl", verifyUrl);
-    
+
     await sendEmail(
       user.email,
       "Welcome to Real Estate App - Verify Your Account",
-      "agent-welcome", // 👈 this should match the .ejs filename
+      "agent-welcome", // this should match the .ejs filename
       {
-        name,
+        name: user.firstName,
         email: user.email,
         agentId: agent._id,
         verifyUrl,
@@ -138,11 +164,22 @@ exports.createAgent = async (req, res) => {
 
 exports.getAgentById = async (req, res) => {
   try {
-    const agent = await Agent.findById(req.params.id).populate(
-      "activeListings"
-    );
+    const agent = await Agent.findById(req.params.id)
+      .populate(
+        "user",
+        "firstName lastName email role phone address profileImagePath emailVerifiedAt"
+      )
+      .populate("activeListings");
+
     if (!agent) return response.notFound(res, "Agent not found");
-    response.ok(res, "Agent fetched successfully", agent);
+
+    // ✅ Include verification status
+    const formattedAgent = {
+      ...agent.toObject(),
+      isVerified: !!agent.user?.emailVerifiedAt,
+    };
+
+    response.ok(res, "Agent fetched successfully", formattedAgent);
   } catch (error) {
     console.error("Error fetching agent:", error);
     response.serverError(res, "Failed to fetch agent");

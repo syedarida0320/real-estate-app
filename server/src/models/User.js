@@ -14,15 +14,16 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     phone: {
       type: String,
-      match: [/^\d{10,15}$/, "Phone number must be 10–15 digits"],
+      // match: [/^\d{10,15}$/, "Phone number must be 10–15 digits"],
     },
     address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      country: { type: String },
+      zipCode: { type: String },
     },
+
     role: { type: String, enum: ["User", "Agent", "Admin"], default: "User" },
     profileImagePath: { type: String, default: "" },
     dateOfBirth: Date,
