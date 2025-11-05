@@ -10,6 +10,19 @@ const propertySchema = new mongoose.Schema(
       enum: ["Apartment", "Hotel", "House", "Commercial", "Garages", "Lots"],
       required: true,
     },
+    status:{
+      type: String,
+      enum:["available", "sold", "rented"],
+      default: "available",
+    },
+
+    availabilityType: {
+      type: String,
+      enum: ["for rent", "for sale", "sold"],
+      required: true,
+      default: "for sale",
+    },
+    
     location: locationSchema,
     price: {
       amount: { type: Number, required: true }, 

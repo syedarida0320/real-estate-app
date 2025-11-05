@@ -61,7 +61,6 @@ const handleClearFilters = () => {
 
     setProperties(data.properties || []);
     setTotalPages(data.totalPages || 1);
-    // setCurrentPage(data.currentPage || 1);
   } catch (error) {
     console.error("Error fetching properties", error);
   }

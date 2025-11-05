@@ -19,7 +19,7 @@ exports.getAllProperties = async (req, res) => {
     const { status, type, country, state, search } = req.query;
 
     if (status && status !== "any") {
-      filter.status = status;
+      filter.$or = [{ status: status }, { availabilityType: status }];
     }
 
     if (type && type !== "any") {
@@ -103,9 +103,10 @@ exports.createProperty = async (req, res) => {
       );
     }
 
-    const { price, location, facilities, ...rest } = req.body;
+    const { price, location, facilities, availabilityType, ...rest } = req.body;
     const propertyData = {
       ...rest,
+      availabilityType,
       price: price ? JSON.parse(price) : {},
       location: location ? JSON.parse(location) : {},
       facilities: facilities ? JSON.parse(facilities) : {},
@@ -132,9 +133,10 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     // Parse nested objects
-    const { price, location, facilities, ...rest } = req.body;
+    const { price, location, facilities, availabilityType, ...rest } = req.body;
     const updateData = {
       ...rest,
+      availabilityType,
       price: price ? JSON.parse(price) : undefined,
       location: location ? JSON.parse(location) : undefined,
       facilities: facilities ? JSON.parse(facilities) : undefined,
@@ -220,7 +222,7 @@ exports.getProfileImage = async (req, res) => {
 // Get all unique countries from properties
 exports.getUniqueCountries = async (req, res) => {
   try {
-     const user = req.user;
+    const user = req.user;
     let filter = { "location.country": { $ne: null } };
 
     // If user is Agent → only get their own property countries

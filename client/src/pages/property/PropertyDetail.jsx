@@ -303,8 +303,11 @@ const PropertyDetail = () => {
                     {agent.role || "Agent"}
                   </p>
                   <p className="text-gray-500 text-[14px]">
-                    {agent.address || "No location"}
+                    {agent.address
+                      ? Object.values(agent.address).filter(Boolean)
+                      : "No location"}
                   </p>
+
                   <p className="text-black text-[14px]">
                     {agentPropertiesCount}{" "}
                     {agentPropertiesCount === 1 ? "Property" : "Properties"}

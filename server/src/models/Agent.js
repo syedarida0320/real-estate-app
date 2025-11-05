@@ -21,12 +21,7 @@ const agentSchema = new mongoose.Schema(
     taxNumber: { type: String },
     serviceAreas: [{ type: String }],
 
-    // Status & Stats
-    // totalListings: { type: Number, default: 0 },
-    // propertiesSold: { type: Number, default: 0 },
-    // propertiesRented: { type: Number, default: 0 },
-
-    // Profile Details
+     // Profile Details
     bio: { type: String },
     experience: { type: Number },
     rating: { type: Number, default: 0 },

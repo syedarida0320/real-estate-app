@@ -3,7 +3,6 @@ import axios from "@/utils/axios";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import {
   MapContainer,
   TileLayer,
@@ -47,6 +46,7 @@ const AddEditProperty = () => {
   const [formData, setFormData] = useState({
     title: "",
     type: "",
+    availabilityType: "",
     mainImage: "",
     galleryImages: [],
     priceAmount: "",
@@ -299,6 +299,7 @@ const AddEditProperty = () => {
       const data = new FormData();
       data.append("title", formData.title);
       data.append("type", formData.type);
+      data.append("availabilityType", formData.availabilityType);
       data.append("description", formData.description);
 
       data.append(
@@ -492,7 +493,7 @@ const AddEditProperty = () => {
               </div>
 
               {/* Title & Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="flex text-sm font-medium mb-1">
                     Title
@@ -509,6 +510,25 @@ const AddEditProperty = () => {
                     className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="flex text-sm font-medium mb-1">
+                    Availability Type{" "}
+                    <Asterisk className="text-red-500 size-3" />
+                  </label>
+                  <select
+                    name="availabilityType"
+                    value={formData.availabilityType}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-[2px] h-10 px-3"
+                    required
+                  >
+                    <option value="">Select Availability</option>
+                    <option value="for rent">For Rent</option>
+                    <option value="for sale">For Sale</option>
+                    <option value="sold">Sold</option>
+                  </select>
                 </div>
                 <div>
                   <label className="flex text-sm font-medium mb-1">

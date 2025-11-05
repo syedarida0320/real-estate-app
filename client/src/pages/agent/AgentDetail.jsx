@@ -2,11 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
 import axios from "@/utils/axios";
-import {  MapPin, ChevronLeft } from "lucide-react";
+import { MapPin,BedDouble, MoveDiagonal, ChevronLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 import agentBg from "@/assets/agent-bg.png";
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
+
+const getImageUrl = (imgPath) => {
+  if (!imgPath) return "/placeholder.png";
+  if (typeof imgPath !== "string") return "/placeholder.png";
+  const baseHost = axios.defaults.baseURL.replace("/api", "");
+  return imgPath.startsWith("http")
+    ? imgPath
+    : `${baseHost}/${imgPath.replace(/\\/g, "/")}`;
+};
 
 const AgentDetail = () => {
   const { id } = useParams();
@@ -171,61 +180,106 @@ const AgentDetail = () => {
                 <Card className="p-5 text-center">
                   <p className="text-gray-500 text-[16px]">Total Listings</p>
                   <p className="text-2xl font-bold text-blue-600">
-                    {agent.totalListings}
+                    {agent.totalListings ?? 0}
                   </p>
                 </Card>
                 <Card className="p-5 text-center">
                   <p className="text-gray-500 text-[16px]">Properties Sold</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {agent.propertiesSold}
+                  <p className="text-2xl font-bold text-blue-600">
+                    {agent.propertiesSold ?? 0}
                   </p>
                 </Card>
                 <Card className="p-5 text-center">
                   <p className="text-gray-500 text-[16px]">Properties Rented</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {agent.propertiesRented}
+                  <p className="text-2xl font-bold text-blue-600">
+                    {agent.propertiesRented ?? 0}
                   </p>
                 </Card>
               </div>
             </div>
-
-            {/* Active Listings */}
-            <Card className="p-5">
-              <h3 className="text-lg font-semibold mb-4">Active Listings</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agent.activeListings?.length > 0 ? (
-                  agent.activeListings.map((property) => (
-                    <div
-                      key={property._id}
-                      className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-                    >
-                      <img
-                        src={property.images?.[0] || "/placeholder.jpg"}
-                        alt={property.title}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="p-3 text-sm text-gray-600">
-                        <p className="font-medium text-gray-800">
-                          {property.title}
-                        </p>
-                        <p className="flex items-center gap-2 text-gray-500">
-                          <MapPin size={13} /> {property.location}
-                        </p>
-                        <p className="text-blue-600 font-semibold mt-1">
-                          ${property.price?.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-sm">
-                    No active listings yet.
-                  </p>
-                )}
-              </div>
-            </Card>
           </div>
         </div>
+
+        {/* Active Listings */}
+        <Card className="p-5 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-0 px-4 text-gray-800">
+            Active Listings ({agent.activeListings?.length || 0})
+          </h3>
+
+          {agent.activeListings?.length > 0 ? (
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+              {agent.activeListings.map((property) => {
+                const mainImg =
+                  property.mainImage ||
+                  (Array.isArray(property.galleryImages) &&
+                    property.galleryImages[0]) ||
+                  (property.images && property.images[0]) ||
+                  null;
+
+                const imageUrl = getImageUrl(mainImg);
+
+                return (
+                  <div key={property._id} className="group relative">
+                    <Link to={`/properties/${property._id}`} className="group">
+                      <Card className="rounded-2xl h-40 shadow hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row bg-white p-0">
+                        <div className="w-full md:w-[45%] h-56 md:h-40 flex-shrink-0">
+                          <img
+                            src={imageUrl}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        <CardContent className="w-full md:w-[55%] py-4 px-8 relative flex flex-col justify-between">
+                          <div className="absolute top-2 left-3 bg-[#DADEFA] text-blue-600 font-semibold text-[12px] rounded px-3 py-1 shadow">
+                            {property.price?.currency || "USD"}{" "}
+                            {property.price?.amount ?? ""}
+                          </div>
+
+                          <div className="pl-0">
+                            <h3 className="mt-6 md:mt-5 text-[15px] leading-6 font-semibold text-gray-800 mb-0.5">
+                              {property.title}
+                            </h3>
+
+                            <div className="flex items-center text-sm text-gray-500 mb-1.5">
+                              <MapPin className="w-4 h-4 mr-1 text-blue-500" />
+                              <span>
+                                {property.location?.city
+                                  ? `${property.location.city}, ${
+                                      property.location?.country || ""
+                                    }`
+                                  : "Unknown location"}
+                              </span>
+                            </div>
+
+                            <div className="flex space-x-4 text-sm text-gray-600">
+                              <div className="flex items-center text-[12px] gap-2">
+                               <BedDouble className="w-4 h-4" />
+                                {property.facilities?.beds ?? 0} Beds
+                              </div>
+                              <div className="flex items-center text-[12px] gap-1">
+                                <MoveDiagonal className="w-4 h-4" />
+                                {property.facilities?.area ?? "-"}M
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-1 text-xs text-gray-400">
+                            Click to view details
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-4">
+              No active listings yet.
+            </p>
+          )}
+        </Card>
       </div>
     </MainLayout>
   );

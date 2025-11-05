@@ -1,9 +1,17 @@
+const fs = require("fs");
+const path = require("path");
 const Agent = require("../models/Agent");
 const User = require("../models/User");
 const Property = require("../models/Property");
 const { response } = require("../utils/response");
 const crypto = require("../utils/crypto");
 const sendEmail = require("../utils/agent-email");
+
+const uploadDir = path.join(__dirname, "..", "public", "images");
+// make sure upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // ✅ Get all agents
 exports.getAllAgents = async (req, res) => {
@@ -15,13 +23,22 @@ exports.getAllAgents = async (req, res) => {
       )
       .sort({ createdAt: -1 });
 
-    // ✅ Add verification status for each agent
-    const formattedAgents = agents.map((agent) => ({
-      ...agent.toObject(),
-      isVerified: !!agent.user?.emailVerifiedAt, // ✅ true if verified
-    }));
+    // ✅ Add total property counts for each agent
+    const agentsWithCounts = await Promise.all(
+      agents.map(async (agent) => {
+        const totalListings = await Property.countDocuments({
+          createdBy: agent.user._id,
+        });
 
-    response.ok(res, "Agents fetched successfully", formattedAgents);
+        return {
+          ...agent.toObject(),
+          isVerified: !!agent.user?.emailVerifiedAt,
+          totalListings,
+        };
+      })
+    );
+
+    response.ok(res, "Agents fetched successfully", agentsWithCounts);
   } catch (error) {
     console.error("Error fetching agents:", error);
     response.serverError(res, "Failed to fetch agents");
@@ -41,6 +58,7 @@ exports.getAgentProperties = async (req, res) => {
 };
 
 exports.createAgent = async (req, res) => {
+  let uploadedFilePath = null; // ✅ store the actual path here for cleanup if needed
   try {
     // ✅ Only Admin can add agents
     if (req.user.role !== "Admin")
@@ -62,9 +80,6 @@ exports.createAgent = async (req, res) => {
       instagram,
       linkedin,
       age,
-      // totalListings,
-      // propertiesSold,
-      // propertiesRented,
     } = req.body;
 
     // ✅ Build address object (handle both flat and nested keys)
@@ -84,12 +99,26 @@ exports.createAgent = async (req, res) => {
     }
     // console.log("Received address:", address);
 
-    // handle image upload path
-    const profileImage = req.file ? `/images/${req.file.filename}` : null;
+    // ✅ handle profile image manually
+    let profileImage = null;
+    if (req.file) {
+      const uniqueName = `${Date.now()}-${req.file.originalname}`;
+      const imagePath = path.join(uploadDir, uniqueName);
+
+      // write the buffer to disk
+      fs.writeFileSync(imagePath, req.file.buffer); // write file to disk
+      uploadedFilePath = imagePath; // ✅ store the path for cleanup if needed
+      // set relative path for frontend access
+      profileImage = `/images/${uniqueName}`;
+    }
 
     // ✅ Step 1: Check if a user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      // ✅ Delete uploaded image if user already exists
+      if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+        fs.unlinkSync(uploadedFilePath);
+      }
       return response.conflict(res, "User already exists.");
     }
 
@@ -127,9 +156,6 @@ exports.createAgent = async (req, res) => {
         : [],
       bio,
       experience,
-      // totalListings: totalListings ? Number(totalListings) : 0,
-      // propertiesSold: propertiesSold ? Number(propertiesSold) : 0,
-      // propertiesRented: propertiesRented ? Number(propertiesRented) : 0,
       socialLinks: { facebook, twitter, instagram, linkedin },
       profileImage,
     });
@@ -158,25 +184,63 @@ exports.createAgent = async (req, res) => {
     response.created(res, "Agent created and verification email sent.", agent);
   } catch (error) {
     console.error("Error adding agent:", error);
+
+    // ✅ Delete uploaded image if something failed
+    if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+      try {
+        fs.unlinkSync(uploadedFilePath);
+        console.log(
+          "🗑️ Deleted uploaded image due to error:",
+          uploadedFilePath
+        );
+      } catch (err) {
+        console.error("❌ Failed to delete image:", err);
+      }
+    }
+
     response.serverError(res, "Failed to add agent");
   }
 };
 
 exports.getAgentById = async (req, res) => {
   try {
-    const agent = await Agent.findById(req.params.id)
-      .populate(
-        "user",
-        "firstName lastName email role phone address profileImagePath emailVerifiedAt"
-      )
-      .populate("activeListings");
+    const agent = await Agent.findById(req.params.id).populate(
+      "user",
+      "firstName lastName email role phone address profileImagePath emailVerifiedAt"
+    );
+    // .populate("activeListings");
 
     if (!agent) return response.notFound(res, "Agent not found");
+
+    // Dynamic properties counts
+
+    // ✅ Fetch all active properties added by this agent
+    const activeListings = await Property.find({
+      createdBy: agent.user._id,
+      status: { $in: ["active", "available"] }, // adjust if your schema uses 'listed', etc.
+    }).sort({ createdAt: -1 });
+
+    const totalListings = await Property.countDocuments({
+      createdBy: agent.user._id,
+    });
+    const propertiesSold = await Property.countDocuments({
+      createdBy: agent.user._id,
+      status: "sold",
+    });
+
+    const propertiesRented = await Property.countDocuments({
+      createdBy: agent.user._id,
+      status: "rented",
+    });
 
     // ✅ Include verification status
     const formattedAgent = {
       ...agent.toObject(),
       isVerified: !!agent.user?.emailVerifiedAt,
+      totalListings,
+      propertiesSold,
+      propertiesRented,
+      activeListings,
     };
 
     response.ok(res, "Agent fetched successfully", formattedAgent);

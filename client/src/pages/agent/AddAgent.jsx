@@ -32,9 +32,6 @@ const AddAgent = () => {
     twitter: "",
     instagram: "",
     linkedin: "",
-    totalListings: "",
-    propertiesSold: "",
-    propertiesRented: "",
     profileImage: null,
   });
 
@@ -53,9 +50,9 @@ const AddAgent = () => {
     // Prevent negative values for numeric fields
     const numericFields = [
       "age",
-      "totalListings",
-      "propertiesSold",
-      "propertiesRented",
+      // "totalListings",
+      // "propertiesSold",
+      // "propertiesRented",
     ];
     if (numericFields.includes(name)) {
       const numericValue = Math.max(0, Number(value)); // ensures no negative value
@@ -83,7 +80,7 @@ const AddAgent = () => {
       }
 
       // console.log("Submitting agent:", [...form.entries()]);
-      
+
       await axios.post("/agents", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -311,51 +308,6 @@ const AddAgent = () => {
                 placeholder="Service Areas"
                 className="border p-2 w-full rounded"
                 value={formData.serviceAreas}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Total Listings
-              </label>
-              <input
-                type="number"
-                name="totalListings"
-                placeholder="Total Listings"
-                min="0"
-                className="border p-2 w-full rounded"
-                value={formData.totalListings}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Properties Sold
-              </label>
-              <input
-                type="number"
-                name="propertiesSold"
-                placeholder="Properties Sold"
-                min="0"
-                className="border p-2 w-full rounded"
-                value={formData.propertiesSold}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Properties Rented
-              </label>
-              <input
-                type="number"
-                name="propertiesRented"
-                placeholder="Properties Rented"
-                min="0"
-                className="border p-2 w-full rounded"
-                value={formData.propertiesRented}
                 onChange={handleChange}
               />
             </div>

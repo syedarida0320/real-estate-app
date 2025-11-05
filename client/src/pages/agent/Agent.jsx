@@ -91,14 +91,16 @@ const Agent = () => {
                     <div className="flex flex-col space-x-20">
                       <p className="flex items-center gap-2">
                         <MapPin size={15} className="text-gray-500" />
-                        {agent.user?.address?.country || "No Location"}
+                        {agent.user?.address
+                      ? Object.values(agent.user?.address).filter(Boolean)
+                      : "No location"}
                       </p>
                       <p className="flex items-center gap-2">
                         <IconBuildingSkyscraper
                           size={15}
                           className="text-gray-500"
                         />
-                        {agent.properties || 0} Properties
+                        {agent.totalListings || 0} Properties
                       </p>
                     </div>
                   </div>
