@@ -135,7 +135,7 @@ const AddEditProperty = () => {
     ) : null;
   }
 
-  // 🧭 Component to control map view programmatically
+  // Component to control map view programmatically
   function MapUpdater({ lat, lng }) {
     const map = useMap();
     useEffect(() => {
@@ -185,7 +185,7 @@ const AddEditProperty = () => {
     setFormData((prev) => ({ ...prev, mainImage: previewUrl }));
   };
 
-  // --- 📤 Handle Gallery Images Upload (Temporary Preview Only)
+  //  Handle Gallery Images Upload (Temporary Preview Only)
   const handleGalleryUpload = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
@@ -284,7 +284,6 @@ const AddEditProperty = () => {
 
   // 🧭 Auto-update city/country when lat/lng change manually
   useEffect(() => {
-    // const { lat, lng } = formData.mapLocation;
     if (!debouncedLat || !debouncedLng) return;
 
     fetchAndSetLocationDetails(debouncedLat, debouncedLng);
@@ -525,8 +524,8 @@ const AddEditProperty = () => {
                     required
                   >
                     <option value="">Select Availability</option>
-                    <option value="for rent">For Rent</option>
-                    <option value="for sale">For Sale</option>
+                    <option value="for_rent">For Rent</option>
+                    <option value="for_sale">For Sale</option>
                     <option value="sold">Sold</option>
                   </select>
                 </div>
@@ -571,9 +570,14 @@ const AddEditProperty = () => {
                     <input
                       name="priceAmount"
                       type="number"
-                      placeholder="Amount"
+                      placeholder="Enter Amount"
                       value={formData.priceAmount}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          priceAmount: e.target.value,
+                        })
+                      }
                       min="0"
                       step="any"
                       className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
@@ -587,7 +591,12 @@ const AddEditProperty = () => {
                     <select
                       name="priceCurrency"
                       value={formData.priceCurrency}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          priceCurrency: e.target.value,
+                        })
+                      }
                       className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
                     >
                       <option value="USD">USD ($)</option>
@@ -595,21 +604,26 @@ const AddEditProperty = () => {
                       <option value="EUR">EUR (€)</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Duration
-                    </label>
-                    <select
-                      name="priceDuration"
-                      value={formData.priceDuration}
-                      onChange={handleChange}
-                      className="border border-gray-300 rounded-[2px] h-10 px-3 w-full"
-                    >
-                      <option value="Per Day">Per Day</option>
-                      <option value="Per Month">Per Month</option>
-                      <option value="Per Year">Per Year</option>
-                    </select>
-                  </div>
+                  {/* ✅ Show duration only when for_rent */}
+                  {formData.availabilityType === "for_rent" && (
+                    <div>
+                      <label className="text-sm font-medium">Duration</label>
+                      <select
+                        value={formData.priceDuration}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            priceDuration: e.target.value,
+                          })
+                        }
+                        className="w-full border p-2 rounded"
+                      >
+                        <option value="Per Day">Per Day</option>
+                        <option value="Per Month">Per Month</option>
+                        <option value="Per Year">Per Year</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 

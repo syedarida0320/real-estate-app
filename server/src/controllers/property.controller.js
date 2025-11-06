@@ -92,9 +92,12 @@ exports.getPropertyById = async (req, res) => {
 };
 
 exports.createProperty = async (req, res) => {
+
+  
   try {
     const user = req.user; // comes from auth middleware
-
+    
+   
     // Only admin or agent can add property
     if (user.role !== "Admin" && user.role !== "Agent") {
       return response.forbidden(
@@ -102,7 +105,7 @@ exports.createProperty = async (req, res) => {
         "Access denied: Only admin or agent can add properties"
       );
     }
-
+    
     const { price, location, facilities, availabilityType, ...rest } = req.body;
     const propertyData = {
       ...rest,
@@ -113,24 +116,65 @@ exports.createProperty = async (req, res) => {
       userId: user._id,
       createdBy: user._id,
     };
+    
+    // Ensure correct price behavior
+     if (availabilityType === "for_sale") {
+       if (propertyData.price) propertyData.price.duration = null;
+     } else if (
+       availabilityType === "for_rent" &&
+       !propertyData.price.duration
+     ) {
+       propertyData.price.duration = "Per Day"; // or default you prefer
+     }
+    // ✅ Write uploaded images manually to disk
+    const saveFile = (file) => {
+      const uniqueName =
+        Date.now() +
+        "-" +
+        Math.round(Math.random() * 1e9) +
+        "-" +
+        file.originalname;
+      const filePath = path.join("uploads", uniqueName);
+      const fullPath = path.join(__dirname, "../", filePath);
 
-    // Handle uploaded files
-    propertyData.mainImage = req.files?.mainImage?.[0]
-      ? `uploads/${req.files.mainImage[0].filename}`
-      : undefined;
+      fs.writeFileSync(fullPath, file.buffer);
+      return filePath;
+    };
 
-    propertyData.galleryImages = req.files?.galleryImages
-      ? req.files.galleryImages.map((file) => `uploads/${file.filename}`)
-      : [];
+    if (req.files?.mainImage?.[0]) {
+      propertyData.mainImage = saveFile(req.files.mainImage[0]);
+    }
+
+    if (req.files?.galleryImages) {
+      propertyData.galleryImages = req.files.galleryImages.map((file) =>
+        saveFile(file)
+      );
+    }
 
     const property = await Property.create(propertyData);
     response.created(res, "Property created successfully", property);
   } catch (error) {
     console.error("Error creating property:", error);
+    // ✅ Delete files if property creation failed
+    if (req.files) {
+      const deleteFile = (file) => {
+        const tempPath = path.join(__dirname, "../uploads", file.originalname);
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+      };
+      req.files.mainImage?.forEach(deleteFile);
+      req.files.galleryImages?.forEach(deleteFile);
+    }
     response.serverError(res, "Failed to create property");
   }
 };
 exports.updateProperty = async (req, res) => {
+  // Ensure correct price behavior
+  if (availabilityType === "for_sale") {
+    if (propertyData.price) propertyData.price.duration = null;
+  } else if (availabilityType === "for_rent" && !propertyData.price.duration) {
+    propertyData.price.duration = "Per Day"; // or default you prefer
+  }
+
   try {
     // Parse nested objects
     const { price, location, facilities, availabilityType, ...rest } = req.body;

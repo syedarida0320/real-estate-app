@@ -1,81 +1,79 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import Pagination from "@/components/Pagination";
-import { MapPin, BedDouble, MoveDiagonal, Plus, Edit } from "lucide-react";
+import {  Plus } from "lucide-react";
 import PropertyFilters from "@/components/PropertyFilters";
 import MainLayout from "@/layouts/MainLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import PropertyCard from "@/components/PropertyCard";
 
 const Property = () => {
   const [properties, setProperties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages]=useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(10); // show 10 cards per page
-  const defaultFilters={
+  const defaultFilters = {
     status: "any",
     type: "any",
     country: "all",
     state: "all",
     search: "",
-  }
+  };
   const [filters, setFilters] = useState(defaultFilters);
   // Function to reset filters
-const handleClearFilters = () => {
-  setFilters(defaultFilters);
-  fetchProperties(1); // Optional: re-fetch all properties after clearing
-};
+  const handleClearFilters = () => {
+    setFilters(defaultFilters);
+    fetchProperties(1); // Optional: re-fetch all properties after clearing
+  };
 
   const user = useAuth();
   const navigate = useNavigate();
 
   // Fetch all properties
   const fetchProperties = async (page = 1) => {
-  try {
-    const params = new URLSearchParams({
-      page,
-      limit: itemsPerPage,
-    });
+    try {
+      const params = new URLSearchParams({
+        page,
+        limit: itemsPerPage,
+      });
 
-    if (filters.status && filters.status !== "any") {
-      params.append("status", filters.status);
+      if (filters.status && filters.status !== "any") {
+        params.append("status", filters.status);
+      }
+      if (filters.type && filters.type !== "any") {
+        params.append("type", filters.type);
+      }
+      if (filters.country && filters.country !== "all") {
+        params.append("country", filters.country);
+      }
+      if (filters.state && filters.state !== "all") {
+        params.append("state", filters.state);
+      }
+      if (filters.search && filters.search.trim() !== "") {
+        params.append("search", filters.search.trim());
+      }
+
+      const res = await axios.get(`/properties?${params.toString()}`);
+      const data = res?.data?.data || res?.data || {};
+
+      setProperties(data.properties || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (error) {
+      console.error("Error fetching properties", error);
     }
-    if (filters.type && filters.type !== "any") {
-      params.append("type", filters.type);
-    }
-    if (filters.country && filters.country !== "all") {
-      params.append("country", filters.country);
-    }
-    if (filters.state && filters.state !== "all") {
-      params.append("state", filters.state);
-    }
-    if (filters.search && filters.search.trim() !== "") {
-      params.append("search", filters.search.trim());
-    }
+  };
 
-    const res = await axios.get(`/properties?${params.toString()}`);
-    const data = res?.data?.data || res?.data || {};
+  // when either filters or currentPage changes, fetch data
+  useEffect(() => {
+    fetchProperties(currentPage);
+  }, [currentPage, filters]);
 
-    setProperties(data.properties || []);
-    setTotalPages(data.totalPages || 1);
-  } catch (error) {
-    console.error("Error fetching properties", error);
-  }
-};
-
-// when either filters or currentPage changes, fetch data
-useEffect(() => {
-  fetchProperties(currentPage);
-}, [currentPage, filters]);
-
-
-const handleFiltersChange=(newFilters) => {
-  setFilters(newFilters);
-  setCurrentPage(1);
-}
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
 
   // Navigate to add property page
   const handleAddProperty = () => {
@@ -129,103 +127,33 @@ const handleFiltersChange=(newFilters) => {
 
         {/* Filters */}
         <div className="mb-8">
-          <PropertyFilters 
-          filters={filters}
-           onFiltersChange={handleFiltersChange}
-           onClearFilters={handleClearFilters}
-           />
+          <PropertyFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onClearFilters={handleClearFilters}
+          />
         </div>
 
         {/* Property Cards */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
-          {properties.map((property) => {
-            const id = property._id || property.id;
-
-            const mainImg =
-              property.mainImage ||
-              (Array.isArray(property.galleryImages) &&
-                property.galleryImages[0]) ||
-              null;
-            const imageUrl = getImageUrl(mainImg);
-
-            return (
-              <div key={id} className="group relative">
-                <Link to={`/properties/${id}`} className="group">
-                  <Card className="rounded-2xl shadow hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row bg-white p-0">
-                    <div className="w-full md:w-1/2 h-56 md:h-40 flex-shrink-0">
-                      <img
-                        src={imageUrl}
-                        alt={property.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <CardContent className="w-full md:w-1/2 py-4 px-1 relative flex flex-col justify-between">
-                      <Badge className="absolute top-1 bg-[#DADEFA] text-blue-600 font-semibold text-[12px] rounded px-3 py-1 shadow">
-                        {property.price?.currency || "USD"}
-                        {property.price?.amount ?? ""}
-                      </Badge>
-
-                      <div className="pl-0">
-                        <h3 className="mt-6 md:mt-5 text-[15px] leading-6 font-semibold text-gray-800 mb-0.5">
-                          {property.title}
-                        </h3>
-
-                        <div className="flex items-center text-sm text-gray-500 mb-1.5">
-                          <MapPin className="w-4 h-4 mr-1 text-blue-500" />
-                          <span>
-                            {property.location?.city
-                              ? `${property.location.city}, ${
-                                  property.location?.country || ""
-                                }`
-                              : "Unknown location"}
-                          </span>
-                        </div>
-
-                        <div className="flex space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center text-[12px] gap-2">
-                            <BedDouble className="w-4 h-4" />
-                            {property.facilities?.beds ?? 0} Beds
-                          </div>
-                          <div className="flex items-center text-[12px] gap-1">
-                            <MoveDiagonal className="w-4 h-4" />
-                            {property.facilities?.area ?? "-"}M
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-1 text-xs text-gray-400">
-                        Click to view details
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-
-                {/* Edit button only visible to owner/creator or Admin */}
-                {(user?.user?.role === "Admin" ||
-                  isOwnerOfProperty(property)) && (
-                  <div className="absolute top-2 right-3">
-                    <Button
-                      size="sm"
-                      className=" text-black bg-white  border shadow-sm text-sm hover:bg-gray-300"
-                      onClick={() => handleEditProperty(property)}
-                    >
-                      <Edit className=" w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {properties.map((property) => (
+            <PropertyCard
+              key={property._id}
+              property={property}
+              user={user}
+              showEdit={true}
+              onEdit={handleEditProperty}
+            />
+          ))}
         </div>
-  {/*  Pagination Component */}
-       <div className="flex justify-end items-end mt-8 pr-4">
-         <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(page) => setCurrentPage(page)}
-        />
-       </div>
+        {/*  Pagination Component */}
+        <div className="flex justify-end items-end mt-8 pr-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        </div>
       </div>
     </MainLayout>
   );

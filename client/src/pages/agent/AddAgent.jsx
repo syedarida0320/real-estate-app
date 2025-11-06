@@ -34,6 +34,12 @@ const AddAgent = () => {
     linkedin: "",
     profileImage: null,
   });
+  const [errors, setErrors] = useState({
+    facebook: "",
+    twitter: "",
+    instagram: "",
+    linkedin: "",
+  });
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -48,12 +54,7 @@ const AddAgent = () => {
     }
 
     // Prevent negative values for numeric fields
-    const numericFields = [
-      "age",
-      // "totalListings",
-      // "propertiesSold",
-      // "propertiesRented",
-    ];
+    const numericFields = ["age"];
     if (numericFields.includes(name)) {
       const numericValue = Math.max(0, Number(value)); // ensures no negative value
       setFormData({ ...formData, [name]: numericValue });
@@ -66,8 +67,35 @@ const AddAgent = () => {
     });
   };
 
+  const isValidURL = (url) => {
+    const pattern =
+      /^(http(s)?:\/\/)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g;
+    return !url || pattern.test(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {
+      facebook: "",
+      twitter: "",
+      instagram: "",
+      linkedin: "",
+    };
+
+    const platforms = ["facebook", "twitter", "instagram", "linkedin"];
+    let hasError = false;
+    for (let p of platforms) {
+      if (!isValidURL(formData[p])) {
+        newErrors[p] = `Invalid ${p} URL format.`;
+        hasError = true;
+      }
+    }
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors(newErrors);
+
     try {
       const form = new FormData();
       for (const key in formData) {
@@ -78,7 +106,6 @@ const AddAgent = () => {
           form.append(key, formData[key]);
         }
       }
-
       // console.log("Submitting agent:", [...form.entries()]);
 
       await axios.post("/agents", form, {
@@ -89,9 +116,25 @@ const AddAgent = () => {
     } catch (error) {
       console.error("Error adding agent:", error);
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        const msg = error.response.data.message;
+
+        if (
+          msg.includes("Invalid file type") ||
+          msg.includes("Image too large")
+        ) {
+          toast.error(msg); // show exact Multer error
+          return;
+        }
+
+        const backendErrors = { ...errors };
+        platforms.forEach((p) => {
+          if (msg.toLowerCase().includes(p)) {
+            backendErrors[p] = msg;
+          }
+        });
+        setErrors(backendErrors);
       } else {
-        toast.error("Failed to add agent. Please try again.");
+        toast.error("Failed to add agent.");
       }
     }
   };
@@ -140,6 +183,7 @@ const AddAgent = () => {
                 className="border p-2 rounded w-full"
                 value={formData.firstName}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -253,6 +297,7 @@ const AddAgent = () => {
                 className="border p-2 w-full rounded"
                 value={formData.email}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -341,10 +386,21 @@ const AddAgent = () => {
                     placeholder={`${
                       platform.charAt(0).toUpperCase() + platform.slice(1)
                     } URL`}
-                    className="border p-2 w-full rounded"
+                    className={`border p-2 w-full rounded ${
+                      errors[platform] ? "border-red-500" : "border-gray-300"
+                    }`}
                     value={formData[platform]}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      // Clear error instantly as user types
+                      setErrors({ ...errors, [platform]: "" });
+                    }}
                   />
+                  {errors[platform] && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors[platform]}
+                    </p>
+                  )}
                 </div>
               )
             )}

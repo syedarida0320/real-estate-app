@@ -181,7 +181,7 @@ exports.createAgent = async (req, res) => {
     );
 
     // ✅ Step 6: Send response
-    response.created(res, "Agent created and verification email sent.", agent);
+    response.created(res, "Agent added successfully", agent);
   } catch (error) {
     console.error("Error adding agent:", error);
 

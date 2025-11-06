@@ -1,6 +1,5 @@
-// models/Property.js
 const mongoose = require("mongoose");
-const locationSchema=require("./Location")
+const locationSchema = require("./Location");
 
 const propertySchema = new mongoose.Schema(
   {
@@ -10,28 +9,29 @@ const propertySchema = new mongoose.Schema(
       enum: ["Apartment", "Hotel", "House", "Commercial", "Garages", "Lots"],
       required: true,
     },
-    status:{
+    status: {
       type: String,
-      enum:["available", "sold", "rented"],
+      enum: ["available", "sold", "rented"],
       default: "available",
     },
 
     availabilityType: {
       type: String,
-      enum: ["for rent", "for sale", "sold"],
+      enum: ["for_rent", "for_sale", "sold"],
       required: true,
-      default: "for sale",
+      default: "for_sale",
     },
-    
+
     location: locationSchema,
     price: {
-      amount: { type: Number, required: true }, 
-      duration: { type: String, default: "Per Day" }, 
+      amount: { type: Number, required: true },
+      duration: { type: String, default: null },
       currency: { type: String, default: "USD" },
     },
     rating: { type: Number, default: 0 },
-    mainImage: { type: String, required: true }, 
-    galleryImages: [String], 
+    mainImage: { type: String, required: true },
+    galleryImages: [String],
+
     facilities: {
       beds: { type: Number, default: 0 },
       baths: { type: Number, default: 0 },
@@ -52,5 +52,13 @@ const propertySchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ✅ Auto-handle duration logic before saving
+propertySchema.pre("save", function (next) {
+  if (this.availabilityType === "for_sale") {
+    this.price.duration = null;
+  }
+  next();
+});
 
 module.exports = mongoose.model("Property", propertySchema);

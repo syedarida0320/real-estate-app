@@ -54,8 +54,8 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
             <SelectItem value="any" disabled>
               Any Status
             </SelectItem>
-            <SelectItem value="for sale">For Sale</SelectItem>
-            <SelectItem value="for rent">For Rent</SelectItem>
+            <SelectItem value="for_sale">For Sale</SelectItem>
+            <SelectItem value="for_rent">For Rent</SelectItem>
             <SelectItem value="sold">Sold</SelectItem>
           </SelectContent>
         </Select>
@@ -96,24 +96,6 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
             ))}
           </SelectContent>
         </Select>
-
-        {/* <Select
-          value={filters.state}
-          onValueChange={(value) => handleChange("state", value)}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="All States" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all" disabled>
-              All States
-            </SelectItem>
-            <SelectItem value="California">California</SelectItem>
-            <SelectItem value="Texas">Texas</SelectItem>
-            <SelectItem value="North Carolina">North Carolina</SelectItem>
-          </SelectContent>
-        </Select> */}
-      {/* <div className="flex justify-end mt-2"> */}
         <Button
           onClick={onClearFilters}
           size="sm"
@@ -123,8 +105,6 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
           <span>Clear Filters</span>
         </Button>
       </div>
-      {/* </div> */}
-      {/* Clear Filters Button */}
     </div>
   );
 };

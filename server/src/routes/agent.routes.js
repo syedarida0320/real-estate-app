@@ -3,15 +3,13 @@ const express = require('express');
 const router = express.Router();
 const {getAllAgents, getAgentProperties, createAgent, getAgentById} = require('../controllers/agent.controller');
 const {authMiddleware}= require ("../middlewares/auth.middleware");
-const upload=require("../middlewares/upload.middleware");
+const {upload, handleMulterError}=require("../middlewares/upload.middleware");
 
 router.use(authMiddleware);
 
 router.get('/', getAllAgents);
 router.get('/:id/properties', getAgentProperties);
-router.post("/", upload.single("profileImage"), createAgent)
+router.post("/", upload.single("profileImage"),handleMulterError, createAgent)
 router.get('/:id', getAgentById);
-//router.post('/' ,createAgent);
-//router.put('/:id', agentController.updateAgent);
 
 module.exports = router;

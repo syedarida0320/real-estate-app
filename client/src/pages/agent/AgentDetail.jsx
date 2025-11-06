@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
 import axios from "@/utils/axios";
-import { MapPin,BedDouble, MoveDiagonal, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 import agentBg from "@/assets/agent-bg.png";
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
+import PropertyCard from "@/components/PropertyCard";
 
 const getImageUrl = (imgPath) => {
   if (!imgPath) return "/placeholder.png";
@@ -207,77 +208,13 @@ const AgentDetail = () => {
           </h3>
 
           {agent.activeListings?.length > 0 ? (
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
-              {agent.activeListings.map((property) => {
-                const mainImg =
-                  property.mainImage ||
-                  (Array.isArray(property.galleryImages) &&
-                    property.galleryImages[0]) ||
-                  (property.images && property.images[0]) ||
-                  null;
-
-                const imageUrl = getImageUrl(mainImg);
-
-                return (
-                  <div key={property._id} className="group relative">
-                    <Link to={`/properties/${property._id}`} className="group">
-                      <Card className="rounded-2xl h-40 shadow hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row bg-white p-0">
-                        <div className="w-full md:w-[45%] h-56 md:h-40 flex-shrink-0">
-                          <img
-                            src={imageUrl}
-                            alt={property.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <CardContent className="w-full md:w-[55%] py-4 px-8 relative flex flex-col justify-between">
-                          <div className="absolute top-2 left-3 bg-[#DADEFA] text-blue-600 font-semibold text-[12px] rounded px-3 py-1 shadow">
-                            {property.price?.currency || "USD"}{" "}
-                            {property.price?.amount ?? ""}
-                          </div>
-
-                          <div className="pl-0">
-                            <h3 className="mt-6 md:mt-5 text-[15px] leading-6 font-semibold text-gray-800 mb-0.5">
-                              {property.title}
-                            </h3>
-
-                            <div className="flex items-center text-sm text-gray-500 mb-1.5">
-                              <MapPin className="w-4 h-4 mr-1 text-blue-500" />
-                              <span>
-                                {property.location?.city
-                                  ? `${property.location.city}, ${
-                                      property.location?.country || ""
-                                    }`
-                                  : "Unknown location"}
-                              </span>
-                            </div>
-
-                            <div className="flex space-x-4 text-sm text-gray-600">
-                              <div className="flex items-center text-[12px] gap-2">
-                               <BedDouble className="w-4 h-4" />
-                                {property.facilities?.beds ?? 0} Beds
-                              </div>
-                              <div className="flex items-center text-[12px] gap-1">
-                                <MoveDiagonal className="w-4 h-4" />
-                                {property.facilities?.area ?? "-"}M
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mt-1 text-xs text-gray-400">
-                            Click to view details
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  </div>
-                );
-              })}
+            <div className="max-w-7xl mx-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+              {agent.activeListings.map((property) => (
+                <PropertyCard key={property._id} property={property} />
+              ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm text-center py-4">
-              No active listings yet.
-            </p>
+            <p className="text-gray-500 mt-4 px-4">No active listings.</p>
           )}
         </Card>
       </div>
