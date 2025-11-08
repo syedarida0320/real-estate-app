@@ -40,7 +40,7 @@ const Agent = () => {
           {/* Only Admin can see Add Agent button */}
           {user?.role === "Admin" && (
             <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
               onClick={() => navigate("/add-agent")}
             >
               <Plus className="w-4 h-4 text-white" /> Add Agent

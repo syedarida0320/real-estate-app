@@ -64,7 +64,9 @@ const PropertyCard = ({
                 <MapPin className="w-4 h-4 mr-1 text-blue-500" />
                 <span>
                   {property.location?.city
-                    ? `${property.location.city}, ${property.location?.country || ""}`
+                    ? `${property.location.city}, ${
+                        property.location?.country || ""
+                      }`
                     : "Unknown location"}
                 </span>
               </div>
@@ -93,8 +95,11 @@ const PropertyCard = ({
         <div className="absolute top-2 right-3">
           <Button
             size="sm"
-            className=" text-black bg-white  border shadow-sm text-sm hover:bg-gray-300"
-            onClick={() => onEdit(property)}
+            className="cursor-pointer text-black bg-white border shadow-sm text-sm hover:bg-gray-300"
+            onClick={(e) => {
+              e.preventDefault(); // prevent link navigation under it
+              onEdit(property);
+            }}
           >
             <Edit className=" w-3 h-3" />
           </Button>

@@ -353,7 +353,7 @@ const PropertyDetail = () => {
                     Map not available
                   </div>
                 )}
-                <Button className="w-full">Book Now</Button>
+                <Button className="cursor-pointer w-full">Book Now</Button>
               </div>
             </aside>
           </div>

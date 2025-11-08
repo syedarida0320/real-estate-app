@@ -92,12 +92,9 @@ exports.getPropertyById = async (req, res) => {
 };
 
 exports.createProperty = async (req, res) => {
-
-  
   try {
     const user = req.user; // comes from auth middleware
-    
-   
+
     // Only admin or agent can add property
     if (user.role !== "Admin" && user.role !== "Agent") {
       return response.forbidden(
@@ -105,7 +102,7 @@ exports.createProperty = async (req, res) => {
         "Access denied: Only admin or agent can add properties"
       );
     }
-    
+
     const { price, location, facilities, availabilityType, ...rest } = req.body;
     const propertyData = {
       ...rest,
@@ -116,16 +113,16 @@ exports.createProperty = async (req, res) => {
       userId: user._id,
       createdBy: user._id,
     };
-    
+
     // Ensure correct price behavior
-     if (availabilityType === "for_sale") {
-       if (propertyData.price) propertyData.price.duration = null;
-     } else if (
-       availabilityType === "for_rent" &&
-       !propertyData.price.duration
-     ) {
-       propertyData.price.duration = "Per Day"; // or default you prefer
-     }
+    if (availabilityType === "for_sale") {
+      if (propertyData.price) propertyData.price.duration = null;
+    } else if (
+      availabilityType === "for_rent" &&
+      !propertyData.price.duration
+    ) {
+      propertyData.price.duration = "Per Day"; // or default you prefer
+    }
     // ✅ Write uploaded images manually to disk
     const saveFile = (file) => {
       const uniqueName =
@@ -167,14 +164,8 @@ exports.createProperty = async (req, res) => {
     response.serverError(res, "Failed to create property");
   }
 };
-exports.updateProperty = async (req, res) => {
-  // Ensure correct price behavior
-  if (availabilityType === "for_sale") {
-    if (propertyData.price) propertyData.price.duration = null;
-  } else if (availabilityType === "for_rent" && !propertyData.price.duration) {
-    propertyData.price.duration = "Per Day"; // or default you prefer
-  }
 
+exports.updateProperty = async (req, res) => {
   try {
     // Parse nested objects
     const { price, location, facilities, availabilityType, ...rest } = req.body;
@@ -185,6 +176,17 @@ exports.updateProperty = async (req, res) => {
       location: location ? JSON.parse(location) : undefined,
       facilities: facilities ? JSON.parse(facilities) : undefined,
     };
+
+    // ✅ Corrected propertyData → updateData
+    if (availabilityType === "for_sale") {
+      if (updateData.price) updateData.price.duration = null;
+    } else if (
+      availabilityType === "for_rent" &&
+      (!updateData.price || !updateData.price.duration)
+    ) {
+      if (!updateData.price) updateData.price = {};
+      updateData.price.duration = "Per Day"; // or default you prefer
+    }
 
     // Handle uploaded files
     // Main Image
@@ -211,6 +213,7 @@ exports.updateProperty = async (req, res) => {
 
     updateData.galleryImages = [...existingGalleryImages, ...newGalleryImages];
 
+    // ✅ Update property
     const property = await Property.findByIdAndUpdate(
       req.params.id,
       updateData,
@@ -219,9 +222,11 @@ exports.updateProperty = async (req, res) => {
         runValidators: true,
       }
     );
+
     if (!property) {
       return response.notFound(res, "Property not found");
     }
+
     response.ok(res, "Property updated successfully", property);
   } catch (error) {
     console.error("Error updating property:", error);

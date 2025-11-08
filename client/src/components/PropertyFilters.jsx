@@ -99,7 +99,7 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
         <Button
           onClick={onClearFilters}
           size="sm"
-          className="border text-gray-600 bg-white border-gray-300 hover:bg-gray-100 flex items-center space-x-2"
+          className="cursor-pointer border text-gray-600 bg-white border-gray-300 hover:bg-gray-100 flex items-center space-x-2"
         >
           <SlidersHorizontal className="w-4 h-4 text-gray-500" />
           <span>Clear Filters</span>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { User, Settings, LogOut, Moon, ChevronDown, Sun}from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { User, Settings, LogOut, Moon, ChevronDown, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import dummyAvatar from "@/assets/dummy-avatar.png";
@@ -8,21 +8,41 @@ import { useTheme } from "@/context/ThemeContext";
 export function NavUser({ user }) {
   const [open, setOpen] = useState(false);
   const { logout } = useAuth();
-  const {darkMode,toggleDarkMode}=useTheme();
+  const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
+  const menuRef = useRef(null); // 🟢 Ref to detect outside clicks
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  const handleEditProfile=()=>{
+  const handleEditProfile = () => {
     setOpen(false);
-    navigate("/profile", {state:{editing:true}});
+    navigate("/profile", { state: { editing: true } });
   };
 
+  // 🟢 Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       {/* Profile Section */}
       <div
         className="flex items-center gap-3 cursor-pointer select-none"
@@ -56,28 +76,32 @@ export function NavUser({ user }) {
           key="dropdown"
           className="absolute right-0 mt-3 w-44 bg-white border rounded-lg shadow-lg z-50 transition-all duration-300"
         >
-          <button onClick={handleEditProfile}
-           className="flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100">
+          <button
+            onClick={handleEditProfile}
+            className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
+          >
             <User className="w-4 h-4 text-gray-600" />
             Edit Profile
           </button>
 
-          <button className="flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100">
+          <button className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100">
             <Settings className="w-4 h-4 text-gray-600" />
             Settings
           </button>
 
           <button
             onClick={handleLogout}
-            className="flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
+            className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
           >
             <LogOut className="w-4 h-4 text-gray-600" />
             Logout
           </button>
 
-          <button onClick={toggleDarkMode}
-           className="flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-             {darkMode ? (
+          <button
+            onClick={toggleDarkMode}
+            className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {darkMode ? (
               <>
                 <Sun className="w-4 h-4 text-yellow-400" />
                 Light Mode

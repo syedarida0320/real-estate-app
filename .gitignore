@@ -23,4 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
-private/
+server/private/
+server/public/
+server/uploads/

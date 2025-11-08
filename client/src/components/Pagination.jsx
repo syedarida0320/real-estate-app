@@ -14,7 +14,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         variant="outline"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2"
+        className="p-2 cursor-pointer"
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
@@ -24,7 +24,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           key={page}
           variant={page === currentPage ? "default" : "outline"}
           onClick={() => onPageChange(page)}
-          className={`w-10 ${
+          className={`w-10 cursor-pointer ${
             page === currentPage ? "bg-blue-600 text-white" : ""
           }`}
         >
@@ -36,7 +36,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         variant="outline"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2"
+        className="p-2 cursor-pointer"
       >
         <ChevronRight className="w-4 h-4" />
       </Button>

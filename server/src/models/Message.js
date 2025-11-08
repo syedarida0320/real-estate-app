@@ -1,4 +1,3 @@
-// models/Message.js
 const { text } = require("express");
 const mongoose = require("mongoose");
 

@@ -372,7 +372,7 @@ const AddEditProperty = () => {
       <div className="p-6 bg-gray-50 min-h-screen">
         {/* Header */}
         <div className="flex items-center mb-6">
-          <Button variant="outline" onClick={handleBack} className="mr-4">
+          <Button variant="outline" onClick={handleBack} className="mr-4 cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h2 className="text-2xl font-bold text-gray-800">
@@ -663,9 +663,6 @@ const AddEditProperty = () => {
               </div>
               {/* 🗺️ Map Section */}
               <div className="flex items-center gap-2 mb-3">
-                {/* <label className="block text-sm font-semibold mb-2">
-                Search Location
-              </label> */}
                 <input
                   type="text"
                   placeholder="Search city, address, or landmark"
@@ -676,7 +673,7 @@ const AddEditProperty = () => {
                 <button
                   type="button"
                   onClick={handleLocationSearch}
-                  className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md"
+                  className="cursor-pointer flex items-center bg-blue-500 text-white px-4 py-2 rounded-md"
                   disabled={searchLoading}
                 >
                   <Search className="w-4 h-4 mr-1" />
@@ -866,6 +863,7 @@ const AddEditProperty = () => {
               <div className="flex justify-end space-x-3 pt-4 mt-4">
                 <Button
                   type="button"
+                  className="cursor-pointer"
                   variant="outline"
                   onClick={handleBack}
                   disabled={loading}
@@ -874,7 +872,7 @@ const AddEditProperty = () => {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 text-white"
+                  className="cursor-pointer bg-blue-600 text-white"
                   disabled={loading}
                 >
                   {loading

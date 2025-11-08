@@ -1,26 +1,56 @@
 const { response } = require("../utils/response");
+const Property = require("../models/Property");
+const User = require("../models/User");
 
-const dashboardData = {
-  stats: [
-    { title: "Properties for Sale", value: 684 },
-    { title: "Properties for Rent", value: 546 },
-    { title: "Total Customers", value: 5732 },
-    { title: "Total Cities", value: 90 },
-  ],
-  referrals: [
-    { source: "Social Media", value: 64, color: "#6366F1" },
-    { source: "Marketplaces", value: 40, color: "#22C55E" },
-    { source: "Websites", value: 50, color: "#FACC15" },
-    { source: "Digital Ads", value: 80, color: "#EF4444" },
-    { source: "Others", value: 15, color: "#A855F7" },
-  ],
-};
-
-// Controller to get dashboard data
 const getDashboardData = async (req, res) => {
   try {
+    // 1) Properties for sale (model uses "for_sale")
+    const saleCount = await Property.countDocuments({ availabilityType: "for_sale" });
+
+    // 2) Properties for rent (model uses "for_rent")
+    const rentCount = await Property.countDocuments({ availabilityType: "for_rent" });
+
+    // 3) Total customers excluding Agent and Admin
+    const customersCount = await User.countDocuments({
+      role: { $nin: ["Agent", "Admin"] },
+    });
+
+    // 4) Total distinct cities where properties exist.
+    // Use distinct to get unique non-empty city values.
+    let cityValues = [];
+    try {
+      cityValues = await Property.distinct("location.city");
+    } catch (e) {
+      // fallback: try top-level "city" if you used that earlier
+      cityValues = await Property.distinct("city");
+    }
+    // Filter out falsy/empty values and normalize trimming
+    const uniqueCities = (cityValues || [])
+      .map((c) => (typeof c === "string" ? c.trim() : c))
+      .filter((c) => c !== null && c !== undefined && c !== "");
+
+    const totalCities = uniqueCities.length;
+
+    const dashboardData = {
+      stats: [
+        { title: "Properties for Sale", value: saleCount },
+        { title: "Properties for Rent", value: rentCount },
+        { title: "Total Customers", value: customersCount },
+        { title: "Total Cities", value: totalCities },
+      ],
+      // keep referrals static for now (you can compute this dynamically later)
+      referrals: [
+        { source: "Social Media", value: 64, color: "#6366F1" },
+        { source: "Marketplaces", value: 40, color: "#22C55E" },
+        { source: "Websites", value: 50, color: "#FACC15" },
+        { source: "Digital Ads", value: 80, color: "#EF4444" },
+        { source: "Others", value: 15, color: "#A855F7" },
+      ],
+    };
+
     return response.ok(res, "Dashboard data fetched successfully", dashboardData);
   } catch (err) {
+    console.error("getDashboardData error:", err);
     return response.serverError(res, "Failed to fetch dashboard data", err.message);
   }
 };

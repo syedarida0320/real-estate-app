@@ -3,7 +3,7 @@ const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const { response } = require("../utils/response");
 
-// 📌 Get all conversations for logged-in user
+//  Get all conversations for logged-in user
 const getConversations = async (req, res) => {
   try {
     const conversations = await Conversation.find({ participants: req.user.id })
@@ -15,7 +15,7 @@ const getConversations = async (req, res) => {
   }
 };
 
-// 📌 Get single conversation by ID
+//  Get single conversation by ID
 const getConversation = async (req, res) => {
   try {
     const messages = await Message.find({ conversationId: req.params.id })
@@ -27,7 +27,7 @@ const getConversation = async (req, res) => {
   }
 };
 
-// 📌 Send a message
+//  Send a message
 const sendMessage = async (req, res) => {
   try {
     const { conversationId, text, receiverId } = req.body;

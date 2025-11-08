@@ -6,32 +6,9 @@ import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
 import { useAuth } from "@/context/AuthContext";
-//import axios from "@/utils/axios"
-
 
 export const Navbar = () => {
   const {user, profileImage}=useAuth();
-  // const [profileImage, setProfileImage]=useState(dummyAvatar);
-
-// useEffect(() => {
-//     const fetchProfileImage = async () => {
-//       if (!user?._id) return;
-
-//       try {
-//         const res = await axios.get(`/users/${user._id}/profile-image`, {
-//           responseType: "blob",
-//         });
-//         const imgUrl = URL.createObjectURL(res.data);
-//         setProfileImage(imgUrl);
-//        // console.log("here in navbar => ", res.data);
-//       } catch (error) {
-//         console.error("Failed to fetch profile image:", error.message);
-//         setProfileImage(dummyAvatar);
-//       }
-//     };
-
-//     fetchProfileImage();
-//   }, [user?._id]);
 
   const userData=user
     ?{
@@ -46,7 +23,7 @@ export const Navbar = () => {
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white px-6 py-2 border-b shadow-sm   dark:bg-gray-900">
       {/* Left section - Logo and name */}
       <div className="flex items-center gap-2">
-        <SidebarTrigger/>
+        <SidebarTrigger className="cursor-pointer"/>
         <img src={logo} alt="Yariga Logo" className="w-8 h-8 object-contain" />
         <h1 className="text-xl font-bold text-gray-800">Yariga</h1>
       </div>

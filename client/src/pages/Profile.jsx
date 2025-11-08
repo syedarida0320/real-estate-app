@@ -45,11 +45,31 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const menuRef = useRef(null);
   const [formData, setFormData] = useState({
     address: "",
     phone: "",
     email: "",
   });
+
+  // 🟢 Close menu on clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (location.state?.editing) {
@@ -150,14 +170,18 @@ const Profile = () => {
 
         <Card className="p-6 flex flex-col md:flex-row gap-6 items-start relative">
           {/* 3-dot Menu */}
-          <div className="absolute top-4 right-4">
-            <button onClick={() => setMenuOpen(!menuOpen)}>
+          <div className="absolute top-4 right-4" ref={menuRef}>
+            <button
+              className="cursor-pointer"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
               <MoreVertical className="w-5 h-5 text-gray-600" />
             </button>
+
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
                 <button
-                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  className="cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                   onClick={() => {
                     setEditing(true);
                     setMenuOpen(false);
@@ -165,7 +189,7 @@ const Profile = () => {
                 >
                   Edit Profile
                 </button>
-                <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                <button className="cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
                   Setting
                 </button>
               </div>
@@ -185,7 +209,7 @@ const Profile = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute bottom-3 left-3 bg-white flex items-center gap-2 text-gray-500"
+                className="cursor-pointer absolute bottom-3 left-3 bg-white flex items-center gap-2 text-gray-500"
                 onClick={() => fileInputRef.current.click()} // open file picker
               >
                 <Camera className="w-4 h-4 text-gray-600" />
@@ -256,14 +280,20 @@ const Profile = () => {
                     name="email"
                     value={formData.email || ""}
                     disabled
-                   className="text-sm bg-gray-100 cursor-not-allowed"
+                    className="text-sm bg-gray-100 cursor-not-allowed"
                   />
                 </div>
 
                 {/* Save & Cancel Buttons */}
                 <div className="flex gap-3 pt-2">
-                  <Button onClick={handleSave}>Save</Button>
-                  <Button variant="outline" onClick={() => setEditing(false)}>
+                  <Button className="cursor-pointer" onClick={handleSave}>
+                    Save
+                  </Button>
+                  <Button
+                    className="cursor-pointer"
+                    variant="outline"
+                    onClick={() => setEditing(false)}
+                  >
                     Cancel
                   </Button>
                 </div>

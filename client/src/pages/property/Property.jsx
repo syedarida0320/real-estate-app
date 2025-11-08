@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import Pagination from "@/components/Pagination";
-import {  Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import PropertyFilters from "@/components/PropertyFilters";
 import MainLayout from "@/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,6 @@ const Property = () => {
     search: "",
   };
   const [filters, setFilters] = useState(defaultFilters);
-  // Function to reset filters
-  const handleClearFilters = () => {
-    setFilters(defaultFilters);
-    fetchProperties(1); // Optional: re-fetch all properties after clearing
-  };
 
   const user = useAuth();
   const navigate = useNavigate();
@@ -75,6 +70,11 @@ const Property = () => {
     setCurrentPage(1);
   };
 
+  const handleClearFilters = () => {
+    setFilters(defaultFilters);
+    fetchProperties(1); // re-fetch all properties after clearing
+  };
+
   // Navigate to add property page
   const handleAddProperty = () => {
     navigate("/properties/add");
@@ -84,25 +84,6 @@ const Property = () => {
   const handleEditProperty = (property) => {
     const id = property._id || property.id;
     navigate(`/properties/edit/${id}`);
-  };
-
-  // check if current user is owner/creator of the property
-  const isOwnerOfProperty = (property) => {
-    if (!user?.user) return false;
-    const uid = user.user._id || user.user.id || user.user._id?.toString();
-    const propUserId =
-      property.userId?._id || property.userId || property.userId?.toString();
-    return uid && propUserId && uid.toString() === propUserId.toString();
-  };
-
-  // formatting for card images (kept same as original)
-  const getImageUrl = (imgPath) => {
-    if (!imgPath) return "/placeholder.png";
-    if (typeof imgPath !== "string") return "/placeholder.png";
-    const baseHost = axios.defaults.baseURL.replace("/api", "");
-    return imgPath.startsWith("http")
-      ? imgPath
-      : `${baseHost}/${imgPath.replace(/\\/g, "/")}`;
   };
 
   return (
@@ -117,7 +98,7 @@ const Property = () => {
           {(user?.user?.role === "Admin" || user?.user?.role === "Agent") && (
             <Button
               onClick={handleAddProperty}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow inline-flex items-center"
+              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow inline-flex items-center"
             >
               <Plus className="w-4 h-4 text-white mr-2" />
               Add Property
