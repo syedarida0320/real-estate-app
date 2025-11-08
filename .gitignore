@@ -25,4 +25,6 @@ dist-ssr
 .env
 server/private/
 server/public/
-server/uploads/
+server/src/uploads/
+server/src/public/
+server/uploads
