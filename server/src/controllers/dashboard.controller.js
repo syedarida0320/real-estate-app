@@ -4,16 +4,11 @@ const User = require("../models/User");
 
 const getDashboardData = async (req, res) => {
   try {
-    // 1) Properties for sale (model uses "for_sale")
-    const saleCount = await Property.countDocuments({ availabilityType: "for_sale" });
-
-    // 2) Properties for rent (model uses "for_rent")
-    const rentCount = await Property.countDocuments({ availabilityType: "for_rent" });
-
-    // 3) Total customers excluding Agent and Admin
-    const customersCount = await User.countDocuments({
-      role: { $nin: ["Agent", "Admin"] },
-    });
+    const [saleCount, rentCount, customersCount] = await Promise.all([
+      Property.countDocuments({ availabilityType: "for_sale" }),
+      Property.countDocuments({ availabilityType: "for_rent" }),
+      User.countDocuments({ role: { $nin: ["Agent", "Admin"] } }),
+    ]);
 
     // 4) Total distinct cities where properties exist.
     // Use distinct to get unique non-empty city values.
@@ -48,10 +43,18 @@ const getDashboardData = async (req, res) => {
       ],
     };
 
-    return response.ok(res, "Dashboard data fetched successfully", dashboardData);
+    return response.ok(
+      res,
+      "Dashboard data fetched successfully",
+      dashboardData
+    );
   } catch (err) {
     console.error("getDashboardData error:", err);
-    return response.serverError(res, "Failed to fetch dashboard data", err.message);
+    return response.serverError(
+      res,
+      "Failed to fetch dashboard data",
+      err.message
+    );
   }
 };
 

@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     phone: {
       type: String,
-      // match: [/^\d{10,15}$/, "Phone number must be 10–15 digits"],
     },
     address: {
       street: { type: String },

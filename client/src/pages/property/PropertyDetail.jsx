@@ -164,7 +164,7 @@ const PropertyDetail = () => {
 
   return (
     <MainLayout>
-      <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+      <div className="p-4 md:-ml-[25px] md:p-8 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-md overflow-hidden">
           <Link
             to="/properties"

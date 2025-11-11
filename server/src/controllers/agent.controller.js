@@ -249,3 +249,31 @@ exports.getAgentById = async (req, res) => {
     response.serverError(res, "Failed to fetch agent");
   }
 };
+
+// ✅ Fetch all active agents with user info for messaging
+exports.getAllAgentsForMessaging = async (req, res) => {
+  try {
+    const agents = await Agent.find({ isActive: true })
+      .populate(
+        "user",
+        "firstName lastName email role profileImagePath emailVerifiedAt"
+      )
+      .sort({ createdAt: -1 });
+
+    const formattedAgents = agents.map((agent) => ({
+      _id: agent.user._id,
+      firstName: agent.user.firstName,
+      lastName: agent.user.lastName,
+      email: agent.user.email,
+      role: agent.user.role,
+      profileImagePath:
+        agent.user.profileImagePath || agent.profileImage || "/images/default-avatar.png",
+      isVerified: !!agent.user.emailVerifiedAt,
+    }));
+
+    response.ok(res, "Agents fetched successfully", formattedAgents);
+  } catch (error) {
+    console.error("Error fetching agents:", error);
+    response.serverError(res, "Failed to fetch agents");
+  }
+};
