@@ -5,7 +5,7 @@ import axios from "@/utils/axios";
 import { io } from "socket.io-client";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 
-const SERVER = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+const SERVER = import.meta.env.VITE_API || "http://localhost:5000";
 
 const Message = () => {
   const [agents, setAgents] = useState([]);
@@ -21,8 +21,9 @@ const Message = () => {
 
   // Connect socket when component mounts
   useEffect(() => {
-    socket.current = io(SERVER);
-    socket.current.emit("addUser", loggedInUser?._id);
+    socket.current = io(SERVER, { transports: ["websocket", "polling"] });
+
+    socket.current.emit("registerUser", loggedInUser?._id);
 
     socket.current.on("getMessage", (data) => {
       if (data && data.senderId && data.text) {
@@ -43,14 +44,26 @@ const Message = () => {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const res = await axios.get("/agents/messaging");
-        setAgents(res.data?.data || []);
+        const res = await axios.get("/agents/messaging", {
+          params: { userId: loggedInUser._id }, // fallback if token not handled
+        });
+
+        // Backend already excludes logged-in user
+        const fetchedAgents = res.data?.data || [];
+
+        // (Optional) small safeguard: exclude logged-in user again on client
+        const filteredAgents = fetchedAgents.filter(
+          (agent) => agent._id !== loggedInUser._id
+        );
+
+        setAgents(filteredAgents);
       } catch (err) {
         console.error("Error fetching agents:", err);
       }
     };
-    fetchAgents();
-  }, []);
+
+    if (loggedInUser?._id) fetchAgents();
+  }, [loggedInUser?._id]);
 
   // ✅ Find or create conversation between user and agent
   const getOrCreateConversation = async (receiverId) => {

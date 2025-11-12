@@ -253,6 +253,8 @@ exports.getAgentById = async (req, res) => {
 // ✅ Fetch all active agents with user info for messaging
 exports.getAllAgentsForMessaging = async (req, res) => {
   try {
+     const loggedInUserId = req.query.userId;
+
     const agents = await Agent.find({ isActive: true })
       .populate(
         "user",
@@ -260,7 +262,13 @@ exports.getAllAgentsForMessaging = async (req, res) => {
       )
       .sort({ createdAt: -1 });
 
-    const formattedAgents = agents.map((agent) => ({
+       // Filter out the logged-in user (both by Agent ID or linked User ID)
+    const filteredAgents = agents.filter((agent) => {
+      if (!agent.user) return false;
+      return String(agent.user._id) !== String(loggedInUserId);
+    });
+
+    const formattedAgents = filteredAgents.map((agent) => ({
       _id: agent.user._id,
       firstName: agent.user.firstName,
       lastName: agent.user.lastName,

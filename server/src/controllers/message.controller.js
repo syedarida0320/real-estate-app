@@ -112,9 +112,46 @@ const markAsRead = async (req, res) => {
   }
 };
 
+// message.controller.js (add this at the bottom before module.exports)
+const sendMessageSocket = async (data) => {
+  const { senderId, receiver, text, messageType = "text" } = data;
+  if (!senderId || !receiver || !text) throw new Error("Missing fields");
+
+  // find/create conversation
+  let conversation = await Conversation.findOne({
+    participants: { $all: [senderId, receiver] },
+  });
+
+  if (!conversation) {
+    conversation = await Conversation.create({
+      participants: [senderId, receiver],
+    });
+  }
+
+  const message = await new Message({
+    sender: senderId,
+    receiver,
+    text,
+    messageType,
+    conversationId: conversation._id,
+  }).save();
+
+  conversation.lastMessage = message._id;
+  conversation.updatedAt = new Date();
+  await conversation.save();
+
+  const populatedMessage = await Message.findById(message._id)
+    .populate("sender", "name email avatar")
+    .populate("receiver", "name email avatar");
+
+  return populatedMessage;
+};
+
+
 module.exports = {
   getConversations,
   getConversation,
   sendMessage,
-  markAsRead
+  markAsRead,
+  sendMessageSocket,
 };

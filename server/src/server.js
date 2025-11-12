@@ -6,10 +6,7 @@ const colors = require("colors");
 const path = require("path");
 const uploads = require("./routes/upload.routes");
 const http = require("http");
-const { Server } = require("socket.io");
-// ✅ Save message in MongoDB
-const Message = require("./models/Message");
-
+const initSocket=require("./utils/socket");
 
 dotenv.config();
 connectDB();
@@ -35,6 +32,7 @@ app.use("/api/maps", require("./routes/map.routes"));
 app.use("/api/conversations", require("./routes/conversation.routes"))
 app.use("/api/messages", require("./routes/message.routes"))
 app.use("/api/upload", uploads);
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/images", express.static("public/images"));
 app.use("/public", express.static(path.join(__dirname, "public")));
@@ -42,70 +40,9 @@ app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "*", // or specific origin: ["http://localhost:5173"]
-    methods: ["GET", "POST"],
-  },
-});
-
-// ✅ Store online users (socket.id <-> userId)
-let onlineUsers = new Map();
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  // Register user when they join
-  socket.on("registerUser", (userId) => {
-    onlineUsers.set(userId, socket.id);
-  });
-
-  // Handle private message
-  socket.on("privateMessage", async (data) => {
-    const { senderId, receiverId, text } = data;
-
-    let conversation = await Conversation.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
-
-    if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [senderId, receiverId],
-      });
-    }
-
-    const message = await Message.create({
-      sender: senderId,
-      receiver: receiverId,
-      text,
-      conversationId: conversation._id,
-    });
-
-    conversation.lastMessage = message._id;
-    await conversation.save();
-
-    // ✅ Send to receiver in real-time
-    const receiverSocketId = onlineUsers.get(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receiveMessage", message);
-    }
-
-    // ✅ Emit to sender as confirmation
-    io.to(socket.id).emit("messageSaved", message);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-    for (const [key, value] of onlineUsers.entries()) {
-      if (value === socket.id) {
-        onlineUsers.delete(key);
-        break;
-      }
-    }
-  });
-});
+initSocket(server);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
-  console.log(colors.bgCyan(`🚀 Server running on port ${PORT}`))
+  console.log(colors.bgCyan(`Server running on port ${PORT}`))
 );
