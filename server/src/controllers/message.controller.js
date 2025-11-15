@@ -1,46 +1,7 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
-const { response } = require("../utils/response"); // assuming this is your helper
+const { response } = require("../utils/response"); 
 
-// Get all conversations for logged-in user
-const getConversations = async (req, res) => {
-  try {
-    // find all conversations where user is participant
-    const conversations = await Conversation.find({ participants: req.user.id })
-      .populate("participants", "name email avatar") // avatar optional
-      .populate({
-        path: "lastMessage",
-        populate: { path: "sender", select: "name email avatar" }
-      })
-      .sort({ updatedAt: -1 });
-
-    // compute unread counts per conversation (optional efficient version could use aggregation)
-    const convsWithCounts = await Promise.all(
-      conversations.map(async (conv) => {
-        const unreadCount = await Message.countDocuments({
-          conversationId: conv._id,
-          receiver: req.user.id,
-          isRead: false
-        });
-
-        return {
-          _id: conv._id,
-          participants: conv.participants,
-          lastMessage: conv.lastMessage,
-          property: conv.property,
-          createdAt: conv.createdAt,
-          updatedAt: conv.updatedAt,
-          unreadCount
-        };
-      })
-    );
-
-    response.ok(res, "Conversations fetched successfully", convsWithCounts);
-  } catch (error) {
-    console.error(error);
-    response.serverError(res, "Error fetching conversations");
-  }
-};
 
 // Get single conversation by ID
 const getConversation = async (req, res) => {
@@ -66,7 +27,7 @@ const sendMessage = async (req, res) => {
     let conversation = conversationId
       ? await Conversation.findById(conversationId)
       : await Conversation.create({
-          participants: [req.user.id, receiver]
+          participants: [req.user.id, receiver],
         });
 
     const message = new Message({
@@ -74,7 +35,7 @@ const sendMessage = async (req, res) => {
       receiver,
       text,
       messageType,
-      conversationId: conversation._id
+      conversationId: conversation._id,
     });
 
     await message.save();
@@ -97,22 +58,6 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// Mark message as read
-const markAsRead = async (req, res) => {
-  try {
-    const message = await Message.findByIdAndUpdate(
-      req.params.id,
-      { isRead: true },
-      { new: true }
-    );
-    response.ok(res, "Message marked as read", message);
-  } catch (error) {
-    console.error(error);
-    response.serverError(res, "Error marking message as read");
-  }
-};
-
-// message.controller.js (add this at the bottom before module.exports)
 const sendMessageSocket = async (data) => {
   const { senderId, receiver, text, messageType = "text" } = data;
   if (!senderId || !receiver || !text) throw new Error("Missing fields");
@@ -147,11 +92,8 @@ const sendMessageSocket = async (data) => {
   return populatedMessage;
 };
 
-
 module.exports = {
-  getConversations,
   getConversation,
   sendMessage,
-  markAsRead,
   sendMessageSocket,
 };

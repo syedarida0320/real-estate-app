@@ -22,19 +22,6 @@ const createConversation = async (req, res) => {
   }
 };
 
-// GET /api/conversations/:userId
-const getConversation = async (req, res) => {
-  try {
-    const conversations = await Conversation.find({
-      participants: { $in: [req.params.userId] },
-    });
-    res.status(200).json(conversations);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 module.exports = {
-  createConversation,
-  getConversation,
+  createConversation
 };

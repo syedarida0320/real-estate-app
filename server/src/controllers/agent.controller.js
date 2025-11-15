@@ -6,6 +6,7 @@ const Property = require("../models/Property");
 const { response } = require("../utils/response");
 const crypto = require("../utils/crypto");
 const sendEmail = require("../utils/agent-email");
+const Message = require("../models/Message");
 
 const uploadDir = path.join(__dirname, "..", "public", "images");
 // make sure upload directory exists
@@ -253,7 +254,7 @@ exports.getAgentById = async (req, res) => {
 // ✅ Fetch all active agents with user info for messaging
 exports.getAllAgentsForMessaging = async (req, res) => {
   try {
-     const loggedInUserId = req.query.userId;
+    const loggedInUserId = req.query.userId;
 
     const agents = await Agent.find({ isActive: true })
       .populate(
@@ -262,22 +263,33 @@ exports.getAllAgentsForMessaging = async (req, res) => {
       )
       .sort({ createdAt: -1 });
 
-       // Filter out the logged-in user (both by Agent ID or linked User ID)
-    const filteredAgents = agents.filter((agent) => {
-      if (!agent.user) return false;
-      return String(agent.user._id) !== String(loggedInUserId);
-    });
+    const filteredAgents = agents.filter(agent => agent.user && String(agent.user._id) !== String(loggedInUserId));
 
-    const formattedAgents = filteredAgents.map((agent) => ({
-      _id: agent.user._id,
-      firstName: agent.user.firstName,
-      lastName: agent.user.lastName,
-      email: agent.user.email,
-      role: agent.user.role,
-      profileImagePath:
-        agent.user.profileImagePath || agent.profileImage || "/images/default-avatar.png",
-      isVerified: !!agent.user.emailVerifiedAt,
-    }));
+    const formattedAgents = await Promise.all(
+      filteredAgents.map(async agent => {
+        // get last message with this agent
+        const lastMsg = await Message.findOne({
+          $or: [
+            { sender: loggedInUserId, receiver: agent.user._id },
+            { sender: agent.user._id, receiver: loggedInUserId },
+          ],
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        return {
+          _id: agent.user._id,
+          firstName: agent.user.firstName,
+          lastName: agent.user.lastName,
+          email: agent.user.email,
+          role: agent.user.role,
+          profileImagePath: agent.user.profileImagePath || agent.profileImage || "/images/default-avatar.png",
+          isVerified: !!agent.user.emailVerifiedAt,
+          lastMessage: lastMsg?.text || "",
+          lastTime: lastMsg?.createdAt || 0,
+        };
+      })
+    );
 
     response.ok(res, "Agents fetched successfully", formattedAgents);
   } catch (error) {
@@ -285,3 +297,4 @@ exports.getAllAgentsForMessaging = async (req, res) => {
     response.serverError(res, "Failed to fetch agents");
   }
 };
+

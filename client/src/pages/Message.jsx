@@ -4,8 +4,9 @@ import { Search, Send } from "lucide-react";
 import axios from "@/utils/axios";
 import { io } from "socket.io-client";
 import dummyAvatar from "@/assets/dummy-avatar.png";
-
 const SERVER = import.meta.env.VITE_API || "http://localhost:5000";
+
+let typingTimeout;
 
 const Message = () => {
   const [agents, setAgents] = useState([]);
@@ -14,58 +15,115 @@ const Message = () => {
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [isTyping, setIsTyping] = useState(false);
+
   const socket = useRef(null);
   const messagesEndRef = useRef(null);
+  const selectedUserRef = useRef(null);
 
-  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  // Keep ref updated so socket always has the latest user
+  useEffect(() => {
+    selectedUserRef.current = selectedUser;
+  }, [selectedUser]);
 
-  // Connect socket when component mounts
   useEffect(() => {
     socket.current = io(SERVER, { transports: ["websocket", "polling"] });
-
     socket.current.emit("registerUser", loggedInUser?._id);
 
-    socket.current.on("getMessage", (data) => {
-      if (data && data.senderId && data.text) {
-        setMessages((prev) => [
-          ...prev,
-          { sender: data.senderId, text: data.text },
-        ]);
+    socket.current.on("onlineUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
+    socket.current.on("typing", (data) => {
+      if (selectedUserRef.current?._id === data.senderId) {
+        setIsTyping(true);
       }
     });
 
-    return () => {
-      socket.current.disconnect();
-    };
+    socket.current.on("stopTyping", (data) => {
+      if (selectedUserRef.current?._id === data.senderId) {
+        setIsTyping(false);
+      }
+    });
+
+    socket.current.on("getMessage", (data) => {
+      console.log("Incoming message:", data);
+
+      const currentSelected = selectedUserRef.current;
+
+      // Ensure message is for the open chat
+      const isCurrentChat =
+        currentSelected &&
+        (data.sender === currentSelected._id ||
+          data.senderId === currentSelected._id);
+
+      if (data.receiver === loggedInUser?._id) {
+        const formattedMessage = {
+          _id: Date.now(), // temp id
+          text: data.text,
+          createdAt: data.timestamp || new Date().toISOString(),
+          sender: { _id: data.sender || data.senderId },
+        };
+        // If the chat is open → show message directly
+        if (isCurrentChat) {
+          setMessages((prev) => [...prev, formattedMessage]);
+        } else {
+          // Increment unread count for this sender
+          setUnreadCounts((prev) => ({
+            ...prev,
+            [data.sender]: (prev[data.sender] || 0) + 1,
+          }));
+        }
+
+        // Update list preview
+        setAgents((prev) =>
+          prev.map((a) =>
+            a._id === data.sender
+              ? { ...a, lastMessage: data.text, lastTime: new Date() }
+              : a
+          )
+        );
+      }
+    });
+
+    return () => socket.current.disconnect();
   }, [loggedInUser?._id]);
 
-  // ✅ Fetch all agents dynamically
-
+  // Fetch agents
   useEffect(() => {
     const fetchAgents = async () => {
       try {
         const res = await axios.get("/agents/messaging", {
-          params: { userId: loggedInUser._id }, // fallback if token not handled
+          params: { userId: loggedInUser._id },
         });
-
-        // Backend already excludes logged-in user
         const fetchedAgents = res.data?.data || [];
-
-        // (Optional) small safeguard: exclude logged-in user again on client
-        const filteredAgents = fetchedAgents.filter(
-          (agent) => agent._id !== loggedInUser._id
-        );
-
-        setAgents(filteredAgents);
+        setAgents(fetchedAgents);
       } catch (err) {
         console.error("Error fetching agents:", err);
       }
     };
+    fetchAgents();
+  }, []);
 
-    if (loggedInUser?._id) fetchAgents();
-  }, [loggedInUser?._id]);
+  const handleTyping = () => {
+    socket.current.emit("typing", {
+      senderId: loggedInUser._id,
+      receiverId: selectedUser._id,
+    });
 
-  // ✅ Find or create conversation between user and agent
+    clearTimeout(typingTimeout);
+
+    typingTimeout = setTimeout(() => {
+      socket.current.emit("stopTyping", {
+        senderId: loggedInUser._id,
+        receiverId: selectedUser._id,
+      });
+    }, 1000);
+  };
+
   const getOrCreateConversation = async (receiverId) => {
     try {
       const res = await axios.post("/conversations", {
@@ -79,34 +137,23 @@ const Message = () => {
     }
   };
 
-  // ✅ Fetch messages when an agent is selected
+  // Fetch messages when selecting an agent
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedUser) return;
 
-      try {
-        // get or create conversation first
-        const convId = await getOrCreateConversation(selectedUser._id);
-        setConversationId(convId);
-
-        if (convId) {
-          const res = await axios.get(`/messages/conversation/${convId}`);
-          setMessages(res.data.data || res.data);
-        } else {
-          setMessages([]);
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
+      const convId = await getOrCreateConversation(selectedUser._id);
+      setConversationId(convId);
+      if (convId) {
+        const res = await axios.get(`/messages/conversation/${convId}`);
+        setMessages(res.data.data || []);
       }
     };
-
     fetchMessages();
   }, [selectedUser]);
 
-  // Send message
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !conversationId) return;
-
     const messageData = {
       sender: loggedInUser._id,
       receiver: selectedUser._id,
@@ -116,29 +163,50 @@ const Message = () => {
 
     try {
       const res = await axios.post("/messages/send", messageData);
-      setMessages((prev) => [...prev, res.data.data]);
+      const sentMsg = res.data.data;
+      setMessages((prev) => [...prev, sentMsg]);
 
-      // emit message via socket
       socket.current.emit("sendMessage", {
         senderId: loggedInUser._id,
         receiverId: selectedUser._id,
         text: newMessage,
       });
 
+      // Update last message for that agent
+      setAgents((prev) =>
+        prev.map((a) =>
+          a._id === selectedUser._id
+            ? { ...a, lastMessage: sentMsg.text, lastTime: new Date() }
+            : a
+        )
+      );
+
       setNewMessage("");
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch (err) {
+      console.error("Error sending message:", err);
     }
   };
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const filteredAgents = agents.filter((agent) =>
+  // Sort agents by last message time
+  const sortedAgents = [...agents].sort(
+    (a, b) => new Date(b.lastTime || 0) - new Date(a.lastTime || 0)
+  );
+
+  const filteredAgents = sortedAgents.filter((agent) =>
     agent.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const formatTime = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <MainLayout>
@@ -146,7 +214,7 @@ const Message = () => {
         Messages
       </h2>
       <div className="flex h-[calc(100vh-125px)] bg-gray-50 -ml-[20px]">
-        {/* Left Sidebar: Agent List */}
+        {/* LEFT SIDEBAR */}
         <div className="w-1/3 border-r bg-white flex flex-col">
           <div className="p-5 border-b">
             <div className="flex items-center border border-gray-300 px-3 py-3 rounded-lg">
@@ -166,29 +234,64 @@ const Message = () => {
               filteredAgents.map((agent) => (
                 <div
                   key={agent._id}
-                  onClick={() => setSelectedUser(agent)}
+                  onClick={() => {
+                    setSelectedUser(agent);
+                    setUnreadCounts((prev) => ({ ...prev, [agent._id]: 0 }));
+                  }}
                   className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 ${
                     selectedUser?._id === agent._id ? "bg-blue-50" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <img
-                      src={
-                        agent.profileImagePath
-                          ? `${SERVER}${agent.profileImagePath}`
-                          : dummyAvatar
-                      }
-                      alt={agent.firstName}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <h3 className="font-medium text-gray-800 text-sm">
-                        {agent.firstName} {agent.lastName}
-                      </h3>
-                      <p className="text-xs text-gray-500 truncate">
+                    <div className="relative">
+                      <img
+                        src={
+                          agent.profileImagePath
+                            ? `${SERVER}${agent.profileImagePath}`
+                            : dummyAvatar
+                        }
+                        alt={agent.firstName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <span
+                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${
+                          onlineUsers.includes(agent._id)
+                            ? "bg-green-500"
+                            : "bg-gray-400"
+                        }`}
+                      ></span>
+                    </div>
+                    <div className="flex flex-col">
+                      <h3
+                        className={`text-sm text-gray-800 ${
+                          unreadCounts[agent._id] > 0
+                            ? "font-semibold"
+                            : "font-medium"
+                        }`}
+                      >
                         {agent.email}
+                      </h3>
+                      <p
+                        className={`text-xs truncate w-[150px] ${
+                          unreadCounts[agent._id] > 0
+                            ? "text-gray-800 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {agent.lastMessage || ""}
                       </p>
                     </div>
+                  </div>
+
+                  <div className="flex flex-col items-center space-y-1">
+                    <p className="text-[10px] text-gray-400">
+                      {formatTime(agent.lastTime)}
+                    </p>
+                    {unreadCounts[agent._id] > 0 && (
+                      <span className="bg-blue-500 text-white text-[10px] px-2 py-[2px] rounded-full">
+                        {unreadCounts[agent._id]}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))
@@ -200,10 +303,11 @@ const Message = () => {
           </div>
         </div>
 
-        {/* Right Side: Chat Window */}
+        {/* RIGHT CHAT SECTION */}
         <div className="flex-1 flex flex-col bg-white">
           {selectedUser ? (
             <>
+              {/* HEADER */}
               <div className="flex justify-between items-center p-4 border-b">
                 <div className="flex items-center space-x-3">
                   <img
@@ -220,47 +324,85 @@ const Message = () => {
                       {selectedUser.firstName} {selectedUser.lastName}
                     </h3>
                     <p className="text-xs text-gray-500">
-                      {selectedUser.email}
+                      {isTyping ? (
+                        <span className="text-blue-500 font-medium animate-pulse">
+                          Typing...
+                        </span>
+                      ) : (
+                        <>
+                          <span
+                            className={`inline-block mr-1 w-2 h-2 rounded-full ${
+                              onlineUsers.includes(selectedUser._id)
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          ></span>
+                          {onlineUsers.includes(selectedUser._id)
+                            ? "Active now"
+                            : "Offline"}
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Messages */}
+              {/* MESSAGES */}
               <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex mb-2 ${
-                      msg.sender?._id === loggedInUser._id ||
-                      msg.sender === loggedInUser._id
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                {messages.map((msg, index) => {
+                  const isSent =
+                    msg.sender?._id === loggedInUser._id ||
+                    msg.sender === loggedInUser._id;
+
+                  return (
                     <div
-                      className={`px-4 py-2 rounded-lg max-w-xs ${
-                        msg.sender?._id === loggedInUser._id ||
-                        msg.sender === loggedInUser._id
-                          ? "bg-blue-500 text-white rounded-br-none"
-                          : "bg-gray-200 text-gray-800 rounded-bl-none"
+                      key={index}
+                      className={`flex mb-2 ${
+                        isSent ? "justify-end" : "justify-start"
                       }`}
                     >
-                      {msg.text}
+                      <div className="flex flex-col">
+                        {!isSent && (
+                          <span className="text-xs text-gray-500 mb-1 ml-1">
+                            {msg.sender?.email}
+                          </span>
+                        )}
+                        <div
+                          className={`relative px-3 py-1 rounded-lg max-w-xs shadow-sm ${
+                            isSent
+                              ? "bg-blue-500 text-white rounded-br-none"
+                              : "bg-gray-200 text-gray-800 rounded-bl-none"
+                          }`}
+                        >
+                          <p className="text-sm break-words">{msg.text}</p>
+                          <span
+                            className={`block text-[10px] mt-1 ${
+                              isSent
+                                ? "text-blue-100 text-right"
+                                : "text-gray-500 text-left"
+                            }`}
+                          >
+                            {formatTime(msg.createdAt)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input */}
+              {/* INPUT */}
               <div className="p-4 flex items-center space-x-3 bg-white">
                 <input
                   type="text"
                   placeholder="Write a message..."
                   className="flex-1 bg-[#f2f2f2] border border-[#E4E4E4] rounded-xl px-4 py-2 text-sm focus:outline-none"
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    handleTyping();
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                 />
                 <button
