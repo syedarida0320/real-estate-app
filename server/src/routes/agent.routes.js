@@ -7,7 +7,6 @@ const {upload, handleMulterError}=require("../middlewares/upload.middleware");
 
 router.use(authMiddleware);
 
-router.get("/messaging", getAllAgentsForMessaging)
 router.get('/', getAllAgents);
 router.get('/:id/properties', getAgentProperties);
 router.post("/", upload.single("profileImage"),handleMulterError, createAgent)

@@ -151,9 +151,9 @@ exports.createAgent = async (req, res) => {
         ? Array.isArray(serviceAreas)
           ? serviceAreas
           : String(serviceAreas)
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [],
       bio,
       experience,
@@ -248,53 +248,6 @@ exports.getAgentById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching agent:", error);
     response.serverError(res, "Failed to fetch agent");
-  }
-};
-
-// ✅ Fetch all active agents with user info for messaging
-exports.getAllAgentsForMessaging = async (req, res) => {
-  try {
-    const loggedInUserId = req.query.userId;
-
-    const agents = await Agent.find({ isActive: true })
-      .populate(
-        "user",
-        "firstName lastName email role profileImagePath emailVerifiedAt"
-      )
-      .sort({ createdAt: -1 });
-
-    const filteredAgents = agents.filter(agent => agent.user && String(agent.user._id) !== String(loggedInUserId));
-
-    const formattedAgents = await Promise.all(
-      filteredAgents.map(async agent => {
-        // get last message with this agent
-        const lastMsg = await Message.findOne({
-          $or: [
-            { sender: loggedInUserId, receiver: agent.user._id },
-            { sender: agent.user._id, receiver: loggedInUserId },
-          ],
-        })
-          .sort({ createdAt: -1 })
-          .lean();
-
-        return {
-          _id: agent.user._id,
-          firstName: agent.user.firstName,
-          lastName: agent.user.lastName,
-          email: agent.user.email,
-          role: agent.user.role,
-          profileImagePath: agent.user.profileImagePath || agent.profileImage || "/images/default-avatar.png",
-          isVerified: !!agent.user.emailVerifiedAt,
-          lastMessage: lastMsg?.text || "",
-          lastTime: lastMsg?.createdAt || 0,
-        };
-      })
-    );
-
-    response.ok(res, "Agents fetched successfully", formattedAgents);
-  } catch (error) {
-    console.error("Error fetching agents:", error);
-    response.serverError(res, "Failed to fetch agents");
   }
 };
 

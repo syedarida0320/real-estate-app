@@ -171,10 +171,122 @@ const getProfileImage = async (req, res) => {
   }
 };
 
+const getUserMessages = async (req, res) => {
+  try {
+    const loggedInUserId = req.user?._id;
+    if (!loggedInUserId) {
+      return response.unauthorized(res, "Authentication required");
+    }
+
+    const { search } = req.query;
+    const hasSearch = search && search.trim().length > 0;
+
+    let users = [];
+    let messagesByPartner = {};
+
+    // If getting search query param then return all users which match the search query
+    if (hasSearch) {
+      const searchRegex = new RegExp(search.trim(), 'i'); // Case-insensitive partial match
+      users = await User.find({ 
+        isActive: true,
+        role: { $in: ["Agent", "Admin"] },
+        _id: { $ne: loggedInUserId },
+        $or: [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex }
+        ]
+      })
+      .select("firstName lastName email role profileImagePath emailVerifiedAt")
+      .sort({ createdAt: -1 });
+
+      if (users.length > 0) {
+        const userIds = users.map(u => u._id);
+        const messageFilter = {
+          $or: [
+            { sender: loggedInUserId, receiver: { $in: userIds } },
+            { receiver: loggedInUserId, sender: { $in: userIds } }
+          ]
+        };
+        const allMessages = await Message.find(messageFilter)
+          .sort({ createdAt: -1 })
+          .lean();
+
+        allMessages.forEach(msg => {
+          const partnerId = msg.sender.toString() === loggedInUserId.toString() ? msg.receiver : msg.sender;
+          if (!messagesByPartner[partnerId]) {
+            messagesByPartner[partnerId] = msg;
+          }
+        });
+      }
+    } else {
+
+      // by Default we just have to return only the users which are in the conversation
+      const messageFilter = {
+        $or: [
+          { sender: loggedInUserId },
+          { receiver: loggedInUserId }
+        ]
+      };
+      const allMessages = await Message.find(messageFilter)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      const partnerIds = new Set();
+      allMessages.forEach(msg => {
+        const partnerId = msg.sender.toString() === loggedInUserId.toString() ? msg.receiver : msg.sender;
+        if (partnerId.toString() !== loggedInUserId.toString()) {
+          partnerIds.add(partnerId.toString());
+        }
+      });
+
+      if (partnerIds.size === 0) {
+        return response.ok(res, "Users fetched successfully", []);
+      }
+
+      users = await User.find({ 
+        _id: { $in: Array.from(partnerIds) },
+        isActive: true,
+        role: { $in: ["Agent", "Admin"] }
+      })
+      .select("firstName lastName email role profileImagePath emailVerifiedAt")
+      .sort({ createdAt: -1 });
+
+      allMessages.forEach(msg => {
+        const partnerId = msg.sender.toString() === loggedInUserId.toString() ? msg.receiver : msg.sender;
+        if (!messagesByPartner[partnerId]) {
+          messagesByPartner[partnerId] = msg;
+        }
+      });
+    }
+
+    const formattedUsers = users.map(user => {
+      const lastMsg = messagesByPartner[user._id.toString()];
+      return {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        profileImagePath: user.profileImagePath || "/images/default-avatar.png",
+        isVerified: !!user.emailVerifiedAt,
+        lastMessage: lastMsg?.text || "",
+        lastTime: lastMsg?.createdAt ? lastMsg.createdAt : null,
+      };
+    });
+
+    response.ok(res, "Users fetched successfully", formattedUsers);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    response.serverError(res, "Failed to fetch users");
+  }
+};
+
 module.exports = {
   getUsers,
   createUser,
   getUserById,
   updateUser,
   getProfileImage,
+  getUserMessages
 };
