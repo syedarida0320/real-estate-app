@@ -2,6 +2,7 @@ const User = require("../models/User");
 const { response } = require("../utils/response");
 const path = require("path");
 const fs = require("fs");
+const Message = require("../models/Message");
 //const Review = require("../models/Review");
 
 ///  Utility: build profile image URL dynamically
