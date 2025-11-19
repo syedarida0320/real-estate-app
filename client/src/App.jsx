@@ -6,6 +6,8 @@ import Loader from "@/components/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const HeroSection = lazy(() => import("@/pages/HeroSection"));
+const AllCities=lazy(()=> import("@/pages/AllCities"));
 const Login = lazy(() => import("@/auth/Login"));
 const Register = lazy(() => import("@/auth/Register"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -26,6 +28,8 @@ const App = () => {
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicRoute />}>
+          <Route path="/" element={<HeroSection />} />
+          <Route path="/all-cities" element={<AllCities/>}/>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify/email" element={<VerifyEmail />} />
@@ -54,7 +58,7 @@ const App = () => {
         closeOnClick
         pauseOnHover
         theme="light"
-        toastStyle={{backgroundColor: "#f8fafc", color:"#111827"}}
+        toastStyle={{ backgroundColor: "#f8fafc", color: "#111827" }}
       />
     </Suspense>
   );

@@ -1,14 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const {getAllProperties, getPropertyById, createProperty, updateProperty, getUniqueCountries} = require('../controllers/property.controller');
+const {getAllProperties, getPropertyById, createProperty, updateProperty, getUniqueCountries, getPropertiesByCity} = require('../controllers/property.controller');
 const {propertyUpload, handleMulterError}=require("../middlewares/property.middleware");
 const {authMiddleware}= require ("../middlewares/auth.middleware")
-router.use(authMiddleware);
 
-router.get('/countries', getUniqueCountries);
-router.get('/', getAllProperties);
-router.get('/:id' ,getPropertyById);
-router.post('/', propertyUpload ,handleMulterError, createProperty);
-router.put('/:id', propertyUpload ,handleMulterError, updateProperty);
+
+router.get('/all', getAllProperties);
+router.get("/cities/list", getPropertiesByCity)
+router.get('/countriesProperty', getUniqueCountries);
+
+router.get('/countries',  authMiddleware, getUniqueCountries);
+router.get('/', authMiddleware, getAllProperties);
+router.get('/:id' , authMiddleware, getPropertyById);
+
+router.post('/', authMiddleware, propertyUpload ,handleMulterError, createProperty);
+router.put('/:id', authMiddleware, propertyUpload ,handleMulterError, updateProperty);
+
+
 
 module.exports = router;

@@ -292,3 +292,32 @@ exports.getUniqueCountries = async (req, res) => {
     response.serverError(res, "Failed to fetch countries");
   }
 };
+
+exports.getPropertiesByCity = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$location.city",
+          count: { $sum: 1 },
+          sampleImage: { $first: "$mainImage" }
+        }
+      },
+      { $sort: { count: -1 } }
+    ];
+
+    const cities = await Property.aggregate(pipeline);
+
+    res.json({
+      success: true,
+      cities: cities.map(c => ({
+        city: c._id,
+        count: c.count,
+        image: c.sampleImage ? `${process.env.BASE_URL}/${c.sampleImage}` : null
+      }))
+    });
+  } catch (error) {
+    console.error("Error loading cities:", error);
+    response.serverError(res, "Failed to load cities");
+  }
+};

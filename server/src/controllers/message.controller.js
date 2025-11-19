@@ -1,6 +1,8 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
-const { response } = require("../utils/response"); 
+const { response } = require("../utils/response");
+const User=require("../models/User");
+const Agent=require("../models/Agent"); 
 
 
 // Get single conversation by ID
@@ -92,8 +94,42 @@ const sendMessageSocket = async (data) => {
   return populatedMessage;
 };
 
+const getUserConversations = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const conversations = await Conversation.find({
+      participants: userId
+    })
+      .populate("participants", "firstName lastName email profileImagePath")
+      .populate("lastMessage")
+      .sort({ updatedAt: -1 });
+
+    const formatted = conversations.map((c) => {
+      const otherUser = c.participants.find(
+        (p) => p._id.toString() !== userId
+      );
+
+      return {
+        _id: c._id,
+        otherUser,
+        lastMessage: c.lastMessage,
+      };
+    });
+
+    res.json({ success: true, data: formatted });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+
+
+
 module.exports = {
   getConversation,
   sendMessage,
   sendMessageSocket,
+  getUserConversations,
 };

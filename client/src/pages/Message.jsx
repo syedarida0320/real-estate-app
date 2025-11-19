@@ -3,7 +3,9 @@ import MainLayout from "@/layouts/MainLayout";
 import { Search, Send } from "lucide-react";
 import axios from "@/utils/axios";
 import { io } from "socket.io-client";
+import { useDebounce } from "@/hooks/useDebounce";
 import dummyAvatar from "@/assets/dummy-avatar.png";
+
 const SERVER = import.meta.env.VITE_API || "http://localhost:5000";
 
 let typingTimeout;
@@ -11,6 +13,7 @@ let typingTimeout;
 const Message = () => {
   const [agents, setAgents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 800);
   const [selectedUser, setSelectedUser] = useState(null);
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -23,6 +26,14 @@ const Message = () => {
   const socket = useRef(null);
   const messagesEndRef = useRef(null);
   const selectedUserRef = useRef(null);
+
+  useEffect(() => {
+    if (debouncedSearch.trim() !== "") {
+      handleSearch(debouncedSearch.trim());
+    } else {
+      handleSearch(""); // Fetch all if search is cleared
+    }
+  }, [debouncedSearch]);
 
   // Keep ref updated so socket always has the latest user
   useEffect(() => {
@@ -82,7 +93,11 @@ const Message = () => {
         setAgents((prev) =>
           prev.map((a) =>
             a._id === data.sender
-              ? { ...a, lastMessage: data.text, lastTime: new Date() }
+              ? {
+                  ...a,
+                  lastText: data.text,
+                  lastTime: new Date().toISOString(),
+                }
               : a
           )
         );
@@ -92,21 +107,83 @@ const Message = () => {
     return () => socket.current.disconnect();
   }, [loggedInUser?._id]);
 
-  // Fetch agents
-  useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const res = await axios.get("/agents/messaging", {
-          params: { userId: loggedInUser._id },
-        });
-        const fetchedAgents = res.data?.data || [];
-        setAgents(fetchedAgents);
-      } catch (err) {
-        console.error("Error fetching agents:", err);
+  const fetchAgentImages = async (list) => {
+    const updated = await Promise.all(
+      list.map(async (u) => {
+        try {
+          const res = await axios.get(`/users/${u._id}/profile-image`, {
+            responseType: "blob",
+          });
+          const url = URL.createObjectURL(res.data);
+
+          return { ...u, profileImage: url };
+        } catch (err) {
+          console.error("Error loading profile:", err);
+          return { ...u, profileImage: dummyAvatar };
+        }
+      })
+    );
+    setAgents(updated);
+  };
+
+  const fetchConversationList = async () => {
+    try {
+      const res = await axios.get(
+        `/messages/conversations/${loggedInUser._id}`
+      );
+
+      const formatted = res.data.data.map((c) => ({
+        ...c.otherUser,
+        conversationId: c._id,
+        lastText: c.lastMessage?.text || "",
+        lastTime: c.lastMessage?.createdAt || null,
+      }));
+
+      setAgents(formatted);
+      fetchAgentImages(formatted);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // user table
+  const handleSearch = async (query) => {
+    try {
+      const url = query
+        ? `/users/messages?search=${query}`
+        : `/messages/conversations/${loggedInUser._id}`;
+
+      const res = await axios.get(url);
+
+      let data = res.data.data;
+
+      // If searching, backend returns user list → format them
+      if (query) {
+        data = data.map((u) => ({
+          // data is a list of users matching the search
+          ...u,
+          conversationId: null,
+          lastText: "",
+          lastTime: null,
+        }));
+        setAgents(data);
+        fetchAgentImages(data);
+      } else {
+        // conversation list
+        data = data.map((c) => ({
+          ...c.otherUser,
+          conversationId: c._id,
+          lastText: c.lastMessage?.text || "",
+          lastTime: c.lastMessage?.createdAt || null,
+        }));
       }
-    };
-    fetchAgents();
-  }, []);
+
+      setAgents(data);
+      fetchAgentImages(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleTyping = () => {
     socket.current.emit("typing", {
@@ -124,6 +201,7 @@ const Message = () => {
     }, 1000);
   };
 
+  // conversation table
   const getOrCreateConversation = async (receiverId) => {
     try {
       const res = await axios.post("/conversations", {
@@ -137,7 +215,7 @@ const Message = () => {
     }
   };
 
-  // Fetch messages when selecting an agent
+  // message table
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedUser) return;
@@ -162,6 +240,7 @@ const Message = () => {
     };
 
     try {
+      // message table
       const res = await axios.post("/messages/send", messageData);
       const sentMsg = res.data.data;
       setMessages((prev) => [...prev, sentMsg]);
@@ -176,7 +255,11 @@ const Message = () => {
       setAgents((prev) =>
         prev.map((a) =>
           a._id === selectedUser._id
-            ? { ...a, lastMessage: sentMsg.text, lastTime: new Date() }
+            ? {
+                ...a,
+                lastText: sentMsg.text,
+                lastTime: sentMsg.createdAt,
+              }
             : a
         )
       );
@@ -196,9 +279,7 @@ const Message = () => {
     (a, b) => new Date(b.lastTime || 0) - new Date(a.lastTime || 0)
   );
 
-  const filteredAgents = sortedAgents.filter((agent) =>
-    agent.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAgents = sortedAgents; // backend already handles search
 
   const formatTime = (date) => {
     if (!date) return "";
@@ -208,13 +289,26 @@ const Message = () => {
     });
   };
 
+  const fetchUsers = async () => {
+    const res = await axios.get("/messages/users", {
+      params: { search: searchQuery },
+    });
+
+    fetchAgentImages(res.data.data); // <= convert to blob URLs
+  };
+
+  useEffect(() => {
+    fetchConversationList();
+  }, []);
+
   return (
     <MainLayout>
       <h2 className="text-[25px] font-semibold py-2 -ml-[20px] w-full">
         Messages
       </h2>
       <div className="flex h-[calc(100vh-125px)] bg-gray-50 -ml-[20px]">
-        {/* LEFT SIDEBAR */}
+        {/* LEFT SIDEBAR
+        for showing loggedIn user's all chat conversations */}
         <div className="w-1/3 border-r bg-white flex flex-col">
           <div className="p-5 border-b">
             <div className="flex items-center border border-gray-300 px-3 py-3 rounded-lg">
@@ -233,7 +327,7 @@ const Message = () => {
             {filteredAgents.length > 0 ? (
               filteredAgents.map((agent) => (
                 <div
-                  key={agent._id}
+                  key={agent.conversationId || agent._id}
                   onClick={() => {
                     setSelectedUser(agent);
                     setUnreadCounts((prev) => ({ ...prev, [agent._id]: 0 }));
@@ -245,14 +339,11 @@ const Message = () => {
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <img
-                        src={
-                          agent.profileImagePath
-                            ? `${SERVER}${agent.profileImagePath}`
-                            : dummyAvatar
-                        }
+                        src={agent.profileImage}
                         alt={agent.firstName}
                         className="w-10 h-10 rounded-full object-cover"
                       />
+
                       <span
                         className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${
                           onlineUsers.includes(agent._id)
@@ -278,7 +369,7 @@ const Message = () => {
                             : "text-gray-500"
                         }`}
                       >
-                        {agent.lastMessage || ""}
+                        {agent.lastMessage?.text || ""}
                       </p>
                     </div>
                   </div>
@@ -311,21 +402,18 @@ const Message = () => {
               <div className="flex justify-between items-center p-4 border-b">
                 <div className="flex items-center space-x-3">
                   <img
-                    src={
-                      selectedUser.profileImagePath
-                        ? `${SERVER}${selectedUser.profileImagePath}`
-                        : dummyAvatar
-                    }
+                    src={selectedUser.profileImage}
                     alt={selectedUser.firstName}
                     className="w-10 h-10 rounded-full"
                   />
+
                   <div>
                     <h3 className="font-semibold">
                       {selectedUser.firstName} {selectedUser.lastName}
                     </h3>
                     <p className="text-xs text-gray-500">
                       {isTyping ? (
-                        <span className="text-blue-500 font-medium animate-pulse">
+                        <span className="text-green-600 font-medium animate-pulse">
                           Typing...
                         </span>
                       ) : (

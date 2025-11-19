@@ -9,9 +9,10 @@ router.use(authMiddleware);
 
 router.get('/', getUsers);
 router.post("/", createUser);
+router.get('/messages', getUserMessages);
+
+router.get("/:id/profile-image",getProfileImage);
 router.get('/:id', getUserById);
 router.put("/:id",upload.single("profileImage"), updateUser);
-router.get("/:id/profile-image",getProfileImage);
-router.get('/messages', getUserMessages);
 
 module.exports = router;

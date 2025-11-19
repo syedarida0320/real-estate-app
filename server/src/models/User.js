@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
       country: { type: String },
       zipCode: { type: String },
     },
+    isActive: { type: Boolean, default: true },
 
     role: { type: String, enum: ["User", "Agent", "Admin"], default: "User" },
     profileImagePath: { type: String, default: "" },
