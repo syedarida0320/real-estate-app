@@ -180,9 +180,7 @@ export default function HeroSection() {
         {/* Dynamic Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {cities.slice(0,8).map((c, i) => {
-            const cityImg =
-              c.mainImage ||
-              (Array.isArray(c.galleryImages) && c.galleryImages[0]);
+            const cityImg = c.image;
             return (
               <div
                 key={i}

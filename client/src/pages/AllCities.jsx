@@ -46,10 +46,7 @@ export default function AllCities() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {cities.map((c, i) => {
-          const img =
-            c.mainImage ||
-            (Array.isArray(c.galleryImages) && c.galleryImages[0]);
-
+          const img = c.image;
           return (
             <Card
               key={i}

@@ -300,21 +300,23 @@ exports.getPropertiesByCity = async (req, res) => {
         $group: {
           _id: "$location.city",
           count: { $sum: 1 },
-          sampleImage: { $first: "$mainImage" }
-        }
+          sampleImage: { $first: "$mainImage" },
+        },
       },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ];
 
     const cities = await Property.aggregate(pipeline);
 
     res.json({
       success: true,
-      cities: cities.map(c => ({
+      cities: cities.map((c) => ({
         city: c._id,
         count: c.count,
-        image: c.sampleImage ? `${process.env.BASE_URL}/${c.sampleImage}` : null
-      }))
+        image: c.sampleImage
+          ? `${process.env.BASE_URL}/${c.sampleImage}`
+          : null,
+      })),
     });
   } catch (error) {
     console.error("Error loading cities:", error);
