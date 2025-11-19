@@ -171,7 +171,10 @@ export default function HeroSection() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Properties By Cities</h2>
 
-          <a href="/all-cities" className="text-sm flex font-semibold hover:underline">
+          <a
+            href="/all-cities"
+            className="text-sm flex font-semibold hover:underline"
+          >
             See All Cities
             <MoveUpRight className="text-gray-500 ml-2 w-5 h-5" />
           </a>
@@ -179,20 +182,27 @@ export default function HeroSection() {
 
         {/* Dynamic Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {cities.slice(0,8).map((c, i) => {
+          {cities.slice(0, 8).map((c, i) => {
             const cityImg = c.image;
             return (
               <div
                 key={i}
-                className="bg-white rounded-xl shadow hover:shadow-lg transition p-3 cursor-pointer"
+                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex items-center gap-4"
               >
+                {/* City Image */}
                 <img
                   src={getImageUrl(cityImg)}
-                  className="rounded-lg w-full h-40 object-cover"
+                  alt={c.city}
+                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                 />
 
-                <h3 className="font-semibold mt-3">{c.city}</h3>
-                <p className="text-gray-500 text-sm">{c.count} Properties</p>
+                {/* City Name + Count */}
+                <div>
+                  <h3 className="font-semibold text-lg">{c.city}</h3>
+                  <p className="text-gray-500 text-sm">
+                    {c.count} {c.count === 1 ? "Property" : "Properties"}
+                  </p>
+                </div>
               </div>
             );
           })}
