@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import backgroundImg from "../assets/background.jpg";
 import { Menu, MoveUpRight } from "lucide-react";
+import CityCard from "@/components/CityCard";
 
 export default function HeroSection() {
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -182,30 +183,9 @@ export default function HeroSection() {
 
         {/* Dynamic Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {cities.slice(0, 8).map((c, i) => {
-            const cityImg = c.image;
-            return (
-              <div
-                key={i}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex items-center gap-4"
-              >
-                {/* City Image */}
-                <img
-                  src={getImageUrl(cityImg)}
-                  alt={c.city}
-                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                />
-
-                {/* City Name + Count */}
-                <div>
-                  <h3 className="font-semibold text-lg">{c.city}</h3>
-                  <p className="text-gray-500 text-sm">
-                    {c.count} {c.count === 1 ? "Property" : "Properties"}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {cities.slice(0, 8).map((c, i) => (
+            <CityCard key={i} city={c.city} count={c.count} image={c.image} />
+          ))}
         </div>
       </section>
     </div>

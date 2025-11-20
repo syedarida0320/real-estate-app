@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/utils/axios";
-import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CityCard from "@/components/CityCard";
 
 export default function AllCities() {
   const [cities, setCities] = useState([]);
@@ -42,27 +42,9 @@ export default function AllCities() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {cities.map((c, i) => {
-          const img = c.image;
-          return (
-            <div
-              key={i}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex items-center gap-4"
-            >
-              <img
-                src={getImageUrl(img)}
-                className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-              />
-              <div>
-                <h3 className="font-semibold text-lg">{c.city}</h3>
-                <p className="text-gray-500 text-sm">
-                  {" "}
-                  {c.count} {c.count === 1 ? "Property" : "Properties"}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+        {cities.map((c, i) => (
+          <CityCard key={i} city={c.city} count={c.count} image={c.image} />
+        ))}
       </div>
     </div>
   );
