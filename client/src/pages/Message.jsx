@@ -22,6 +22,7 @@ const Message = () => {
   const loggedInUser = JSON.parse(localStorage.getItem("user"));
   const [unreadCounts, setUnreadCounts] = useState({});
   const [isTyping, setIsTyping] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   const socket = useRef(null);
   const messagesEndRef = useRef(null);
@@ -178,7 +179,7 @@ const Message = () => {
         }));
       }
 
-      setAgents(data);
+      setSearchResults(data);
       fetchAgentImages(data);
     } catch (err) {
       console.error(err);
@@ -202,36 +203,54 @@ const Message = () => {
   };
 
   // conversation table
-  const getOrCreateConversation = async (receiverId) => {
-    try {
-      const res = await axios.post("/conversations", {
-        senderId: loggedInUser._id,
-        receiverId,
-      });
-      setConversationId(res.data._id);
-      return res.data._id;
-    } catch (error) {
-      console.error("Error in conversation:", error);
+ const fetchConversation = async (receiverId) => {
+  try {
+    // fetch all user conversations
+    const res = await axios.get(`/messages/conversations/${loggedInUser._id}`);
+    const existingConv = res.data.data.find(
+      (c) => c.otherUser._id === receiverId
+    );
+    if (existingConv) {
+      setConversationId(existingConv._id);
+      return existingConv._id;
     }
-  };
+    setConversationId(null); // no conversation exists yet
+    return null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
 
   // message table
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!selectedUser) return;
+ useEffect(() => {
+  const fetchMessages = async () => {
+    if (!selectedUser) return;
 
-      const convId = await getOrCreateConversation(selectedUser._id);
-      setConversationId(convId);
-      if (convId) {
-        const res = await axios.get(`/messages/conversation/${convId}`);
-        setMessages(res.data.data || []);
-      }
-    };
-    fetchMessages();
-  }, [selectedUser]);
+    const convId = await fetchConversation(selectedUser._id);
+    setConversationId(convId);
+
+    if (convId) {
+      const res = await axios.get(`/messages/conversation/${convId}`);
+      setMessages(res.data.data || []);
+    } else {
+      setMessages([]); // no conversation yet
+    }
+  };
+  fetchMessages();
+}, [selectedUser]);
+
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !conversationId) return;
+    if (!newMessage.trim()) return;
+
+    // If no conversation exists yet → create it NOW
+    let convId = conversationId;
+    if (!convId) {
+      convId = await fetchConversation (selectedUser._id);
+      setConversationId(convId);
+    }
     const messageData = {
       sender: loggedInUser._id,
       receiver: selectedUser._id,

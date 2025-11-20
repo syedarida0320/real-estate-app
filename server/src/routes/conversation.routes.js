@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const {
-  createConversation
+  getUserConversations
 } = require("../controllers/conversation.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
 router.use(authMiddleware);
 
-router.post("/", createConversation);
+router.post("/", getUserConversations);
 
 module.exports = router;

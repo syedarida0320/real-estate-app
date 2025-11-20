@@ -1,9 +1,8 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const { response } = require("../utils/response");
-const User=require("../models/User");
-const Agent=require("../models/Agent"); 
-
+const User = require("../models/User");
+const Agent = require("../models/Agent");
 
 // Get single conversation by ID
 const getConversation = async (req, res) => {
@@ -26,11 +25,15 @@ const sendMessage = async (req, res) => {
     const { conversationId, text, receiver, messageType = "text" } = req.body;
 
     // if no conversation exists, create new
-    let conversation = conversationId
-      ? await Conversation.findById(conversationId)
-      : await Conversation.create({
-          participants: [req.user.id, receiver],
-        });
+    let conversation = await Conversation.findOne({
+      participants: { $all: [req.user.id, receiver] },
+    });
+
+    if (!conversation && text?.trim()) {
+      conversation = await Conversation.create({
+        participants: [req.user.id, receiver],
+      });
+    }
 
     const message = new Message({
       sender: req.user.id,
@@ -99,16 +102,15 @@ const getUserConversations = async (req, res) => {
     const userId = req.params.userId;
 
     const conversations = await Conversation.find({
-      participants: userId
+      participants: userId,
+      lastMessage: { $ne: null },
     })
       .populate("participants", "firstName lastName email profileImagePath")
       .populate("lastMessage")
       .sort({ updatedAt: -1 });
 
     const formatted = conversations.map((c) => {
-      const otherUser = c.participants.find(
-        (p) => p._id.toString() !== userId
-      );
+      const otherUser = c.participants.find((p) => p._id.toString() !== userId);
 
       return {
         _id: c._id,
@@ -123,9 +125,6 @@ const getUserConversations = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
-
-
 
 module.exports = {
   getConversation,
