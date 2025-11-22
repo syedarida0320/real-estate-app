@@ -13,7 +13,7 @@ const Property = () => {
   const [properties, setProperties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(10); // show 10 cards per page
+  const [itemsPerPage] = useState(10);
   const defaultFilters = {
     status: "any",
     type: "any",

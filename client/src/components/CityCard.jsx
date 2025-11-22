@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "@/utils/axios";
+import { Card, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export default function CityCard({ city, count, image }) {
   const getImageUrl = (imgPath) => {
@@ -11,7 +12,7 @@ export default function CityCard({ city, count, image }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex items-center gap-4">
+    <Card className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex flex-row items-center gap-0">
       {/* City Image */}
       <img
         src={getImageUrl(image)}
@@ -20,12 +21,12 @@ export default function CityCard({ city, count, image }) {
       />
 
       {/* City Name + Property Count */}
-      <div>
-        <h3 className="font-semibold text-lg">{city}</h3>
-        <p className="text-gray-500 text-sm">
+      <CardContent>
+        <CardTitle className="font-semibold text-lg">{city}</CardTitle>
+        <CardDescription className="text-gray-500 text-sm">
           {count} {count === 1 ? "Property" : "Properties"}
-        </p>
-      </div>
-    </div>
+        </CardDescription>
+      </CardContent>
+    </Card>
   );
 }

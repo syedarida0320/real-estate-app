@@ -1,26 +1,52 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/utils/axios";
 import backgroundImg from "../assets/background.jpg";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Menu, MoveUpRight } from "lucide-react";
 import CityCard from "@/components/CityCard";
+import PropertyCards from "@/components/PropertyCards";
+import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
-  const [openDropdown, setOpenDropdown] = useState(false);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
-  const [heroContent, setHeroContent] = useState(null);
+  const [latestProperties, setLatestProperties] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("any");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  useEffect(() => {
+    loadPropertyTypes();
+    loadCountries();
+    loadCities();
+    loadLatestProperties();
+  }, []);
 
-  const getImageUrl = (imgPath) => {
-    if (!imgPath) return "/placeholder.png";
-    if (typeof imgPath !== "string") return "/placeholder.png";
-
-    const baseHost = axios.defaults.baseURL.replace("/api", "");
-    return imgPath.startsWith("http")
-      ? imgPath
-      : `${baseHost}/${imgPath.replace(/\\/g, "/")}`;
+  // 👉 Fetch Latest 8 Properties
+  const loadLatestProperties = async () => {
+    try {
+      const { data } = await axios.get("/properties/all?limit=8");
+      setLatestProperties(data.data.properties);
+    } catch (error) {
+      console.log("Error loading latest properties:", error);
+    }
   };
 
   useEffect(() => {
@@ -80,45 +106,35 @@ export default function HeroSection() {
             <li className="hover:text-gray-300 cursor-pointer">Home</li>
 
             {/* Properties Dropdown */}
-            <li
-              className="relative cursor-pointer hover:text-gray-300"
-              onMouseEnter={() => setOpenDropdown(true)}
-              onMouseLeave={() => setOpenDropdown(false)}
-            >
-              Properties
-              {openDropdown && (
-                <ul className="absolute left-0 mt-2 bg-white text-black rounded-lg shadow-lg w-40 py-2">
-                  {propertyTypes.map((type, i) => (
-                    <li
-                      key={i}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      {type}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="outline-none cursor-pointer">
+                Properties
+              </DropdownMenuTrigger>
 
-            <li className="hover:text-gray-300 cursor-pointer">Agents</li>
+              <DropdownMenuContent className="bg-white text-black w-40 rounded-lg shadow-lg">
+                {propertyTypes.map((type, i) => (
+                  <DropdownMenuItem key={i} className="cursor-pointer">
+                    {type}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <li className="hover:text-gray-300 cursor-pointer">About</li>
             <li className="hover:text-gray-300 cursor-pointer">Contact</li>
           </ul>
 
           {/* Auth Buttons */}
           <div className="hidden md:flex gap-4">
-            <a
-              href="/login"
-              className="bg-white text-black px-5 py-2 rounded-lg font-semibold hover:bg-gray-200"
-            >
-              Sign In
+            <a href="/login">
+              <Button className="cursor-pointer bg-white text-black hover:bg-gray-200">
+                Sign In
+              </Button>
             </a>
 
-            <a
-              href="/register"
-              className="bg-transparent border border-white px-5 py-2 rounded-lg font-semibold hover:bg-white hover:text-black transition"
-            >
-              Register
+            <a href="/register">
+              <Button className="cursor-pointer bg-white text-black hover:bg-gray-200">
+                Register
+              </Button>
             </a>
           </div>
         </nav>
@@ -132,35 +148,79 @@ export default function HeroSection() {
 
             <div className="bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg max-w-xl">
               <div className="flex gap-4 border-b pb-2 mb-4">
-                <button className="font-semibold text-black border-b-2 border-black">
+                <Button
+                  onClick={() => setSelectedStatus("any")}
+                  variant="ghost"
+                  className={`font-semibold border-b-2 text-black rounded-none ${
+                    selectedStatus === "any"
+                      ? "border-white"
+                      : "border-transparent"
+                  }`}
+                >
                   All
-                </button>
-                <button className="text-gray-600 hover:text-black">
+                </Button>
+
+                <Button
+                  onClick={() => setSelectedStatus("for_sale")}
+                  variant="ghost"
+                  className={`text-black ${
+                    selectedStatus === "for_sale"
+                      ? "border-b-2 border-white"
+                      : ""
+                  }`}
+                >
                   For Sale
-                </button>
-                <button className="text-gray-600 hover:text-black">
+                </Button>
+
+                <Button
+                  onClick={() => setSelectedStatus("for_rent")}
+                  variant="ghost"
+                  className={`text-black ${
+                    selectedStatus === "for_rent"
+                      ? "border-b-2 border-white"
+                      : ""
+                  }`}
+                >
                   For Rent
-                </button>
+                </Button>
               </div>
 
               <div className="flex text-gray-600 flex-col md:flex-row gap-3">
-                <input
-                  type="text"
+                <Input
                   placeholder="Enter Keyword"
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none text-gray-600"
+                  className="w-full"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
                 />
 
                 {/* Dynamic Types */}
-                <select className="w-full px-4 py-2 rounded-lg border bg-white focus:outline-none">
-                  <option>Type</option>
-                  {propertyTypes.map((type, i) => (
-                    <option key={i}>{type}</option>
-                  ))}
-                </select>
+                <Select onValueChange={(value) => setTypeFilter(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {propertyTypes.map((type, i) => (
+                      <SelectItem key={i} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                <button className="px-5 py-2 bg-[#26415E] text-white rounded-lg hover:bg-gray-800">
+                <Button
+                  className="bg-[#26415E] text-white hover:bg-gray-800 w-full md:w-auto"
+                  onClick={() => {
+                    const query = new URLSearchParams({
+                      search: keyword || "",
+                      type: typeFilter || "",
+                      status: statusFilter || "",
+                    }).toString();
+
+                    navigate(`/properties/search?${query}`);
+                  }}
+                >
                   Search
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -170,7 +230,7 @@ export default function HeroSection() {
       {/* PROPERTIES BY CITIES */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Properties By Cities</h2>
+          <h2 className="text-3xl font-semibold">Properties By Cities</h2>
 
           <a
             href="/all-cities"
@@ -185,6 +245,30 @@ export default function HeroSection() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {cities.slice(0, 8).map((c, i) => (
             <CityCard key={i} city={c.city} count={c.count} image={c.image} />
+          ))}
+        </div>
+      </section>
+
+      {/* LATEST PROPERTIES */}
+      <section className="max-w-6xl mx-auto px-6 py-10">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-3xl font-semibold">Latest Properties</h2>
+          </div>
+
+          <div className="flex gap-3">
+            <Button className="bg-black text-white hover:bg-gray-700">
+              For Sale
+            </Button>
+            <Button className="bg-black text-white hover:bg-gray-700">
+              For Rent
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {latestProperties.map((p) => (
+            <PropertyCards key={p._id} property={p} />
           ))}
         </div>
       </section>
