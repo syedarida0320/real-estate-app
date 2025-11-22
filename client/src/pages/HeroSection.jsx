@@ -113,7 +113,13 @@ export default function HeroSection() {
 
               <DropdownMenuContent className="bg-white text-black w-40 rounded-lg shadow-lg">
                 {propertyTypes.map((type, i) => (
-                  <DropdownMenuItem key={i} className="cursor-pointer">
+                  <DropdownMenuItem
+                    key={i}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigate(`/properties/search?type=${type}`);
+                    }}
+                  >
                     {type}
                   </DropdownMenuItem>
                 ))}
@@ -161,7 +167,10 @@ export default function HeroSection() {
                 </Button>
 
                 <Button
-                  onClick={() => setSelectedStatus("for_sale")}
+                   onClick={() => {
+    setSelectedStatus("for_sale");
+    setStatusFilter("for_sale");
+  }}
                   variant="ghost"
                   className={`text-black ${
                     selectedStatus === "for_sale"
@@ -173,7 +182,10 @@ export default function HeroSection() {
                 </Button>
 
                 <Button
-                  onClick={() => setSelectedStatus("for_rent")}
+                  onClick={() => {
+    setSelectedStatus("for_rent");
+    setStatusFilter("for_rent");
+  }}
                   variant="ghost"
                   className={`text-black ${
                     selectedStatus === "for_rent"
@@ -257,12 +269,19 @@ export default function HeroSection() {
           </div>
 
           <div className="flex gap-3">
-            <Button className="bg-black text-white hover:bg-gray-700">
-              For Sale
-            </Button>
-            <Button className="bg-black text-white hover:bg-gray-700">
-              For Rent
-            </Button>
+            <Button
+    className="bg-black text-white hover:bg-gray-700"
+    onClick={() => navigate("/properties/search?status=for_sale")}
+  >
+    For Sale
+  </Button>
+
+            <Button
+    className="bg-black text-white hover:bg-gray-700"
+    onClick={() => navigate("/properties/search?status=for_rent")}
+  >
+    For Rent
+  </Button>
           </div>
         </div>
 

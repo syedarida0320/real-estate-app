@@ -2,7 +2,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import axios from "@/utils/axios";
 import { useEffect, useState } from "react";
 import PropertyCards from "@/components/PropertyCards";
-import { ArrowLeft, ChevronRight} from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 
 export default function SearchResults() {
   const [params] = useSearchParams();
@@ -51,14 +51,13 @@ export default function SearchResults() {
 
   return (
     <div className="p-10">
-      {/* ----------------- NEW SEARCH BREADCRUMB + SUMMARY ----------------- */}
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-600 flex flex-wrap gap-2 items-center">
           <Link to="/" className="text-blue-600 hover:underline">
             Home
           </Link>
-         <ChevronRight size={16} className="text-gray-500"/>
+          <ChevronRight size={16} className="text-gray-500" />
           <span className="text-gray-800 font-medium">{buildHeading()}</span>
         </div>
       </div>
@@ -81,9 +80,8 @@ export default function SearchResults() {
           )}
         </p>
       </div>
-      {/* ------------------------------------------------------------------ */}
-
-      {/* RESULTS GRID */}
+   
+     {/* RESULTS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {results.length > 0 ? (
           results.map((p, i) => <PropertyCards key={i} property={p} />)
