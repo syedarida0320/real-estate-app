@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const User = require("../models/User");
 const { response } = require("../utils/response");
+const slugify = require("slugify");
 
 exports.getAllProperties = async (req, res) => {
   try {
@@ -103,9 +104,11 @@ exports.createProperty = async (req, res) => {
       );
     }
 
-    const { price, location, facilities, availabilityType, ...rest } = req.body;
+    const { price, location, facilities, availabilityType, title, ...rest } =
+      req.body;
     const propertyData = {
       ...rest,
+      title,
       availabilityType,
       price: price ? JSON.parse(price) : {},
       location: location ? JSON.parse(location) : {},
@@ -138,6 +141,13 @@ exports.createProperty = async (req, res) => {
       return filePath;
     };
 
+    // ✅ Generate slug from title + city
+    const city = propertyData.location.city || "unknown";
+    propertyData.slug = slugify(`${title}-${city}`, {
+      lower: true,
+      strict: true,
+    });
+
     if (req.files?.mainImage?.[0]) {
       propertyData.mainImage = saveFile(req.files.mainImage[0]);
     }
@@ -168,7 +178,8 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     // Parse nested objects
-    const { price, location, facilities, availabilityType, ...rest } = req.body;
+    const { price, location, facilities, availabilityType, title, ...rest } =
+      req.body;
     const updateData = {
       ...rest,
       availabilityType,
@@ -213,6 +224,13 @@ exports.updateProperty = async (req, res) => {
 
     updateData.galleryImages = [...existingGalleryImages, ...newGalleryImages];
 
+    if (title && updateData.location?.city) {
+      updateData.slug = slugify(`${title}-${updateData.location.city}`, {
+        lower: true,
+        strict: true,
+      });
+    }
+
     // ✅ Update property
     const property = await Property.findByIdAndUpdate(
       req.params.id,
@@ -231,6 +249,23 @@ exports.updateProperty = async (req, res) => {
   } catch (error) {
     console.error("Error updating property:", error);
     response.serverError(res, "Error updating property");
+  }
+};
+
+// Fetch property by slug
+exports.getPropertyBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const property = await Property.findOne({ slug }).populate(
+      "userId",
+      "firstName lastName email phone role profileImagePath address"
+    );
+
+    if (!property) return response.notFound(res, "Property not found");
+    response.ok(res, "Property fetched successfully", property);
+  } catch (error) {
+    console.error("Error fetching property by slug:", error);
+    response.serverError(res, "Failed to fetch property");
   }
 };
 

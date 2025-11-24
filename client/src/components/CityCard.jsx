@@ -2,7 +2,7 @@ import React from "react";
 import axios from "@/utils/axios";
 import { Card, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
-export default function CityCard({ city, count, image }) {
+export default function CityCard({ city, count, image, onClick, className }) {
   const getImageUrl = (imgPath) => {
     if (!imgPath) return "/placeholder.png";
     const baseHost = axios.defaults.baseURL.replace("/api", "");
@@ -12,6 +12,10 @@ export default function CityCard({ city, count, image }) {
   };
 
   return (
+    <div
+      onClick={onClick}
+      className={`bg-white rounded-xl shadow-md overflow-hidden ${className}`}
+    >
     <Card className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-4 cursor-pointer flex flex-row items-center gap-0">
       {/* City Image */}
       <img
@@ -28,5 +32,6 @@ export default function CityCard({ city, count, image }) {
         </CardDescription>
       </CardContent>
     </Card>
+    </div>
   );
 }

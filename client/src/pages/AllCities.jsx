@@ -43,7 +43,14 @@ export default function AllCities() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {cities.map((c, i) => (
-          <CityCard key={i} city={c.city} count={c.count} image={c.image} />
+          <CityCard
+            key={i}
+            city={c.city}
+            count={c.count}
+            image={c.image}
+            onClick={() => navigate(`/properties/search?search=${c.city}`)}
+            className="cursor-pointer"
+          />
         ))}
       </div>
     </div>

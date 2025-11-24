@@ -49,7 +49,7 @@ const initSocket = (server) => {
     // Handle message sending
     socket.on("sendMessage", (data) => {
       const { senderId, receiverId, text } = data;
-      console.log("📩 sendMessage event:", data);
+      console.log("sendMessage event:", data);
 
       const receiverSocket = onlineUsers.get(receiverId);
 

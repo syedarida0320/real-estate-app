@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {getAllProperties, getPropertyById, createProperty, updateProperty, getUniqueCountries, getPropertiesByCity} = require('../controllers/property.controller');
+const {getAllProperties, getPropertyById, createProperty, updateProperty, getUniqueCountries, getPropertiesByCity, getPropertyBySlug} = require('../controllers/property.controller');
 const {propertyUpload, handleMulterError}=require("../middlewares/property.middleware");
 const {authMiddleware}= require ("../middlewares/auth.middleware")
 
 
+router.get('/public/:slug', getPropertyBySlug);  
 router.get('/all', getAllProperties);
 router.get("/cities/list", getPropertiesByCity)
 router.get('/countriesProperty', getUniqueCountries);

@@ -2,15 +2,25 @@ import { useSearchParams, Link } from "react-router-dom";
 import axios from "@/utils/axios";
 import { useEffect, useState } from "react";
 import PropertyCards from "@/components/PropertyCards";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchResults() {
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const [results, setResults] = useState([]);
 
   const keyword = params.get("search") || "";
   const type = params.get("type") || "";
   const status = params.get("status") || "";
+
+  // Map raw status values to human-readable text
+  const statusTextMap = {
+    for_sale: "for-sale",
+    for_rent: "for-rent",
+  };
+
+  const readableStatus = statusTextMap[status] || "";
 
   useEffect(() => {
     const fetchFiltered = async () => {
@@ -28,14 +38,14 @@ export default function SearchResults() {
   }, [params]);
 
   const buildHeading = () => {
-    if (keyword && type && status) {
-      return `${type} for ${status} in ${keyword}`;
+    if (keyword && type && readableStatus) {
+      return `${type} for ${readableStatus} in ${keyword}`;
     }
     if (keyword && type) {
       return `${type} in ${keyword}`;
     }
-    if (keyword && status) {
-      return `${keyword} - ${status} properties`;
+    if (keyword && readableStatus) {
+      return `${keyword} - ${readableStatus} properties`;
     }
     if (keyword) {
       return `Properties in ${keyword}`;
@@ -43,8 +53,8 @@ export default function SearchResults() {
     if (type) {
       return `${type} properties`;
     }
-    if (status) {
-      return `${status} properties`;
+    if (readableStatus) {
+      return `${readableStatus} properties`;
     }
     return "All Properties";
   };
@@ -80,8 +90,8 @@ export default function SearchResults() {
           )}
         </p>
       </div>
-   
-     {/* RESULTS GRID */}
+
+      {/* RESULTS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {results.length > 0 ? (
           results.map((p, i) => <PropertyCards key={i} property={p} />)

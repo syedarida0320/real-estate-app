@@ -167,10 +167,10 @@ export default function HeroSection() {
                 </Button>
 
                 <Button
-                   onClick={() => {
-    setSelectedStatus("for_sale");
-    setStatusFilter("for_sale");
-  }}
+                  onClick={() => {
+                    setSelectedStatus("for_sale");
+                    setStatusFilter("for_sale");
+                  }}
                   variant="ghost"
                   className={`text-black ${
                     selectedStatus === "for_sale"
@@ -183,9 +183,9 @@ export default function HeroSection() {
 
                 <Button
                   onClick={() => {
-    setSelectedStatus("for_rent");
-    setStatusFilter("for_rent");
-  }}
+                    setSelectedStatus("for_rent");
+                    setStatusFilter("for_rent");
+                  }}
                   variant="ghost"
                   className={`text-black ${
                     selectedStatus === "for_rent"
@@ -256,7 +256,17 @@ export default function HeroSection() {
         {/* Dynamic Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {cities.slice(0, 8).map((c, i) => (
-            <CityCard key={i} city={c.city} count={c.count} image={c.image} />
+            <CityCard
+              key={i}
+              city={c.city}
+              count={c.count}
+              image={c.image}
+              onClick={() => {
+                // Navigate to search page filtered by city
+                navigate(`/properties/search?search=${c.city}`);
+              }}
+              className="cursor-pointer"
+            />
           ))}
         </div>
       </section>
@@ -270,18 +280,18 @@ export default function HeroSection() {
 
           <div className="flex gap-3">
             <Button
-    className="bg-black text-white hover:bg-gray-700"
-    onClick={() => navigate("/properties/search?status=for_sale")}
-  >
-    For Sale
-  </Button>
+              className="bg-black text-white hover:bg-gray-700"
+              onClick={() => navigate("/properties/search?status=for_sale")}
+            >
+              For Sale
+            </Button>
 
             <Button
-    className="bg-black text-white hover:bg-gray-700"
-    onClick={() => navigate("/properties/search?status=for_rent")}
-  >
-    For Rent
-  </Button>
+              className="bg-black text-white hover:bg-gray-700"
+              onClick={() => navigate("/properties/search?status=for_rent")}
+            >
+              For Rent
+            </Button>
           </div>
         </div>
 

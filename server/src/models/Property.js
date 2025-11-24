@@ -14,6 +14,11 @@ const propertySchema = new mongoose.Schema(
       enum: ["available", "sold", "rented"],
       default: "available",
     },
+    slug: {
+      type: String,
+      unique: true,
+      required: true,
+    },
 
     availabilityType: {
       type: String,

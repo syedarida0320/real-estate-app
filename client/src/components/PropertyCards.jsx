@@ -2,8 +2,10 @@ import React from "react";
 import { MapPin, BedDouble, Bath, MoveDiagonal } from "lucide-react";
 import axios from "@/utils/axios";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export default function PropertyCards({ property }) {
+  const navigate = useNavigate();
   if (!property) return null;
 
   // Handle Image URL
@@ -20,11 +22,13 @@ export default function PropertyCards({ property }) {
   const p = property;
 
   return (
-    <Card className="gap-0 overflow-hidden py-0 rounded-xl shadow-sm hover:shadow-lg transition border bg-white">
+    <Card
+      onClick={() => navigate(`/property/${p.slug}`)}
+    className="gap-0 overflow-hidden py-0 rounded-xl shadow-sm hover:shadow-lg transition border bg-white cursor-pointer">
       <img
         src={getImageUrl(p.mainImage)}
         alt={p.title}
-        className="w-full  h-40 object-cover"
+        className="w-full h-40 object-cover"
       />
 
       <CardHeader className="p-3">

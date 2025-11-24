@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const HeroSection = lazy(() => import("@/pages/HeroSection"));
 const SearchResults=lazy(()=> import("@/pages/SearchResults"));
+const PropertyDetails=lazy(()=>import("@/pages/Property/PropertyDetails.jsx"));
 const AllCities = lazy(() => import("@/pages/AllCities"));
 const Login = lazy(() => import("@/auth/Login"));
 const Register = lazy(() => import("@/auth/Register"));
@@ -32,6 +33,7 @@ const App = () => {
         <Route element={<PublicRoute />}>
           <Route path="/" element={<HeroSection />} />
           <Route path="/properties/search" element={<SearchResults />} />
+          <Route path="/property/:slug" element={<PropertyDetails/>}/>
           <Route path="/all-cities" element={<AllCities />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

@@ -61,7 +61,7 @@ const Message = () => {
       }
     });
 
-    socket.current.on("getMessage", (data) => {
+    socket.current.on("getMessage", async (data) => {
       console.log("Incoming message:", data);
 
       const currentSelected = selectedUserRef.current;
@@ -89,20 +89,27 @@ const Message = () => {
             [data.sender]: (prev[data.sender] || 0) + 1,
           }));
         }
-
-        // Update list preview
-        setAgents((prev) =>
-          prev.map((a) =>
-            a._id === data.sender
-              ? {
-                  ...a,
-                  lastText: data.text,
-                  lastTime: new Date().toISOString(),
-                }
-              : a
-          )
-        );
       }
+      setAgents((prevAgents) => {
+        const exists = prevAgents.some((a) => a._id === data.sender);
+
+        if (!exists) {
+          console.log("New conversation detected → Refreshing list...");
+          fetchConversationList(); // <= ⭐ fetch instantly
+          return prevAgents;
+        }
+
+        // If exists → update preview text
+        return prevAgents.map((a) =>
+          a._id === data.sender
+            ? {
+                ...a,
+                lastText: data.text,
+                lastTime: new Date().toISOString(),
+              }
+            : a
+        );
+      });
     });
 
     return () => socket.current.disconnect();
@@ -203,44 +210,44 @@ const Message = () => {
   };
 
   // conversation table
- const fetchConversation = async (receiverId) => {
-  try {
-    // fetch all user conversations
-    const res = await axios.get(`/messages/conversations/${loggedInUser._id}`);
-    const existingConv = res.data.data.find(
-      (c) => c.otherUser._id === receiverId
-    );
-    if (existingConv) {
-      setConversationId(existingConv._id);
-      return existingConv._id;
-    }
-    setConversationId(null); // no conversation exists yet
-    return null;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-};
-
-
-  // message table
- useEffect(() => {
-  const fetchMessages = async () => {
-    if (!selectedUser) return;
-
-    const convId = await fetchConversation(selectedUser._id);
-    setConversationId(convId);
-
-    if (convId) {
-      const res = await axios.get(`/messages/conversation/${convId}`);
-      setMessages(res.data.data || []);
-    } else {
-      setMessages([]); // no conversation yet
+  const fetchConversation = async (receiverId) => {
+    try {
+      // fetch all user conversations
+      const res = await axios.get(
+        `/messages/conversations/${loggedInUser._id}`
+      );
+      const existingConv = res.data.data.find(
+        (c) => c.otherUser._id === receiverId
+      );
+      if (existingConv) {
+        setConversationId(existingConv._id);
+        return existingConv._id;
+      }
+      setConversationId(null); // no conversation exists yet
+      return null;
+    } catch (err) {
+      console.error(err);
+      return null;
     }
   };
-  fetchMessages();
-}, [selectedUser]);
 
+  // message table
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedUser) return;
+
+      const convId = await fetchConversation(selectedUser._id);
+      setConversationId(convId);
+
+      if (convId) {
+        const res = await axios.get(`/messages/conversation/${convId}`);
+        setMessages(res.data.data || []);
+      } else {
+        setMessages([]); // no conversation yet
+      }
+    };
+    fetchMessages();
+  }, [selectedUser]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -248,7 +255,7 @@ const Message = () => {
     // If no conversation exists yet → create it NOW
     let convId = conversationId;
     if (!convId) {
-      convId = await fetchConversation (selectedUser._id);
+      convId = await fetchConversation(selectedUser._id);
       setConversationId(convId);
     }
     const messageData = {
@@ -381,14 +388,15 @@ const Message = () => {
                       >
                         {agent.email}
                       </h3>
+              
                       <p
-                        className={`text-xs truncate w-[150px] ${
+                        className={`text-xs truncate p-1 w-[150px] ${
                           unreadCounts[agent._id] > 0
                             ? "text-gray-800 font-semibold"
                             : "text-gray-500"
                         }`}
                       >
-                        {agent.lastMessage?.text || ""}
+                        {agent.lastText || ""}
                       </p>
                     </div>
                   </div>
