@@ -35,17 +35,6 @@ const AgentProfileImage = ({ agentId }) => {
   );
 };
 
-const Facility = ({ children }) => (
-  <div className="flex items-center gap-2 text-sm text-gray-600">
-    {children}
-  </div>
-);
-
-const formatImageUrl = (img) => {
-  if (!img) return "/placeholder.png";
-  if (img.startsWith("http")) return img;
-  return `${import.meta.env.VITE_API}/${img.replace(/\\/g, "/")}`;
-};
 const PropertyDetails = () => {
   const { slug } = useParams();
   const [property, setProperty] = useState(null);
@@ -127,32 +116,15 @@ const PropertyDetails = () => {
     );
   }
 
-  // ✅ Image paths from backend
-  const baseURL = import.meta.env.VITE_API || "http://localhost:5000";
-  const mainImageUrl = property.mainImage
-    ? `${baseURL}/${property.mainImage.replace(/\\/g, "/")}`
-    : "/placeholder.jpg";
-
-  const galleryUrls = Array.isArray(property.galleryImages)
-    ? property.galleryImages.map(
-        (img) => `${baseURL}/${img.replace(/\\/g, "/")}`
-      )
-    : [];
-
   const agent = property.userId || {};
-  const agentFullName = agent.firstName
-    ? `${agent.firstName} ${agent.lastName}`
-    : "Unknown Agent";
 
   const lat = property?.location?.mapLocation?.lat;
   const lng = property?.location?.mapLocation?.lng;
 
   return (
-   <div className="m-10">
+   <div className="my-10 mx-15">
       <PropertyDetailLayout
       property={property}
-      mainImageUrl={mainImageUrl}
-      galleryUrls={galleryUrls}
       agent={agent}
       agentProfileImage={<AgentProfileImage agentId={agent._id} />}
       agentPropertiesCount={agentPropertiesCount}

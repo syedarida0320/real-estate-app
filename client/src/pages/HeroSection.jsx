@@ -16,9 +16,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Menu, MoveUpRight } from "lucide-react";
+import { Menu, MoveUpRight,Home } from "lucide-react";
 import CityCard from "@/components/CityCard";
 import PropertyCards from "@/components/PropertyCards";
+import ApartmentTypes from "@/components/ApartmentTypes";
 import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
@@ -301,6 +302,9 @@ export default function HeroSection() {
           ))}
         </div>
       </section>
-    </div>
+ 
+   <ApartmentTypes propertyTypes={propertyTypes} />
+
+       </div>
   );
 }
