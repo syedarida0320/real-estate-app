@@ -3,15 +3,14 @@ import axios from "@/utils/axios";
 import { useEffect, useState } from "react";
 import PropertyCards from "@/components/PropertyCards";
 import { ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 export default function SearchResults() {
-  const navigate = useNavigate();
   const [params] = useSearchParams();
   const [results, setResults] = useState([]);
 
   const keyword = params.get("search") || "";
   const type = params.get("type") || "";
+  const availabilityType = params.get("availabilityType") || "";
   const status = params.get("status") || "";
 
   // Map raw status values to human-readable text
@@ -19,8 +18,8 @@ export default function SearchResults() {
     for_sale: "for-sale",
     for_rent: "for-rent",
   };
-
-  const readableStatus = statusTextMap[status] || "";
+const finalStatus = status || availabilityType;
+const readableStatus = statusTextMap[finalStatus] || "";
 
   useEffect(() => {
     const fetchFiltered = async () => {

@@ -25,7 +25,7 @@ const ApartmentTypes = ({ propertyTypes = [] }) => {
   const navigate = useNavigate();
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-16">
+    <section className="max-w-6xl mx-auto px-10 py-16">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-semibold">Apartment Types</h2>
 

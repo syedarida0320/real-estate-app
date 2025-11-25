@@ -16,10 +16,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Menu, MoveUpRight,Home } from "lucide-react";
+import { Menu, MoveUpRight } from "lucide-react";
 import CityCard from "@/components/CityCard";
 import PropertyCards from "@/components/PropertyCards";
 import ApartmentTypes from "@/components/ApartmentTypes";
+import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
@@ -100,7 +101,7 @@ export default function HeroSection() {
             <Menu />
           </button>
 
-          <h1 className="text-2xl font-bold tracking-wide">RealEstate</h1>
+          <h1 className="text-2xl font-bold tracking-wide">Real Estate App</h1>
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex items-center gap-8 text-lg">
@@ -241,7 +242,7 @@ export default function HeroSection() {
       </div>
 
       {/* PROPERTIES BY CITIES */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      <section className="max-w-6xl mx-auto px-10 py-16">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-semibold">Properties By Cities</h2>
 
@@ -273,7 +274,7 @@ export default function HeroSection() {
       </section>
 
       {/* LATEST PROPERTIES */}
-      <section className="max-w-6xl mx-auto px-6 py-10">
+      <section className="max-w-6xl mx-auto px-10 py-10">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-semibold">Latest Properties</h2>
@@ -302,9 +303,30 @@ export default function HeroSection() {
           ))}
         </div>
       </section>
- 
-   <ApartmentTypes propertyTypes={propertyTypes} />
 
-       </div>
+      <ApartmentTypes propertyTypes={propertyTypes} />
+
+      {/* Agent register */}
+      <div className="bg-[#EB67531A]">
+        <section className="max-w-6xl mx-auto px-10 py-20">
+          <div className="flex flex-col mb-6">
+            <h2 className="text-3xl font-semibold">
+              Become a Real Estate Agent
+            </h2>
+            <p className="text-[14px] font-normal mb-[20px]">
+              We only work with the best companies around the globe to survey
+            </p>
+          </div>
+          <span>
+            <a href="#">
+              <Button className="bg-blue-900">
+                Register Now <MoveUpRight />
+              </Button>
+            </a>
+          </span>
+        </section>
+      </div>
+      <Footer/>
+    </div>
   );
 }
