@@ -18,10 +18,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, MoveUpRight } from "lucide-react";
 import CityCard from "@/components/CityCard";
+import { cacheFetchStorage } from "@/utils/cacheStorage";
 import PropertyCards from "@/components/PropertyCards";
 import ApartmentTypes from "@/components/ApartmentTypes";
 import Footer from "@/components/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function HeroSection() {
   const [propertyTypes, setPropertyTypes] = useState([]);
@@ -34,59 +35,54 @@ export default function HeroSection() {
   const [statusFilter, setStatusFilter] = useState("");
   const navigate = useNavigate();
 
+  // 👉 Fetch Latest 8 Properties
+  const loadLatestProperties = async () => {
+    const data = await cacheFetchStorage("/properties?limit=8", async () => {
+      const res = await axios.get("/properties?limit=8");
+      return res.data.data.properties;
+    });
+    setLatestProperties(data);
+  };
+
+  // 👉 Fetch unique property types from backend DB
+  const loadPropertyTypes = async () => {
+    const types = await cacheFetchStorage("/properties?limit=200", async () => {
+      const res = await axios.get("/properties?limit=200");
+      return [...new Set(res.data.data.properties.map((p) => p.type))];
+    });
+    setPropertyTypes(types);
+  };
+
+  // 👉 Fetch unique countries
+  const loadCountries = async () => {
+    const data = await cacheFetchStorage(
+      "/properties/countriesProperty",
+      async () => {
+        const res = await axios.get("/properties/countriesProperty");
+        return res.data;
+      }
+    );
+    setCountries(data);
+  };
+
+  // 👉 Fetch cities with property count
+  const loadCities = async () => {
+    const data = await cacheFetchStorage(
+      "/properties/cities/list",
+      async () => {
+        const res = await axios.get("/properties/cities/list");
+        return res.data.cities;
+      }
+    );
+    setCities(data);
+  };
+
   useEffect(() => {
     loadPropertyTypes();
     loadCountries();
     loadCities();
     loadLatestProperties();
   }, []);
-
-  // 👉 Fetch Latest 8 Properties
-  const loadLatestProperties = async () => {
-    try {
-      const { data } = await axios.get("/properties?limit=8");
-      setLatestProperties(data.data.properties);
-    } catch (error) {
-      console.log("Error loading latest properties:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadPropertyTypes();
-    loadCountries();
-    loadCities();
-  }, []);
-
-  // 👉 Fetch unique property types from backend DB
-  const loadPropertyTypes = async () => {
-    try {
-      const { data } = await axios.get("/properties?limit=200");
-      const types = [...new Set(data.data.properties.map((p) => p.type))];
-      setPropertyTypes(types);
-    } catch (err) {
-      console.log("Error loading types");
-    }
-  };
-
-  // 👉 Fetch unique countries
-  const loadCountries = async () => {
-    try {
-      const { data } = await axios.get("/properties/countriesProperty");
-      setCountries(data.data);
-    } catch (err) {
-      console.log("Error loading countries");
-    }
-  };
-
-  // 👉 Fetch cities with property count
-  const loadCities = async () => {
-    try {
-      const { data } = await axios.get("/properties/cities/list");
-      setCities(data.cities);
-    } catch (err) {
-      console.log("Error loading cities");
-    }
-  };
 
   return (
     <div>
@@ -318,14 +314,15 @@ export default function HeroSection() {
             </p>
           </div>
           <span>
-            <a href="#">
+            <Link to="/register-agent">
               <Button className="bg-blue-900">
                 Register Now <MoveUpRight />
               </Button>
-            </a>
+            </Link>
           </span>
         </section>
       </div>
+
       <Footer />
     </div>
   );
