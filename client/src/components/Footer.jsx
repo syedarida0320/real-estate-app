@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import axios from "@/utils/axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { cacheFetchStorage } from "@/utils/cacheStorage";
 
 export default function Footer() {
   const [popularSearches, setPopularSearches] = useState([]);
@@ -41,8 +42,10 @@ export default function Footer() {
   useEffect(() => {
     const fetchPopularSearches = async () => {
       try {
-        const res = await axios.get("/properties");
-        const properties = res?.data?.data?.properties || [];
+         const properties = await cacheFetchStorage("footerPopularSearches", async () => {
+          const res = await axios.get("/properties");
+          return res?.data?.data?.properties || [];
+        });
 
         const ORDERED_TYPES = [
           "Apartment",

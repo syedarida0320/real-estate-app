@@ -420,7 +420,7 @@ const AddAgent = () => {
               htmlFor="profileUpload"
               className="cursor-pointer block text-gray-600 text-sm font-medium mb-1"
             >
-              Click to upload or drag and drop
+              Click to upload
               <br />
               <span className="text-sm text-gray-400">
                 SVG, PNG, JPG or GIF (max. 800x400px)

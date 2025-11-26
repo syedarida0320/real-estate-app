@@ -5,6 +5,7 @@ import PublicRoute from "@/routes/PublicRoute";
 import Loader from "@/components/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AgentRegister from "./pages/AgentRegister";
 
 const HeroSection = lazy(() => import("@/pages/HeroSection"));
 const SearchResults=lazy(()=> import("@/pages/SearchResults"));
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify/email" element={<VerifyEmail />} />
+          <Route path="/register-agent" element={<AgentRegister/>}/>
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
         {/* Private Routes */}

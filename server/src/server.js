@@ -32,6 +32,7 @@ app.use("/api/maps", require("./routes/map.routes"));
 app.use("/api/conversations", require("./routes/conversation.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api", require("./routes/subscribe.routes"));
+app.use("/api/agent-request",require("./routes/agent.request.routes"));
 app.use("/api/upload", uploads);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
