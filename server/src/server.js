@@ -6,7 +6,7 @@ const colors = require("colors");
 const path = require("path");
 const uploads = require("./routes/upload.routes");
 const http = require("http");
-const initSocket=require("./utils/socket");
+const initSocket = require("./utils/socket");
 
 dotenv.config();
 connectDB();
@@ -29,8 +29,9 @@ app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api", require("./routes/email.routes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/maps", require("./routes/map.routes"));
-app.use("/api/conversations", require("./routes/conversation.routes"))
-app.use("/api/messages", require("./routes/message.routes"))
+app.use("/api/conversations", require("./routes/conversation.routes"));
+app.use("/api/messages", require("./routes/message.routes"));
+app.use("/api", require("./routes/subscribe.routes"));
 app.use("/api/upload", uploads);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
