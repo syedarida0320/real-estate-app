@@ -8,33 +8,64 @@ export default function Footer() {
   const [popularSearches, setPopularSearches] = useState([]);
 
   useEffect(() => {
-    const fetchPopularSearches = async () => {
-      try {
-        const res = await axios.get("/properties/all"); // Fetch all properties
-        const properties = res?.data?.data?.properties || [];
+  const fetchPopularSearches = async () => {
+    try {
+      const res = await axios.get("/properties");
+      const properties = res?.data?.data?.properties || [];
 
-        // Generate unique popular searches based on type + availabilityType
-        const searchesMap = {};
-        properties.forEach((p) => {
-          if (p.type && p.availabilityType) {
-            const key = `${p.type}-${p.availabilityType}`;
-            if (!searchesMap[key]) {
-              searchesMap[key] = {
-                type: p.type,
-                availabilityType: p.availabilityType,
-              };
-            }
-          }
-        });
+      const ORDERED_TYPES = [
+        "Apartment",
+        "Hotel",
+        "House",
+        "Commercial",
+        "Garages",
+        "Lots",
+      ];
 
-        setPopularSearches(Object.values(searchesMap));
-      } catch (error) {
-        console.error("Error fetching popular searches:", error);
-      }
-    };
+      const PRIORITY_ORDER = ["for_sale", "for_rent"]; // sold excluded from footer
 
-    fetchPopularSearches();
-  }, []);
+      // Map to store unique searches
+      const searchesMap = {};
+
+      properties.forEach((p) => {
+        if (!p.type || !p.availabilityType) return;
+
+        if (p.availabilityType === "sold") return; // Skip sold from Popular Search
+
+        const key = `${p.type}-${p.availabilityType}`;
+        if (!searchesMap[key]) {
+          searchesMap[key] = {
+            type: p.type,
+            availabilityType: p.availabilityType,
+          };
+        }
+      });
+
+      let sortedList = Object.values(searchesMap);
+
+      // Sort by type order AND availability order
+      sortedList.sort((a, b) => {
+        const typeA = ORDERED_TYPES.indexOf(a.type);
+        const typeB = ORDERED_TYPES.indexOf(b.type);
+
+        if (typeA !== typeB) return typeA - typeB;
+
+        // If same type → sort by availability (sale first, rent second)
+        const availA = PRIORITY_ORDER.indexOf(a.availabilityType);
+        const availB = PRIORITY_ORDER.indexOf(b.availabilityType);
+
+        return availA - availB;
+      });
+
+      setPopularSearches(sortedList);
+    } catch (error) {
+      console.error("Error fetching popular searches:", error);
+    }
+  };
+
+  fetchPopularSearches();
+}, []);
+
 
   return (
     <footer className="bg-[#111] text-white py-10">

@@ -44,7 +44,7 @@ export default function HeroSection() {
   // 👉 Fetch Latest 8 Properties
   const loadLatestProperties = async () => {
     try {
-      const { data } = await axios.get("/properties/all?limit=8");
+      const { data } = await axios.get("/properties?limit=8");
       setLatestProperties(data.data.properties);
     } catch (error) {
       console.log("Error loading latest properties:", error);
@@ -60,7 +60,7 @@ export default function HeroSection() {
   // 👉 Fetch unique property types from backend DB
   const loadPropertyTypes = async () => {
     try {
-      const { data } = await axios.get("/properties/all?limit=200");
+      const { data } = await axios.get("/properties?limit=200");
       const types = [...new Set(data.data.properties.map((p) => p.type))];
       setPropertyTypes(types);
     } catch (err) {
@@ -105,8 +105,10 @@ export default function HeroSection() {
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex items-center gap-8 text-lg">
-            <li className="hover:text-gray-300 cursor-pointer">Home</li>
-
+            <a href="#">
+              {" "}
+              <li className="hover:text-gray-300 cursor-pointer">Agent</li>
+            </a>
             {/* Properties Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="outline-none cursor-pointer">
@@ -127,8 +129,6 @@ export default function HeroSection() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <li className="hover:text-gray-300 cursor-pointer">About</li>
-            <li className="hover:text-gray-300 cursor-pointer">Contact</li>
           </ul>
 
           {/* Auth Buttons */}
@@ -326,7 +326,7 @@ export default function HeroSection() {
           </span>
         </section>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

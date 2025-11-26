@@ -10,7 +10,5 @@ router.post('/login',validate(loginSchema), loginUser);
 router.post('/register',validate(registerSchema), registerUser);
 router.get("/verify/email", verifyEmail);
 router.post("/set-password", setNewPassword);
-// router.post('/forgot-password', authController.forgotPassword);
-// router.post('/reset-password', authController.resetPassword);
 
 module.exports = router;

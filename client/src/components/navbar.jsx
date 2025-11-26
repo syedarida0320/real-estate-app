@@ -25,7 +25,7 @@ export const Navbar = () => {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="cursor-pointer"/>
         <img src={logo} alt="Yariga Logo" className="w-8 h-8 object-contain" />
-        <h1 className="text-xl font-bold text-gray-800">Yariga</h1>
+        <h1 className="text-xl font-bold text-gray-800">Real Estate App</h1>
       </div>
 
       {/* Center section - Search */}

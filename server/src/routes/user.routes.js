@@ -4,15 +4,12 @@ const {getUsers,getProfileImage,createUser, getUserById, updateUser, getUserMess
 const {authMiddleware}= require ("../middlewares/auth.middleware")
 const upload=require("../middlewares/upload")
 
-// Protect all routes
-router.use(authMiddleware);
-
-router.get('/', getUsers);
-router.post("/", createUser);
-router.get('/messages', getUserMessages);
+router.get('/',authMiddleware, getUsers);
+router.post("/",authMiddleware, createUser);
+router.get('/messages',authMiddleware, getUserMessages);
 
 router.get("/:id/profile-image",getProfileImage);
-router.get('/:id', getUserById);
-router.put("/:id",upload.single("profileImage"), updateUser);
+router.get('/:id',authMiddleware, getUserById);
+router.put("/:id",upload.single("profileImage"),authMiddleware, updateUser);
 
 module.exports = router;

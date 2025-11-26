@@ -6,12 +6,11 @@ const {authMiddleware}= require ("../middlewares/auth.middleware")
 
 
 router.get('/public/:slug', getPropertyBySlug);  
-router.get('/all', getAllProperties);
+router.get('/', getAllProperties);
 router.get("/cities/list", getPropertiesByCity)
 router.get('/countriesProperty', getUniqueCountries);
 
 router.get('/countries',  authMiddleware, getUniqueCountries);
-router.get('/', authMiddleware, getAllProperties);
 router.get('/:id' , authMiddleware, getPropertyById);
 
 router.post('/', authMiddleware, propertyUpload ,handleMulterError, createProperty);
