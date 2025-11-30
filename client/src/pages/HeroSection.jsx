@@ -78,6 +78,7 @@ export default function HeroSection() {
     loadLatestProperties();
   }, []);
 
+<<<<<<< HEAD
   // Smooth scroll to a section by ID
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -86,6 +87,8 @@ export default function HeroSection() {
     }
   };
 
+=======
+>>>>>>> 1f76e056cbffbb0c3871c1e718313fd9d67f66b0
   return (
     <div>
       <div

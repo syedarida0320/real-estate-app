@@ -42,7 +42,11 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify/email" element={<VerifyEmail />} />
+<<<<<<< HEAD
           <Route path="/register-agent" element={<AgentRegister />} />
+=======
+          <Route path="/register-agent" element={<AgentRegister/>}/>
+>>>>>>> 1f76e056cbffbb0c3871c1e718313fd9d67f66b0
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
         {/* Private Routes */}
