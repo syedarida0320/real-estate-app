@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>New Property Listed</title>
+  </head>
+
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 30px;
+      margin: 0;
+    "
+  >
+    <div
+      style="
+        max-width: 620px;
+        margin: auto;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <!-- Header -->
+      <div
+        style="
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          padding: 25px;
+          text-align: center;
+        "
+      >
+        <h1
+          style="
+            color: #ffffff;
+            font-size: 26px;
+            margin: 0;
+            letter-spacing: 0.5px;
+          "
+        >
+          New Property Listed
+        </h1>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 28px">
+        <h2
+          style="
+            color: #111827;
+            font-size: 22px;
+            margin-bottom: 18px;
+            text-align: center;
+          "
+        >
+          <%= property.title %>
+        </h2>
+        <!-- Property Image -->
+        <div style="text-align: center; margin: 25px 0">
+          <img
+            src="<%= BASE_URL %>/<%= property.mainImage.replace('\\', '/') %>"
+            alt="Property Image"
+            style="
+              width: 100%;
+              max-width: 400px;
+              border-radius: 10px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            "
+          />
+        </div>
+
+        <p
+          style="
+            font-size: 16px;
+            color: #374151;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            text-align: left;
+          "
+        >
+          A new property has just been added to the Real Estate App listings.
+          This listing offers a unique combination of location, comfort, and
+          value—perfect for buyers and investors looking for an excellent
+          opportunity. Below are the essential details including price, type,
+          and geographic location. Click the button below to view full
+          specifications, additional images, and complete property information
+          on our platform.
+        </p>
+
+        <!-- Property Details Box -->
+        <div
+          style="
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+          "
+        >
+          <p style="font-size: 15px; color: #374151; line-height: 1.6">
+            <strong style="color: #111827">Type:</strong> <%= property.type %>
+          </p>
+
+          <p style="font-size: 15px; color: #374151; line-height: 1.6">
+            <strong style="color: #111827">Price:</strong>
+            <%= property.price.amount %> <%= property.price.currency %>
+          </p>
+
+          <p style="font-size: 15px; color: #374151; line-height: 1.6">
+            <strong style="color: #111827">Location:</strong>
+            <%= property.location.city %>, <%= property.location.country %>
+          </p>
+        </div>
+
+        <!-- Button -->
+        <div style="text-align: center; margin: 35px 0">
+          <a
+            href="<%= FRONTEND_URL %>/property/<%= property.slug %>"
+            style="
+              background: #2563eb;
+              color: #ffffff;
+              padding: 14px 32px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: bold;
+              font-size: 16px;
+              display: inline-block;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            "
+          >
+            View Property
+          </a>
+        </div>
+
+        <p
+          style="
+            margin-top: 18px;
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            line-height: 1.6;
+          "
+        >
+          This is an automated notification from Real Estate App. If you have
+          any questions, contact our support team.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style="
+          background: #f9fafb;
+          padding: 18px;
+          text-align: center;
+          border-top: 1px solid #e5e7eb;
+        "
+      >
+        <p style="font-size: 13px; color: #9ca3af; margin: 0">
+          &copy; <%= new Date().getFullYear() %> Real Estate App. All rights
+          reserved.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "@/utils/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function AgentRegister() {
   const navigate = useNavigate();
@@ -182,12 +183,12 @@ export default function AgentRegister() {
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="bg-blue-900 text-white px-6 py-3 rounded mt-4 col-span-2"
+            className="bg-blue-900 text-white px-6 py-5 rounded mt-4 col-span-2"
           >
             Submit
-          </button>
+          </Button>
         </form>
       </div>
     </div>

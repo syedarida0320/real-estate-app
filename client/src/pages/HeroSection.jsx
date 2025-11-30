@@ -10,12 +10,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { Menu, MoveUpRight } from "lucide-react";
 import CityCard from "@/components/CityCard";
 import { cacheFetchStorage } from "@/utils/cacheStorage";
@@ -84,6 +78,14 @@ export default function HeroSection() {
     loadLatestProperties();
   }, []);
 
+  // Smooth scroll to a section by ID
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div>
       <div
@@ -100,31 +102,21 @@ export default function HeroSection() {
           <h1 className="text-2xl font-bold tracking-wide">Real Estate App</h1>
 
           {/* Desktop Menu */}
-          <ul className="hidden md:flex items-center gap-8 text-lg">
-            <a href="#">
-              {" "}
-              <li className="hover:text-gray-300 cursor-pointer">Agent</li>
-            </a>
-            {/* Properties Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="outline-none cursor-pointer">
-                Properties
-              </DropdownMenuTrigger>
+          <ul className="hidden md:flex items-center gap-8 text-[16px]">
+            {/* SCROLL TO CITIES SECTION */}
+            <li className="hover:text-gray-300 cursor-pointer"
+              onClick={() => scrollToSection("cities-properties")}>Properties by Cities
+            </li>
 
-              <DropdownMenuContent className="bg-white text-black w-40 rounded-lg shadow-lg">
-                {propertyTypes.map((type, i) => (
-                  <DropdownMenuItem
-                    key={i}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/properties/search?type=${type}`);
-                    }}
-                  >
-                    {type}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* SCROLL TO LATEST PROPERTIES */}
+            <li className="hover:text-gray-300 cursor-pointer"
+              onClick={() => scrollToSection("latest-properties")}>Latest Properties
+            </li>
+
+            {/* SCROLL TO AGENT REGISTER */}
+            <li className="hover:text-gray-300 cursor-pointer"
+              onClick={() => scrollToSection("agent-register")}>Agent Register
+            </li>
           </ul>
 
           {/* Auth Buttons */}
@@ -238,7 +230,7 @@ export default function HeroSection() {
       </div>
 
       {/* PROPERTIES BY CITIES */}
-      <section className="max-w-6xl mx-auto px-10 py-16">
+      <section id="cities-properties" className="max-w-6xl mx-auto px-10 py-16">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-semibold">Properties By Cities</h2>
 
@@ -270,7 +262,7 @@ export default function HeroSection() {
       </section>
 
       {/* LATEST PROPERTIES */}
-      <section className="max-w-6xl mx-auto px-10 py-10">
+      <section id="latest-properties" className="max-w-6xl mx-auto px-10 py-10">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-semibold">Latest Properties</h2>
@@ -304,7 +296,7 @@ export default function HeroSection() {
 
       {/* Agent register */}
       <div className="bg-[#EB67531A]">
-        <section className="max-w-6xl mx-auto px-10 py-20">
+        <section id="agent-register" className="max-w-6xl mx-auto px-10 py-20">
           <div className="flex flex-col mb-6">
             <h2 className="text-3xl font-semibold">
               Become a Real Estate Agent

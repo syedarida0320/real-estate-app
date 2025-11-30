@@ -11,6 +11,15 @@ const initSocket = require("./utils/socket");
 dotenv.config();
 connectDB();
 
+const agenda = require("./config/agenda");
+// const { sendEmailWithTransport, testingMail } = require("./utils/mailer");
+require("./jobs/propertyEmail.job")(agenda);
+
+agenda.on("ready", async () => {
+  await agenda.start();
+  console.log("Agenda started...");
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
@@ -32,7 +41,7 @@ app.use("/api/maps", require("./routes/map.routes"));
 app.use("/api/conversations", require("./routes/conversation.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api", require("./routes/subscribe.routes"));
-app.use("/api/agent-request",require("./routes/agent.request.routes"));
+app.use("/api/agent-request", require("./routes/agent.request.routes"));
 app.use("/api/upload", uploads);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -44,7 +53,14 @@ const server = http.createServer(app);
 
 initSocket(server);
 
+// app.get('/testing', async (req, res) => {
+//   await testingMail();
+//   console.log("mail sent");
+
+//   res.send({ message : 'Ok'});
+// });
+
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(colors.bgCyan(`Server running on port ${PORT}`))
-);
+server.listen(PORT, async () => {
+  console.log(colors.bgCyan(`Server running on port ${PORT}`));
+});

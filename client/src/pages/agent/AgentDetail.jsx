@@ -49,7 +49,7 @@ const AgentDetail = () => {
         {/* Agent Profile Section */}
         <Link
           to="/agent"
-          className="text-2xl mb-0 flex space-x-3 text-black font-medium p-4"
+          className="text-2xl inline-flex mb-0 space-x-3 text-black font-medium p-4"
         >
           <ChevronLeft className="w-7 h-7" />
           <h1>Details</h1>

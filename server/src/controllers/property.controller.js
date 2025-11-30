@@ -4,6 +4,7 @@ const fs = require("fs");
 const User = require("../models/User");
 const { response } = require("../utils/response");
 const slugify = require("slugify");
+const agenda = require("../config/agenda");
 
 exports.getAllProperties = async (req, res) => {
   try {
@@ -146,7 +147,7 @@ exports.createProperty = async (req, res) => {
     };
 
     // ✅ Generate slug from title + city
-    const city = propertyData.location.city || "unknown";
+    const city = propertyData.location.city || "";
     propertyData.slug = slugify(`${title}-${city}`, {
       lower: true,
       strict: true,
@@ -163,6 +164,7 @@ exports.createProperty = async (req, res) => {
     }
 
     const property = await Property.create(propertyData);
+    await agenda.now("send-new-property-email", { property });
     response.created(res, "Property created successfully", property);
   } catch (error) {
     console.error("Error creating property:", error);

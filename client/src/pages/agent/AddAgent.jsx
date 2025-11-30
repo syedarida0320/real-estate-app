@@ -6,20 +6,23 @@ import dummyAvatar from "@/assets/dummy-avatar.png";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 const AddAgent = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill = location.state?.prefill || {};
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    age: "",
+    firstName: prefill.firstName || "",
+    lastName: prefill.lastName || "",
+    email: prefill.email || "",
+    phone: prefill.phone || "",
+    age: prefill.age || "",
     address: {
       street: "",
-      city: "",
-      state: "",
-      country: "",
+      city: prefill.city || "",
+      state: prefill.state || "",
+      country: prefill.country || "",
       zipCode: "",
     },
     agency: "",
@@ -147,7 +150,11 @@ const AddAgent = () => {
     <MainLayout>
       <div className="px-4 sm:px-8 py-6">
         <div className="flex items-center mb-6">
-          <Button variant="outline" onClick={handleBack} className="cursor-pointer mr-4">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            className="cursor-pointer mr-4"
+          >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -429,10 +436,18 @@ const AddAgent = () => {
           </div>
 
           <div className="flex justify-end gap-3 mt-6">
-            <Button type="button" className="cursor-pointer" variant="outline" onClick={handleBack}>
+            <Button
+              type="button"
+              className="cursor-pointer"
+              variant="outline"
+              onClick={handleBack}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="cursor-pointer bg-blue-600 text-white">
+            <Button
+              type="submit"
+              className="cursor-pointer bg-blue-600 text-white"
+            >
               Save Agent
             </Button>
           </div>

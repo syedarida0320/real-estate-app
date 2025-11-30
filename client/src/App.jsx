@@ -2,14 +2,17 @@ import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "@/routes/PrivateRoute";
 import PublicRoute from "@/routes/PublicRoute";
+import AdminProtected from "@/routes/AdminProtected";
 import Loader from "@/components/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AgentRegister from "./pages/AgentRegister";
 
 const HeroSection = lazy(() => import("@/pages/HeroSection"));
-const SearchResults=lazy(()=> import("@/pages/SearchResults"));
-const PropertyDetails=lazy(()=>import("@/pages/Property/PropertyDetails.jsx"));
+const SearchResults = lazy(() => import("@/pages/SearchResults"));
+const PropertyDetails = lazy(() =>
+  import("@/pages/Property/PropertyDetails.jsx")
+);
 const AllCities = lazy(() => import("@/pages/AllCities"));
 const Login = lazy(() => import("@/auth/Login"));
 const Register = lazy(() => import("@/auth/Register"));
@@ -24,7 +27,7 @@ const Review = lazy(() => import("@/pages/Review"));
 const AddAgent = lazy(() => import("@/pages/agent/AddAgent"));
 const AddEditProperty = lazy(() => import("@/pages/property/AddEditProperty"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
-
+const AgentRequests = lazy(() => import("@/pages/admin/AgentRequests"));
 
 const App = () => {
   return (
@@ -34,12 +37,12 @@ const App = () => {
         <Route element={<PublicRoute />}>
           <Route path="/" element={<HeroSection />} />
           <Route path="/properties/search" element={<SearchResults />} />
-          <Route path="/property/:slug" element={<PropertyDetails/>}/>
+          <Route path="/property/:slug" element={<PropertyDetails />} />
           <Route path="/all-cities" element={<AllCities />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify/email" element={<VerifyEmail />} />
-          <Route path="/register-agent" element={<AgentRegister/>}/>
+          <Route path="/register-agent" element={<AgentRegister />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
         {/* Private Routes */}
@@ -55,6 +58,14 @@ const App = () => {
           <Route path="/agent/:id" element={<AgentDetail />} />
           <Route path="/message" element={<Message />} />
           <Route path="/review" element={<Review />} />
+          <Route
+            path="/admin/agent-requests"
+            element={
+              <AdminProtected>
+                <AgentRequests />
+              </AdminProtected>
+            }
+          />
         </Route>
       </Routes>
       <ToastContainer
