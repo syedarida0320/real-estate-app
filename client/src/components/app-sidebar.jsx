@@ -20,7 +20,7 @@ const navItems = [
     title: "Dashboard",
     path: "/home",
     icon: IconDashboard,
-    roles: ["Admin", "User", "Agent"],
+    roles: ["Admin"],
   },
   {
     title: "Property",
@@ -32,7 +32,7 @@ const navItems = [
     title: "Agent",
     path: "/agent",
     icon: IconUsers,
-    roles: ["Admin", "Agent", "User"],
+    roles: ["Admin"],
   },
   {
     title: "Agent Requests",

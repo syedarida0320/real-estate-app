@@ -32,8 +32,8 @@ const Agent = () => {
     <MainLayout>
       <div className="px-4 sm:px-8 py-6">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-3 sm:mb-0">
+        <div className="flex flex-row justify-between items-start sm:items-center mb-6">
+          <h2 className="md:text-2xl text-xl font-semibold text-gray-800 mb-3 sm:mb-0">
             Agents List
           </h2>
 
@@ -78,7 +78,7 @@ const Agent = () => {
                   <p className="text-sm text-gray-500 mb-7">{agent.user?.role}</p>
 
                   <div className="flex flex-row gap-2 my-2 text-gray-600 text-sm">
-                    <div className="flex flex-col space-x-20">
+                    <div className="flex flex-col md:space-x-20 space-x-5">
                       <p className="flex items-center gap-2">
                         <Mail size={15} className="text-gray-500" />
                         {agent.user?.email}
@@ -88,7 +88,7 @@ const Agent = () => {
                         {agent.user?.phone}
                       </p>
                     </div>
-                    <div className="flex flex-col space-x-20">
+                    <div className="flex flex-col md:space-x-20 space-x-5">
                       <p className="flex items-center gap-2">
                         <MapPin size={15} className="text-gray-500" />
                         {agent.user?.address

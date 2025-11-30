@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { User, Settings, LogOut, Moon, ChevronDown, Sun } from "lucide-react";
+import { User, LogOut, Moon, ChevronDown, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import dummyAvatar from "@/assets/dummy-avatar.png";
@@ -52,7 +52,7 @@ export function NavUser({ user }) {
         <img
           src={user.avatar || dummyAvatar}
           alt="User"
-          className="w-10 h-10 rounded-full object-cover border"
+          className="md:w-10 md:h-10 h-8 w-8 rounded-full object-cover border"
         />
 
         {/* User Info */}
@@ -82,11 +82,6 @@ export function NavUser({ user }) {
           >
             <User className="w-4 h-4 text-gray-600" />
             Edit Profile
-          </button>
-
-          <button className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100">
-            <Settings className="w-4 h-4 text-gray-600" />
-            Settings
           </button>
 
           <button

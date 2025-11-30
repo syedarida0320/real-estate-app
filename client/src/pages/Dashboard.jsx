@@ -62,7 +62,7 @@ export default function Dashboard() {
           </div>
 
           {/* Revenue + Referrals */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Revenue Chart */}
             <Card className="col-span-2 shadow-sm">
               <CardHeader>
@@ -73,31 +73,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Referrals */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle>Property Referrals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(data?.referrals || []).map((ref, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between mb-1 text-sm">
-                      <span>{ref.source || "Loading..."}</span>
-                      <span>{ref.value ? `${ref.value}%` : "--"}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full"
-                        style={{
-                          width: `${ref.value || 0}%`,
-                          backgroundColor: ref.color || "gray",
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+           
           </div>
 
           <SectionCards />

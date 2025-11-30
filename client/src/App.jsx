@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "@/routes/PrivateRoute";
 import PublicRoute from "@/routes/PublicRoute";
-import AdminProtected from "@/routes/AdminProtected";
+import RoleProtected from "@/routes/RoleProtected";
 import Loader from "@/components/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,7 +23,6 @@ const PropertyDetail = lazy(() => import("@/pages/property/PropertyDetail"));
 const Agent = lazy(() => import("@/pages/agent/Agent"));
 const AgentDetail = lazy(() => import("@/pages/agent/AgentDetail"));
 const Message = lazy(() => import("@/pages/Message"));
-const Review = lazy(() => import("@/pages/Review"));
 const AddAgent = lazy(() => import("@/pages/agent/AddAgent"));
 const AddEditProperty = lazy(() => import("@/pages/property/AddEditProperty"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
@@ -42,32 +41,72 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify/email" element={<VerifyEmail />} />
-<<<<<<< HEAD
           <Route path="/register-agent" element={<AgentRegister />} />
-=======
-          <Route path="/register-agent" element={<AgentRegister/>}/>
->>>>>>> 1f76e056cbffbb0c3871c1e718313fd9d67f66b0
         </Route>
+
         <Route path="*" element={<Navigate to="/login" />} />
+
         {/* Private Routes */}
         <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<Dashboard />} />
+          <Route
+            path="/home"
+            element={
+              <RoleProtected allowedRoles={["Admin"]}>
+                <Dashboard />
+              </RoleProtected>
+            }
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/properties" element={<Property />} />
-          <Route path="/properties/add" element={<AddEditProperty />} />
-          <Route path="/properties/edit/:id" element={<AddEditProperty />} />
           <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/agent" element={<Agent />} />
-          <Route path="/add-agent" element={<AddAgent />} />
-          <Route path="/agent/:id" element={<AgentDetail />} />
+          <Route
+            path="/properties/add"
+            element={
+              <RoleProtected allowedRoles={["Admin", "Agent"]}>
+                <AddEditProperty />
+              </RoleProtected>
+            }
+          />
+          <Route
+            path="/properties/edit/:id"
+            element={
+              <RoleProtected allowedRoles={["Admin", "Agent"]}>
+                <AddEditProperty />
+              </RoleProtected>
+            }
+          />
+
+          <Route
+            path="/agent"
+            element={
+              <RoleProtected allowedRoles={["Admin"]}>
+                <Agent />
+              </RoleProtected>
+            }
+          />
+          <Route
+            path="/agent/:id"
+            element={
+              <RoleProtected allowedRoles={["Admin"]}>
+                <AgentDetail />
+              </RoleProtected>
+            }
+          />
           <Route path="/message" element={<Message />} />
-          <Route path="/review" element={<Review />} />
+          <Route
+            path="/add-agent"
+            element={
+              <RoleProtected allowedRoles={["Admin"]}>
+                <AddAgent />
+              </RoleProtected>
+            }
+          />
           <Route
             path="/admin/agent-requests"
             element={
-              <AdminProtected>
+              <RoleProtected allowedRoles={["Admin"]}>
                 <AgentRequests />
-              </AdminProtected>
+              </RoleProtected>
             }
           />
         </Route>

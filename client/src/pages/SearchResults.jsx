@@ -25,7 +25,7 @@ const readableStatus = statusTextMap[finalStatus] || "";
     const fetchFiltered = async () => {
       try {
         const { data } = await axios.get(
-          `/properties?${params.toString()}`
+          `/properties/all?${params.toString()}`
         );
         setResults(data.data.properties);
       } catch (err) {

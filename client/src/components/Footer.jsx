@@ -43,7 +43,7 @@ export default function Footer() {
     const fetchPopularSearches = async () => {
       try {
          const properties = await cacheFetchStorage("footerPopularSearches", async () => {
-          const res = await axios.get("/properties");
+          const res = await axios.get("/properties/all");
           return res?.data?.data?.properties || [];
         });
 

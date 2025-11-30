@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/utils/axios";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CityCard from "@/components/CityCard";
 
 export default function AllCities() {
@@ -32,13 +32,13 @@ export default function AllCities() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="flex space-x-5 items-center mb-6">
-        <button
-          onClick={() => navigate("/")}
-          className=" text-gray-700 hover:text-black"
+        <Link
+          to="/"
+          className="text-gray-700 hover:text-black flex items-center"
         >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h2 className="text-3xl font-bold">All Cities</h2>
+          <ArrowLeft className="w-5 h-5 mr-4" />
+          <h2 className="text-3xl font-bold">All Cities</h2>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

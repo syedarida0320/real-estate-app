@@ -33,7 +33,7 @@ exports.sendEmailWithTransport = async (to, subject, templateName, data) => {
     });
 
     await transporter.sendMail({
-      from: `"Real Estate App" <test@local.com>`,
+      from: `"Real Estate App" <realestateapp@gmail.com>`,
       to,
       subject,
       html,

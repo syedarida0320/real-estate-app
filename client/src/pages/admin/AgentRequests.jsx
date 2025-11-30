@@ -87,7 +87,7 @@ export default function AgentRequests() {
     <MainLayout>
       <Card className="mr-3 my-6 shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold">
+          <CardTitle className="md:text-2xl text-xl mb-5 font-semibold">
             Agent Registration Requests
           </CardTitle>
         </CardHeader>

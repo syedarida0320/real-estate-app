@@ -31,8 +31,8 @@ export default function HeroSection() {
 
   // 👉 Fetch Latest 8 Properties
   const loadLatestProperties = async () => {
-    const data = await cacheFetchStorage("/properties?limit=8", async () => {
-      const res = await axios.get("/properties?limit=8");
+    const data = await cacheFetchStorage("/properties/all?limit=8", async () => {
+      const res = await axios.get("/properties/all?limit=8");
       return res.data.data.properties;
     });
     setLatestProperties(data);
@@ -40,8 +40,8 @@ export default function HeroSection() {
 
   // 👉 Fetch unique property types from backend DB
   const loadPropertyTypes = async () => {
-    const types = await cacheFetchStorage("/properties?limit=200", async () => {
-      const res = await axios.get("/properties?limit=200");
+    const types = await cacheFetchStorage("/properties/all?limit=200", async () => {
+      const res = await axios.get("/properties/all?limit=200");
       return [...new Set(res.data.data.properties.map((p) => p.type))];
     });
     setPropertyTypes(types);
@@ -78,7 +78,6 @@ export default function HeroSection() {
     loadLatestProperties();
   }, []);
 
-<<<<<<< HEAD
   // Smooth scroll to a section by ID
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -87,8 +86,6 @@ export default function HeroSection() {
     }
   };
 
-=======
->>>>>>> 1f76e056cbffbb0c3871c1e718313fd9d67f66b0
   return (
     <div>
       <div

@@ -33,9 +33,8 @@ export function SectionCards() {
 
             {/* Tabs Section */}
             <Tabs defaultValue="popular" className="w-full md:w-auto">
-              <TabsList className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:flex md:space-x-2">
+              <TabsList className="grid grid-cols-3 sm:grid-cols-3 gap-2 md:flex md:space-x-2">
                 <TabsTrigger value="popular">Popular</TabsTrigger>
-                <TabsTrigger value="recommended">Recommended</TabsTrigger>
                 <TabsTrigger value="newest">Newest</TabsTrigger>
                 <TabsTrigger value="recent">Most Recent</TabsTrigger>
               </TabsList>
