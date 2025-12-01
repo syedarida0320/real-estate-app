@@ -4,6 +4,8 @@ const {getUsers,getProfileImage,createUser, getUserById, updateUser, getUserMess
 const {authMiddleware}= require ("../middlewares/auth.middleware")
 const upload=require("../middlewares/upload")
 
+// TODO: If one middleware is common for all routes, use router.use(middleware) instead of adding it to each route.
+
 router.get('/',authMiddleware, getUsers);
 router.post("/",authMiddleware, createUser);
 router.get('/messages',authMiddleware, getUserMessages);

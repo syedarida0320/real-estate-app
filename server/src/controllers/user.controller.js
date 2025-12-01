@@ -32,6 +32,7 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
+    // TODO: Please validate input data before creating user.
     const user = new User(req.body); // parsed JSON payload sent from frontend.
     await user.save();
     response.created(res, "User created successfully", user);
