@@ -31,7 +31,7 @@ export default function PropertyCards({ property }) {
         className="w-full h-40 object-cover"
       />
 
-      <CardHeader className="p-3">
+      <CardHeader className="md:p-3 p-2">
         <CardTitle className="text-lg mt-0 py-0 font-semibold text-gray-800 truncate">
           {p.title}
         </CardTitle>

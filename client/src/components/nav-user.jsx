@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { User, LogOut, Moon, ChevronDown, Sun } from "lucide-react";
+import { UserPen, LogOut, Moon, ChevronDown, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import dummyAvatar from "@/assets/dummy-avatar.png";
@@ -80,16 +80,7 @@ export function NavUser({ user }) {
             onClick={handleEditProfile}
             className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
           >
-            <User className="w-4 h-4 text-gray-600" />
-            Edit Profile
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
-          >
-            <LogOut className="w-4 h-4 text-gray-600" />
-            Logout
+             <UserPen className="text-gray-500 w-5 h-5"/>            Edit Profile
           </button>
 
           <button
@@ -107,6 +98,13 @@ export function NavUser({ user }) {
                 Dark Mode
               </>
             )}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="cursor-pointer flex items-center w-full gap-3 px-4 py-2 text-sm hover:bg-gray-100"
+          >
+            <LogOut className="w-4 h-4 text-gray-600" />
+            Logout
           </button>
         </div>
       )}

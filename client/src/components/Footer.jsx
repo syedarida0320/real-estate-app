@@ -106,7 +106,7 @@ export default function Footer() {
         {/* Popular Search */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Popular Search</h3>
-          <ul className="space-y-2 text-sm text-gray-300">
+          <ul className="space-y-2 md:text-sm text-xs text-gray-300">
             {popularSearches.length > 0 ? (
               popularSearches.map((item, idx) => (
                 <li key={idx}>
@@ -130,18 +130,18 @@ export default function Footer() {
 
         {/* Customer Care & Live Support */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">
+          <h3 className="md:text-lg text-sm font-semibold mb-4">
             Total Free Customer Care
           </h3>
-          <p className="text-gray-300 text-sm mb-6">+(088) 123 456 789</p>
+          <p className="text-gray-300 md:text-sm text-xs mb-6">+(088) 123 456 789</p>
 
-          <h3 className="text-lg font-semibold mb-2">Live Support</h3>
+          <h3 className="md:text-lg text-sm font-semibold mb-2">Live Support</h3>
           <p className="text-gray-300 text-sm">realestate@gmail.com</p>
         </div>
 
         {/* Subscribe */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">
+          <h3 className="md:text-lg text-sm font-semibold mb-4">
             Keep Yourself Up to Date
           </h3>
           <div className="flex items-center gap-3">

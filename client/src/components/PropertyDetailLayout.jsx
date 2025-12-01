@@ -229,7 +229,7 @@ const baseURL = import.meta.env.VITE_API || "http://localhost:5000";
                 </div>
               )}
 
-              <Button className="w-full mt-4">Book Now</Button>
+              <Button className="w-full mt-4 cursor-pointer">Book Now</Button>
             </div>
           </aside>
         </div>

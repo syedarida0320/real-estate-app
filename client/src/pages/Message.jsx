@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import MainLayout from "@/layouts/MainLayout";
-import { Search, Send } from "lucide-react";
+import { Search, Send, ArrowLeft } from "lucide-react";
 import axios from "@/utils/axios";
 import { io } from "socket.io-client";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -19,13 +19,15 @@ const Message = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const loggedInUser = JSON.parse(localStorage.getItem("user"));
   const [unreadCounts, setUnreadCounts] = useState({});
   const [isTyping, setIsTyping] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(true);
+
+  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  const messagesEndRef = useRef(null);
 
   const socket = useRef(null);
-  const messagesEndRef = useRef(null);
   const selectedUserRef = useRef(null);
 
   useEffect(() => {
@@ -329,13 +331,21 @@ const Message = () => {
 
   return (
     <MainLayout>
-      <h2 className="text-[25px] font-semibold py-2 -ml-[20px] w-full">
+      <h2 className="text-[25px] font-semibold py-2 p-5 -ml-[20px] w-full">
         Messages
       </h2>
       <div className="flex h-[calc(100vh-125px)] bg-gray-50 -ml-[20px]">
         {/* LEFT SIDEBAR
         for showing loggedIn user's all chat conversations */}
-        <div className="w-1/3 border-r bg-white flex flex-col">
+        <div
+          className={`
+            w-1/3 border-r bg-white flex flex-col 
+            md:block
+            ${showSidebarOnMobile ? "block" : "hidden"}
+            md:w-1/3
+            w-full
+          `}
+        >
           <div className="p-5 border-b">
             <div className="flex items-center border border-gray-300 px-3 py-3 rounded-lg">
               <Search size={18} className="text-gray-500" />
@@ -357,6 +367,7 @@ const Message = () => {
                   onClick={() => {
                     setSelectedUser(agent);
                     setUnreadCounts((prev) => ({ ...prev, [agent._id]: 0 }));
+                    setShowSidebarOnMobile(false); // MOBILE: hide sidebar
                   }}
                   className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 ${
                     selectedUser?._id === agent._id ? "bg-blue-50" : ""
@@ -388,7 +399,7 @@ const Message = () => {
                       >
                         {agent.email}
                       </h3>
-              
+
                       <p
                         className={`text-xs truncate p-1 w-[150px] ${
                           unreadCounts[agent._id] > 0
@@ -422,11 +433,22 @@ const Message = () => {
         </div>
 
         {/* RIGHT CHAT SECTION */}
-        <div className="flex-1 flex flex-col bg-white">
+        <div
+          className={`
+            flex-1 flex flex-col bg-white 
+            ${showSidebarOnMobile ? "hidden md:flex" : "flex"}
+          `}
+        >
           {selectedUser ? (
             <>
               {/* HEADER */}
-              <div className="flex justify-between items-center p-4 border-b">
+              <div className="flex md:justify-between items-center p-4 border-b">
+                <button
+                  className="md:hidden mr-3"
+                  onClick={() => setShowSidebarOnMobile(true)}
+                >
+                  <ArrowLeft size={22} className="text-gray-700" />
+                </button>
                 <div className="flex items-center space-x-3">
                   <img
                     src={selectedUser.profileImage}

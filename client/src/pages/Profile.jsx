@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { MoreVertical, Mail, Phone, MapPin, Camera } from "lucide-react";
+import { MoreVertical, Mail, Phone, MapPin, Camera, UserPen } from "lucide-react";
 import profileBg from "@/assets/profile-bg.png";
 import dummyAvatar from "@/assets/dummy-avatar.png";
 import axios from "@/utils/axios";
@@ -168,7 +168,7 @@ const Profile = () => {
         {/* Profile Header */}
         <h2 className="text-2xl font-bold mb-6">My Profile</h2>
 
-        <Card className="p-6 flex flex-col md:flex-row gap-6 items-start relative">
+        <Card className="md:p-6 p-8 flex flex-col md:flex-row gap-6 items-start relative">
           {/* 3-dot Menu */}
           <div className="absolute top-4 right-4" ref={menuRef}>
             <button
@@ -181,13 +181,13 @@ const Profile = () => {
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
                 <button
-                  className="cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  className="flex cursor-pointer w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
                   onClick={() => {
                     setEditing(true);
                     setMenuOpen(false);
                   }}
                 >
-                  Edit Profile
+                 <UserPen className="text-gray-500 w-5 h-5 mr-2"/> Edit Profile
                 </button>
               </div>
             )}

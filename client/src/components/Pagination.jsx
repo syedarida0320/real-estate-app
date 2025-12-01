@@ -6,7 +6,16 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   // Guard: no pagination if only 1 page
   if (totalPages <= 1) return null;
 
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+const visiblePages = 5; // number of pages to display
+  let startPage = Math.max(currentPage - Math.floor(visiblePages / 2), 1);
+  let endPage = startPage + visiblePages - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(endPage - visiblePages + 1, 1);
+  }
+
+   const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
   return (
     <div className="flex justify-end items-center space-x-2 mt-8">

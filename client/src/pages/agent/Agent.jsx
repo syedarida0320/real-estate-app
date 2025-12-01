@@ -70,7 +70,7 @@ const Agent = () => {
               </div>
 
               {/* Content Section */}
-              <CardContent className="flex flex-col p-0 justify-center w-full">
+              <CardContent className="flex flex-col p-4 justify-center w-full">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     {agent.user?.firstName} {agent.user?.lastName}

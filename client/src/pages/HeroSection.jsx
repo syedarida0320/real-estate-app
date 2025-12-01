@@ -136,9 +136,9 @@ export default function HeroSection() {
         </nav>
 
         {/* Hero Content */}
-        <div className="flex-1 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div className="flex-1 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 md:gap-10 gap-3 items-center">
           <div className="text-white space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight">
               Find The Perfect Place to Live With your Family
             </h1>
 
@@ -232,14 +232,14 @@ export default function HeroSection() {
       {/* PROPERTIES BY CITIES */}
       <section id="cities-properties" className="max-w-6xl mx-auto px-10 py-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-semibold">Properties By Cities</h2>
+          <h2 className="md:text-3xl text-xl font-semibold">Properties By Cities</h2>
 
           <a
             href="/all-cities"
             className="text-sm flex font-semibold hover:underline"
           >
             See All Cities
-            <MoveUpRight className="text-gray-500 ml-2 w-5 h-5" />
+            <MoveUpRight className="text-gray-500 ml-2 md:w-5 md:h-5 h-4 w-4" />
           </a>
         </div>
 
@@ -265,19 +265,19 @@ export default function HeroSection() {
       <section id="latest-properties" className="max-w-6xl mx-auto px-10 py-10">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-semibold">Latest Properties</h2>
+            <h2 className="md:text-3xl text-[22px] font-semibold">Latest Properties</h2>
           </div>
 
           <div className="flex gap-3">
             <Button
-              className="bg-black text-white hover:bg-gray-700"
+              className="bg-black text-white text-xs p-3 hover:bg-gray-700"
               onClick={() => navigate("/properties/search?status=for_sale")}
             >
               For Sale
             </Button>
 
             <Button
-              className="bg-black text-white hover:bg-gray-700"
+              className="bg-black text-white text-xs p-3 hover:bg-gray-700"
               onClick={() => navigate("/properties/search?status=for_rent")}
             >
               For Rent
@@ -298,10 +298,10 @@ export default function HeroSection() {
       <div className="bg-[#EB67531A]">
         <section id="agent-register" className="max-w-6xl mx-auto px-10 py-20">
           <div className="flex flex-col mb-6">
-            <h2 className="text-3xl font-semibold">
+            <h2 className="md:text-3xl text-2xl font-semibold">
               Become a Real Estate Agent
             </h2>
-            <p className="text-[14px] font-normal mb-[20px]">
+            <p className="text-sm font-normal mb-[20px]">
               We only work with the best companies around the globe to survey
             </p>
           </div>

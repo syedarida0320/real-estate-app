@@ -27,7 +27,7 @@ const ApartmentTypes = ({ propertyTypes = [] }) => {
   return (
     <section className="max-w-6xl mx-auto px-10 py-16">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold">Apartment Types</h2>
+        <h2 className="md:text-3xl text-2xl font-semibold">Apartment Types</h2>
 
         <a
           href="/properties/search"
@@ -47,10 +47,10 @@ const ApartmentTypes = ({ propertyTypes = [] }) => {
             <div
               key={i}
               onClick={() => navigate(`/properties/search?type=${type}`)}
-              className="cursor-pointer group bg-white shadow-md p-6 rounded-xl flex flex-col items-center justify-center hover:shadow-xl hover:-translate-y-1 transition-all"
+              className="cursor-pointer group bg-white shadow-md md:p-6 p-4 rounded-xl flex flex-col items-center justify-center hover:shadow-xl hover:-translate-y-1 transition-all"
             >
               {/* Icon */}
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition">
+              <div className="md:w-16 md:h-16 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition">
                 <Icon className="w-8 h-8 text-gray-700 group-hover:text-black" />
               </div>
 

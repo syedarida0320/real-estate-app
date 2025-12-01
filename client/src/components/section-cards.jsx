@@ -1,44 +1,56 @@
 import { useEffect, useState } from "react";
 import axios from "@/utils/axios";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 
 export function SectionCards() {
   const [properties, setProperties] = useState([]);
+  const navigate=useNavigate();
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const res = await axios.get("/properties");
-        if (res.data?.data?.properties && Array.isArray(res.data.data.properties)) {
+        if (
+          res.data?.data?.properties &&
+          Array.isArray(res.data.data.properties)
+        ) {
           setProperties(res.data.data.properties.slice(0, 3));
         } else {
           console.error("Failed to fetch properties", res.data);
         }
       } catch (err) {
-        console.error("Error fetching properties:", err.response?.data || err.message );
+        console.error(
+          "Error fetching properties:",
+          err.response?.data || err.message
+        );
       }
     };
     fetchProperties();
   }, []);
+
+   const handleCardClick = (property) => {
+    const id = property._id || property.id;
+    navigate(`/properties/${id}`);
+  };
 
   return (
     <div className="px-4 lg:px-0">
       <Card className="shadow-sm mt-8 border rounded-xl">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <h3 className="md:text-lg text-[18px] font-semibold text-gray-800">
+            <h3 className="md:text-2xl text-[18px] font-semibold text-gray-800">
               Property List
             </h3>
-
-            {/* Tabs Section */}
-            <Tabs defaultValue="popular" className="w-full md:w-auto">
-              <TabsList className="grid grid-cols-3 sm:grid-cols-3 gap-2 md:flex md:space-x-2">
-                <TabsTrigger value="popular">Popular</TabsTrigger>
-                <TabsTrigger value="newest">Newest</TabsTrigger>
-                <TabsTrigger value="recent">Most Recent</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Replace tabs with single button */}
+            <div className="flex justify-end">
+              <a
+                href="/properties"
+                className=" border border-gray-300 bg-gray-100 hover:bg-gray-200 text-black px-3 py-1 rounded-sm transition"
+              >
+                View All
+              </a>
+            </div>
           </div>
         </CardHeader>
 
@@ -62,27 +74,28 @@ export function SectionCards() {
               return (
                 <Card
                   key={id || index}
-                  className="rounded-xl py-0 shadow-sm hover:shadow-md transition"
+                  className="rounded-xl cursor-pointer py-0 shadow-sm hover:shadow-md transition"
+                  onClick={()=> handleCardClick(property)}
                 >
-                  <CardContent className="p-2">
+                  <CardContent className="p-4">
                     <img
                       src={imageUrl}
                       alt={property.title}
                       className="w-full h-40 object-cover rounded-lg"
                     />
                     <h4 className="mt-3 font-semibold">{property.title}</h4>
-                    <p className="text-sm text-gray-500">
-                      {property.location?.city && property.location?.country
-                        ? `${property.location.city}, ${property.location.country}`
-                        : "Unknown Location"}
-                    </p>
-                    <span className="text-blue-600 font-bold">
-                      {property.price?.currency || "$"}
-                      {property.price?.amount}
-                      {property.price?.duration
-                        ? ` / ${property.price.duration}`
-                        : ""}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      {" "}
+                      <p className="text-sm text-gray-500">
+                        {property.location?.city && property.location?.country
+                          ? `${property.location.city}, ${property.location.country}`
+                          : "Unknown Location"}
+                      </p>
+                      <span className="text-blue-600 bg-[#DADEFA] p-2 rounded-sm text-sm font-bold">
+                        {property.price?.currency || "$"}
+                        {property.price?.amount}
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
               );
