@@ -1,21 +1,30 @@
-// routes/email.routes.js
 const express = require("express");
 const router = express.Router();
 const { sendEmail } = require("../utils/email");
+const { authMiddleware } = require("../middlewares/auth.middleware");
+const {response}=require("../utils/response");
 
 // POST /api/send-email
-router.post("/send-email", async (req, res) => {
+router.post("/send-email",authMiddleware, async (req, res) => {
   const { to, subject, message } = req.body;
 
+   // Validation
   if (!to || !subject || !message) {
-    return res.status(400).json({ error: "to, subject, and message are required" });
+    return response.badRequest(res, "to, subject, and message fields are required", {
+      fields: ["to", "subject", "message"]
+    });
   }
-
-  try {
+try {
     const info = await sendEmail(to, subject, message);
-    res.status(200).json({ message: "Email sent successfully", messageId: info.messageId });
+
+    return response.ok(res, "Email sent successfully", {
+      messageId: info.messageId
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Email sending failed:", err);
+    return response.serverError(res, "Failed to send email", {
+      error: [err.message]
+    });
   }
 });
 

@@ -46,18 +46,18 @@ exports.sendEmailWithTransport = async (to, subject, templateName, data) => {
   }
 };
 
-exports.testingMail = async () => {
-  try {
-    const transporter = getLocalTransport();
+// exports.testingMail = async () => {
+//   try {
+//     const transporter = getLocalTransport();
 
-    await transporter.sendMail({
-      from: "test@local.com",
-      to: "receiver@local.com",
-      subject: "Local SMTP Test",
-      text: "This is a test email from localhost SMTP",
-    });
-    console.log("Test mail sent to terminal!");
-  } catch (error) {
-    console.log("error => ", error);
-  }
-};
+//     await transporter.sendMail({
+//       from: "test@local.com",
+//       to: "receiver@local.com",
+//       subject: "Local SMTP Test",
+//       text: "This is a test email from localhost SMTP",
+//     });
+//     console.log("Test mail sent to terminal!");
+//   } catch (error) {
+//     console.log("error => ", error);
+//   }
+// };

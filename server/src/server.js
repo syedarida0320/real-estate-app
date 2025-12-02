@@ -13,14 +13,6 @@ connectDB();
 
 const agenda = require("./config/agenda");
 
-// TODO: This is already defined in the agenda config file. Remove duplication.
-require("./jobs/propertyEmail.job")(agenda);
-
-agenda.on("ready", async () => {
-  await agenda.start();
-  console.log("Agenda started...");
-});
-
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
@@ -36,8 +28,8 @@ app.use("/api/users", require("./routes/user.routes"));
 app.use("/api/properties", require("./routes/property.routes"));
 app.use("/api/agents", require("./routes/agent.routes"));
 app.use("/api/reviews", require("./routes/review.routes"));
-app.use("/api", require("./routes/email.routes")); // TODO: This route also not protected anyone can send email using this end-point.
-app.use("/api/dashboard", require("./routes/dashboard.routes")); // TODO: Not protected route, anyone can access dashboard data.
+app.use("/api", require("./routes/email.routes"));
+app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/maps", require("./routes/map.routes"));
 app.use("/api/conversations", require("./routes/conversation.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
@@ -53,13 +45,6 @@ app.use("/images", express.static(path.join(__dirname, "public/images"))); // TO
 const server = http.createServer(app);
 
 initSocket(server);
-
-// app.get('/testing', async (req, res) => {
-//   await testingMail();
-//   console.log("mail sent");
-
-//   res.send({ message : 'Ok'});
-// });
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, async () => {
