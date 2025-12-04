@@ -16,21 +16,22 @@ const verifyEmail = async (req, res) => {
     if (!user) return response.notFound(res, "Email does not exist");
 
     // Prevent password reset after it has already been set
-if (user.password && user.emailVerifiedAt) {
-  return response.unauthorized(res, "Password already set or email already verified");
-}
+    if (user.password && user.emailVerifiedAt) {
+      return response.unauthorized(
+        res,
+        "Password already set or email already verified"
+      );
+    }
     // if (user.emailVerifiedAt) user.emailVerifiedAt = new Date();
-    if(!user.emailVerifiedAt){
-      user.emailVerifiedAt=new Date();
+    if (!user.emailVerifiedAt) {
+      user.emailVerifiedAt = new Date();
       await user.save();
     }
 
     // 👉 Create a 15-min password setup token
-    const passwordToken = jwt.sign(
-      { email },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
+    const passwordToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
 
     // Temporarily send back success to show password form
     response.ok(res, "Email verified successfully", {
@@ -50,7 +51,7 @@ const setNewPassword = async (req, res) => {
     if (!token || !password)
       return response.badRequest(res, "Missing token or password");
 
-// Verify token
+    // Verify token
     let payload;
     try {
       payload = jwt.verify(token, process.env.JWT_SECRET);

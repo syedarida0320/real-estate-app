@@ -31,16 +31,14 @@ app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api", require("./routes/email.routes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/maps", require("./routes/map.routes"));
-//app.use("/api/conversations", require("./routes/conversation.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api", require("./routes/subscribe.routes"));
-app.use("/api/agent-request",require("./routes/agent.request.routes"));
+app.use("/api/agent-request", require("./routes/agent.request.routes"));
 app.use("/api/upload", uploads);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/images", express.static("public/images")); // TODO: Duplication of static path
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use("/images", express.static(path.join(__dirname, "public/images"))); // TODO: Duplication of static path
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 const server = http.createServer(app);
 
