@@ -15,16 +15,28 @@ const verifyEmail = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return response.notFound(res, "Email does not exist");
 
+    // Prevent password reset after it has already been set
+if (user.password && user.emailVerifiedAt) {
+  return response.unauthorized(res, "Password already set or email already verified");
+}
     // if (user.emailVerifiedAt) user.emailVerifiedAt = new Date();
     if(!user.emailVerifiedAt){
       user.emailVerifiedAt=new Date();
       await user.save();
     }
+
+    // 👉 Create a 15-min password setup token
+    const passwordToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
     // Temporarily send back success to show password form
     response.ok(res, "Email verified successfully", {
       verified: false,
       password: true,
-      email,
+      token: passwordToken,
     });
   } catch (err) {
     console.error("Email verification error:", err);
@@ -34,9 +46,19 @@ const verifyEmail = async (req, res) => {
 
 const setNewPassword = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password)
-      return response.badRequest(res, "Missing email or password");
+    const { token, password } = req.body;
+    if (!token || !password)
+      return response.badRequest(res, "Missing token or password");
+
+// Verify token
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return response.unauthorized(res, "Invalid or expired password token");
+    }
+
+    const { email } = payload;
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -45,7 +67,7 @@ const setNewPassword = async (req, res) => {
       { password: hashed, emailVerifiedAt: new Date() }
     );
 
-    response.ok(res, "Password set successfully. You can now log in.");
+    response.ok(res, "Password set successfully.");
   } catch (err) {
     console.error(err);
     response.serverError(res, "Failed to set new password");

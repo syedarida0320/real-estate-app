@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 const VerifyEmail = () => {
   const [status, setStatus] = useState("");
-  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -22,16 +22,14 @@ const VerifyEmail = () => {
             toast.info("Email already verified. Redirecting to login...");
             setTimeout(() => navigate("/login"), 2000);
           } else {
-            setEmail(res.data.data.email);
+            setToken(res.data.data.token);
             toast.success("Email verified successfully!");
             setStatus("verified");
           }
         })
         .catch(() => {
-          toast.error("Invalid or expired token. Please request a new link.");
-          setStatus(
-            "Invalid or expired token. Please request a new verification link."
-          );
+          toast.error("Invalid or expired token.");
+          setStatus("Invalid link.");
         });
     } else {
       toast.warn("Verification token not found in URL.");
@@ -46,7 +44,7 @@ const VerifyEmail = () => {
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Set Your New Password
           </h2>
-          <SetPassword email={email} />
+          <SetPassword token={token} />
         </div>
       </div>
     );
@@ -59,7 +57,7 @@ const VerifyEmail = () => {
   );
 };
 
-const SetPassword = ({ email }) => {
+const SetPassword = ({ token }) => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -72,7 +70,7 @@ const SetPassword = ({ email }) => {
     }
 
     try {
-      await axios.post("/auth/set-password", { email, password });
+      await axios.post("/auth/set-password", { token , password });
       toast.success("Password set successfully!");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
