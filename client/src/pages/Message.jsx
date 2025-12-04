@@ -139,7 +139,7 @@ const Message = () => {
   const fetchConversationList = async () => {
     try {
       const res = await axios.get(
-        `/messages/conversations/${loggedInUser._id}`
+        `/messages/conversations`
       );
 
       const formatted = res.data.data.map((c) => ({
@@ -161,7 +161,7 @@ const Message = () => {
     try {
       const url = query
         ? `/users/messages?search=${query}`
-        : `/messages/conversations/${loggedInUser._id}`;
+        : `/messages/conversations`;
 
       const res = await axios.get(url);
 
@@ -216,7 +216,7 @@ const Message = () => {
     try {
       // fetch all user conversations
       const res = await axios.get(
-        `/messages/conversations/${loggedInUser._id}`
+        `/messages/conversations`
       );
       const existingConv = res.data.data.find(
         (c) => c.otherUser._id === receiverId

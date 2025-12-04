@@ -1,13 +1,31 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const { response } = require("../utils/response");
-const User = require("../models/User");
-const Agent = require("../models/Agent");
+//const User = require("../models/User");
+//const Agent = require("../models/Agent");
 
 // Get single conversation by ID
 const getConversation = async (req, res) => {
   try {
-    const messages = await Message.find({ conversationId: req.params.id })
+    const conversationId = req.params.id;
+
+    // Check if user is a participant
+    const conv = await Conversation.findById(conversationId);
+    if (!conv) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Conversation not found" });
+    }
+
+    if (!conv.participants.includes(req.user.id)) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Access denied. You are not a participant of this conversation.",
+      });
+    }
+
+    const messages = await Message.find({ conversationId })
       .populate("sender", "name email avatar")
       .populate("receiver", "name email avatar")
       .sort({ createdAt: 1 }); // oldest to newest
@@ -99,7 +117,14 @@ const sendMessageSocket = async (data) => {
 
 const getUserConversations = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user.id;
+
+    // if (req.user.id.toString() !== userId.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "Access denied. You can only view your own conversations.",
+    //   });
+    // }
 
     const conversations = await Conversation.find({
       participants: userId,

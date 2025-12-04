@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const Agent = require("../models/Agent");
 const Message = require("../models/Message");
-const Conversation = require("../models/Conversation");
+// const Conversation = require("../models/Conversation");
 
 //  Utility: build profile image URL dynamically
 const buildProfileImageUrl = (req, userId) => {
@@ -27,17 +27,6 @@ const getUsers = async (req, res) => {
     response.ok(res, "Users fetched successfully", usersWithImageUrls);
   } catch (error) {
     response.serverError(res, error.message);
-  }
-};
-
-const createUser = async (req, res) => {
-  try {
-    // TODO: Please validate input data before creating user.
-    const user = new User(req.body); // parsed JSON payload sent from frontend.
-    await user.save();
-    response.created(res, "User created successfully", user);
-  } catch (error) {
-    response.badRequest(res, error.message);
   }
 };
 
@@ -316,7 +305,6 @@ const getUserMessages = async (req, res) => {
 
 module.exports = {
   getUsers,
-  createUser,
   getUserById,
   updateUser,
   getProfileImage,

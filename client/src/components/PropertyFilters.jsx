@@ -9,9 +9,14 @@ import {
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "@/utils/axios";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
   const [countries, setCountries] = useState([]);
+  const [searchInput, setSearchInput] = useState(filters.search || "");
+
+  // Debounced search value
+  const debouncedSearch = useDebounce(searchInput, 500); // 500ms debounce
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -25,6 +30,11 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
     fetchCountries();
   }, []);
 
+  // Update filter whenever debounced value changes
+  useEffect(() => {
+    handleChange("search", debouncedSearch);
+  }, [debouncedSearch]);
+
   const handleChange = (name, value) => {
     onFiltersChange({ ...filters, [name]: value });
   };
@@ -37,8 +47,8 @@ const PropertyFilters = ({ filters, onFiltersChange, onClearFilters }) => {
           <input
             type="text"
             placeholder="Enter an address, city or Zip code"
-            value={filters.search || ""}
-            onChange={(e) => handleChange("search", e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-1.5 text-[14px] text-gray-500 focus:outline-none focus:ring-1 "
           />
         </div>

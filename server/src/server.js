@@ -31,7 +31,7 @@ app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api", require("./routes/email.routes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/maps", require("./routes/map.routes"));
-app.use("/api/conversations", require("./routes/conversation.routes"));
+//app.use("/api/conversations", require("./routes/conversation.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api", require("./routes/subscribe.routes"));
 app.use("/api/agent-request",require("./routes/agent.request.routes"));

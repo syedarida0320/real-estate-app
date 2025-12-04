@@ -191,11 +191,11 @@ exports.createAgent = async (req, res) => {
       try {
         fs.unlinkSync(uploadedFilePath);
         console.log(
-          "🗑️ Deleted uploaded image due to error:",
+          "Deleted uploaded image due to error:",
           uploadedFilePath
         );
       } catch (err) {
-        console.error("❌ Failed to delete image:", err);
+        console.error("Failed to delete image:", err);
       }
     }
 

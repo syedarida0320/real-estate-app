@@ -31,7 +31,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // ✅ Multer instance
-// TODO: Image size check and Exention check also with mimeType
+// Image size check and Exention check also with mimeType
 const upload = multer({
   storage,
   fileFilter,

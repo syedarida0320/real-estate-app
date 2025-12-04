@@ -11,13 +11,16 @@ const authMiddleware = async (req, res, next) => {
       return response.unauthorized(res, "No token, authorization denied");
     }
 
+    /* The line `const token = authHeader.split(" ")[1];` is splitting the `authHeader` string based on
+    the space character (" ") and then extracting the second element (index 1) from the resulting
+    array. */
     const token = authHeader.split(" ")[1];
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach user to request
-    // TODO: check how select work in monogodb
+    // check how select work in monogodb
     // Study mongoose ORM. Also read ORM in general
     req.user = await User.findById(decoded.userId).select("-password");
 

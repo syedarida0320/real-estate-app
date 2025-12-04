@@ -5,7 +5,7 @@ const {authMiddleware}= require ("../middlewares/auth.middleware")
 
 router.use(authMiddleware);
 
-router.get("/conversations/:userId", getUserConversations);
+router.get("/conversations", getUserConversations);
 router.get('/conversation/:id', getConversation);
 router.post('/send' , sendMessage);
 
