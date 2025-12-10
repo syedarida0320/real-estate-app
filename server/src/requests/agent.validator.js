@@ -9,8 +9,8 @@ const addressSchema = Joi.object({
 }).optional();
 
 const socialLinkField = Joi.string()
- .pattern(
-    /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/i
+  .pattern(
+    /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}([\/\w\-.?=&%]*)*$/i
   )
   .allow("", null)
   .optional();

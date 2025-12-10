@@ -88,7 +88,7 @@ const Agent = () => {
                         {agent.user?.phone}
                       </p>
                     </div>
-                    <div className="flex flex-col md:space-x-20 space-x-5">
+                    <div className="flex flex-col md:space-x-5 space-x-5">
                       <p className="flex items-center gap-2">
                         <MapPin size={15} className="text-gray-500" />
                         {agent.user?.address

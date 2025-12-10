@@ -353,7 +353,6 @@ const AddEditProperty = () => {
       handleBack();
     } catch (error) {
       console.log("Validation errors:", error.response?.data?.errors);
-
       console.error(" Error submitting property:", error);
       toast.error(
         error.response?.data?.message ||

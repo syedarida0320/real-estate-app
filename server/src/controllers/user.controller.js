@@ -89,6 +89,9 @@ const updateUser = async (req, res) => {
       // remove old image if exists
       if (existing.profileImagePath) {
         const oldPath = path.join(
+          /* `process.cwd()` is a method in Node.js that returns the current working directory of the
+          Node.js process. It stands for "current working directory". This method returns the path
+          to the directory where the Node.js process is currently running. */
           process.cwd(),
           "private/images",
           existing.profileImagePath
