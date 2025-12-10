@@ -117,6 +117,7 @@ const AddAgent = () => {
       toast.success("Agent added successfully!");
       navigate("/agent");
     } catch (error) {
+      console.log("Backend validation errors:", error.response?.data);
       console.error("Error adding agent:", error);
       if (error.response?.data?.message) {
         const msg = error.response.data.message;

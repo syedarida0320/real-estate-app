@@ -7,9 +7,10 @@ const {
 
 const { authMiddleware } = require("../middlewares/auth.middleware");
 const { isAdmin } = require("../middlewares/roleMiddleware");
+const validateAgentRequest=require("../requests/agentRequest.validator");
 const router = express.Router();
 
-router.post("/create", createAgentRequest); // user submits form
+router.post("/create", validateAgentRequest, createAgentRequest); // user submits form
 router.get("/all", authMiddleware, isAdmin, getAgentRequests); // admin panel
 router.put(
   "/update-status/:id",
@@ -17,9 +18,5 @@ router.put(
   isAdmin,
   updateAgentRequestStatus
 );
-
-router.post("/create", createAgentRequest); // user submits form
-router.get("/all", getAgentRequests); // admin panel
-router.put("/update-status/:id", updateAgentRequestStatus); // admin approves/rejects
 
 module.exports = router;

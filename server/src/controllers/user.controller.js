@@ -4,7 +4,6 @@ const path = require("path");
 const fs = require("fs");
 const Agent = require("../models/Agent");
 const Message = require("../models/Message");
-// const Conversation = require("../models/Conversation");
 
 //  Utility: build profile image URL dynamically
 const buildProfileImageUrl = (req, userId) => {

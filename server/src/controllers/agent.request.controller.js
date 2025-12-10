@@ -1,7 +1,6 @@
 const AgentRequest = require("../models/AgentRequest");
 const { response } = require("../utils/response");
 const User = require("../models/User");
-const Agent=require("../models/Agent");
 
 // Create new agent request
 const createAgentRequest = async (req, res) => {

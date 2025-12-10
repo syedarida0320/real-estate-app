@@ -14,6 +14,10 @@ const getDashboardData = async (req, res) => {
     // Use distinct to get unique non-empty city values.
     let cityValues = [];
     try {
+      /* The line `cityValues = await Property.distinct("location.city");` is querying the database to
+      retrieve unique values of the "city" field within the "location" subdocument of each Property
+      document. It uses the `distinct` method provided by Mongoose to return an array of unique city
+      values found in the database. */
       cityValues = await Property.distinct("location.city");
     } catch (e) {
       // fallback: try top-level "city" if you used that earlier

@@ -6,10 +6,9 @@ const Property = require("../models/Property");
 const { response } = require("../utils/response");
 const crypto = require("../utils/crypto");
 const sendEmail = require("../utils/agent-email");
-const Message = require("../models/Message");
 
 const uploadDir = path.join(__dirname, "..", "public", "images");
-// make sure upload directory exists
+// it make sure upload directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -26,12 +25,16 @@ exports.getAllAgents = async (req, res) => {
 
     // ✅ Add total property counts for each agent
     const agentsWithCounts = await Promise.all(
+      /* This code snippet is mapping over an array of agents and for each agent, it is asynchronously
+      counting the total number of listings associated with that agent. */
       agents.map(async (agent) => {
         const totalListings = await Property.countDocuments({
           createdBy: agent.user._id,
         });
 
         return {
+          /* This code snippet is creating a new object by spreading the properties of the `agent`
+          object using the spread operator (`...agent.toObject()`). */
           ...agent.toObject(),
           isVerified: !!agent.user?.emailVerifiedAt,
           totalListings,

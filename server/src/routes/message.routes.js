@@ -5,7 +5,7 @@ const {authMiddleware}= require ("../middlewares/auth.middleware")
 
 router.use(authMiddleware);
 
-router.get("/conversations", getUserConversations);
+router.get("/conversations", getUserConversations); // TODO: Not secure, anyone can get conversations of any user by providing userId.
 router.get('/conversation/:id', getConversation);
 router.post('/send' , sendMessage);
 

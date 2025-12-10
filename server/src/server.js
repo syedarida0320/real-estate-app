@@ -27,9 +27,8 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/users", require("./routes/user.routes"));
 app.use("/api/properties", require("./routes/property.routes"));
 app.use("/api/agents", require("./routes/agent.routes"));
-app.use("/api/reviews", require("./routes/review.routes"));
-app.use("/api", require("./routes/email.routes"));
-app.use("/api/dashboard", require("./routes/dashboard.routes"));
+app.use("/api", require("./routes/email.routes")); // TODO: This route also not protected anyone can send email using this end-point.
+app.use("/api/dashboard", require("./routes/dashboard.routes")); // TODO: Not protected route, anyone can access dashboard data.
 app.use("/api/maps", require("./routes/map.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api", require("./routes/subscribe.routes"));
@@ -38,7 +37,7 @@ app.use("/api/upload", uploads);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use("/images", express.static(path.join(__dirname, "public/images")));
+app.use("/images", express.static(path.join(__dirname, "public/images")));  // TODO: Duplication of static path
 
 const server = http.createServer(app);
 

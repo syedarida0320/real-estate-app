@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // Your URL validation function (integrated properly)
 function isValidURL(str) {
-    const pattern = /^(http(s)?:\/\/)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g;
+  const pattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}([\/\w\-.?=&%]*)*$/i;
   return pattern.test(str);
 }
 

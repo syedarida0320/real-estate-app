@@ -1,31 +1,40 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const { response } = require("../utils/response");
-//const User = require("../models/User");
-//const Agent = require("../models/Agent");
 
 // Get single conversation by ID
 const getConversation = async (req, res) => {
   try {
+   /* The line `const conversationId = req.params.id;` is extracting the value of the `id` parameter
+   from the request URL. In a typical RESTful API setup, when a client makes a request to a specific
+   endpoint that includes a dynamic parameter like `id`, this line of code captures that parameter
+   value and assigns it to the variable `conversationId`. This variable is then used within the
+   function to identify the specific conversation that the client is requesting to interact with. */
     const conversationId = req.params.id;
 
     // Check if user is a participant
+    /* The line `const conv = await Conversation.findById(conversationId);` is fetching a conversation
+    document from the database based on the provided `conversationId`. It uses the `findById` method
+    provided by the Mongoose library to search for a conversation with the specified ID
+    asynchronously. The result of this operation is stored in the variable `conv` which can then be
+    used to check if the conversation exists and perform further operations based on the retrieved
+    conversation data. */
     const conv = await Conversation.findById(conversationId);
     if (!conv) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Conversation not found" });
+      return response.notFound(res, "Conversation not found");
     }
 
     if (!conv.participants.includes(req.user.id)) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Access denied. You are not a participant of this conversation.",
-      });
+      return response.forbidden(
+        res,
+        "Access denied. You are not a participant of this conversation."
+      );
     }
 
     const messages = await Message.find({ conversationId })
+    /* The `.populate("sender", "name email avatar")` method in Mongoose is used to populate referenced
+    documents in a query result. In this specific context, it is populating the fields of the
+    "sender" referenced in the Message document with the values of "name", "email", and "avatar". */
       .populate("sender", "name email avatar")
       .populate("receiver", "name email avatar")
       .sort({ createdAt: 1 }); // oldest to newest
@@ -41,6 +50,12 @@ const getConversation = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const { conversationId, text, receiver, messageType = "text" } = req.body;
+
+    if (!text || !receiver) {
+      return response.badRequest(res, "Missing required fields", {
+        fields: ["text", "receiver"],
+      });
+    }
 
     // if no conversation exists, create new
     let conversation = await Conversation.findOne({
@@ -119,12 +134,12 @@ const getUserConversations = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // if (req.user.id.toString() !== userId.toString()) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "Access denied. You can only view your own conversations.",
-    //   });
-    // }
+    if (req.user.id.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. You can only view your own conversations.",
+      });
+    }
 
     const conversations = await Conversation.find({
       participants: userId,
@@ -144,10 +159,10 @@ const getUserConversations = async (req, res) => {
       };
     });
 
-    res.json({ success: true, data: formatted });
+    return response.ok(res, "Conversations fetched successfully", formatted);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server Error" });
+    return response.serverError(res, "Server Error");
   }
 };
 

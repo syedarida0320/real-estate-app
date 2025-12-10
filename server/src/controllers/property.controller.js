@@ -115,9 +115,9 @@ exports.createProperty = async (req, res) => {
       ...rest,
       title,
       availabilityType,
-      price: price ? JSON.parse(price) : {},
-      location: location ? JSON.parse(location) : {},
-      facilities: facilities ? JSON.parse(facilities) : {},
+      price: price || {},
+      location: location || {},
+      facilities: facilities || {},
       userId: user._id,
       createdBy: user._id,
     };
