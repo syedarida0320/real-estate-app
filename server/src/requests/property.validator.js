@@ -23,7 +23,7 @@ const locationSchema = Joi.object({
   city: Joi.string().allow("", null),
   state: Joi.string().allow("", null),
   country: Joi.string().allow("", null),
-  postalCode: Joi.string().allow("", null), 
+  postalCode: Joi.string().allow("", null),
   mapLocation: Joi.object({
     lat: Joi.number(),
     lng: Joi.number(),
@@ -37,7 +37,9 @@ const createPropertySchema = Joi.object({
     .valid("Apartment", "Hotel", "House", "Commercial", "Garages", "Lots")
     .required(),
   status: Joi.string().valid("available", "sold", "rented").optional(),
-  availabilityType: Joi.string().valid("for_rent", "for_sale", "sold").required(),
+  availabilityType: Joi.string()
+    .valid("for_rent", "for_sale", "sold")
+    .required(),
   price: priceSchema.required(),
   location: locationSchema.optional(),
   facilities: facilitiesSchema.optional(),
@@ -50,11 +52,14 @@ const updatePropertySchema = Joi.object({
     .valid("Apartment", "Hotel", "House", "Commercial", "Garages", "Lots")
     .required(),
   status: Joi.string().valid("available", "sold", "rented").optional(),
-  availabilityType: Joi.string().valid("for_rent", "for_sale", "sold").required(),
+  availabilityType: Joi.string()
+    .valid("for_rent", "for_sale", "sold")
+    .required(),
   price: priceSchema.optional(),
   location: locationSchema.optional(),
   facilities: facilitiesSchema.optional(),
   description: Joi.string().allow("", null).optional(),
+  mainImageUrl: Joi.string().optional(), // ✅ Add this line
 });
 
 const validate = (schema) => (req, res, next) => {
@@ -64,7 +69,7 @@ const validate = (schema) => (req, res, next) => {
   ["price", "location", "facilities"].forEach((field) => {
     if (req.body[field] && typeof req.body[field] === "string") {
       try {
-       /* The line `data[field] = JSON.parse(req.body[field]);` is parsing the JSON string stored in
+        /* The line `data[field] = JSON.parse(req.body[field]);` is parsing the JSON string stored in
        the `req.body[field]` into a JavaScript object and assigning it to the corresponding field in
        the `data` object. */
         data[field] = JSON.parse(req.body[field]);

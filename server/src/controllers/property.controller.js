@@ -189,9 +189,12 @@ exports.updateProperty = async (req, res) => {
     const updateData = {
       ...rest,
       availabilityType,
-      price: price ? JSON.parse(price) : undefined,
-      location: location ? JSON.parse(location) : undefined,
-      facilities: facilities ? JSON.parse(facilities) : undefined,
+     price:
+    price && typeof price === "string" ? JSON.parse(price) : price,
+  location:
+    location && typeof location === "string" ? JSON.parse(location) : location,
+  facilities:
+    facilities && typeof facilities === "string" ? JSON.parse(facilities) : facilities,
     };
 
     // ✅ Corrected propertyData → updateData
